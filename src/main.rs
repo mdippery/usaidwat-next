@@ -1,7 +1,7 @@
 use clap::Parser;
-use usaidwat::Config;
+use usaidwat::cli::Config;
 
 fn main() {
     let config = Config::parse();
-    usaidwat::run(config)
+    usaidwat::cli::run(config)
 }
