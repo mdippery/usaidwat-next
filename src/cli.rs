@@ -63,6 +63,19 @@ enum Command {
     },
 }
 
+impl Command {
+    pub fn username(&self) -> &str {
+        match &self {
+            Command::Info { username } => username,
+            Command::Log { username, ..} => username,
+            Command::Posts(subconfig) => subconfig.command.username(),
+            Command::Summary { username } => username,
+            Command::Tally(TallyConfig { username, .. }) => username,
+            Command::Timeline { username } => username,
+        }
+    }
+}
+
 #[derive(Args, Debug)]
 struct TallyConfig {
     /// Reddit username
@@ -93,6 +106,15 @@ enum PostSubcommand {
 
     /// Tally a user's posts by subreddit
     Tally(TallyConfig),
+}
+
+impl PostSubcommand {
+    pub fn username(&self) -> &str {
+        match &self {
+            PostSubcommand::Log { username, .. } => username,
+            PostSubcommand::Tally(TallyConfig { username, ..}) => username,
+        }
+    }
 }
 
 #[derive(Clone, Debug, Default, ValueEnum)]
