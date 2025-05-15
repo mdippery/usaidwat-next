@@ -68,7 +68,7 @@ struct TallyConfig {
     /// Reddit username
     username: String,
 
-    /// Sort output by number of comments
+    /// Sort output by number of comments instead of alphabetically by subreddit
     #[arg(short = 'c', long = "count", default_value_t = false)]
     sort_by_count: bool,
 }
@@ -102,6 +102,73 @@ enum DateFormat {
     Relative,
 }
 
+fn run_info(username: String) {
+    println!("Running info for {username}");
+}
+
+fn run_log(
+    username: String,
+    date_format: DateFormat,
+    grep: Option<String>,
+    limit: Option<u32>,
+    oneline: bool,
+    raw: bool,
+) {
+    println!(
+        "Running log for {username}, date_format = {date_format:?}, grep = {grep:?}, limit = {limit:?}, oneline? {oneline}, raw? {raw}"
+    );
+}
+
+fn run_posts_log(username: String, oneline: bool) {
+    println!("Running posts log for {username}, oneline? {oneline}");
+}
+
+fn run_posts_tally(username: String, sort_by_count: bool) {
+    println!("Running posts tally for {username}, sort by count? {sort_by_count}");
+}
+
+fn run_posts(config: PostCommandConfig) {
+    match config.command {
+        PostSubcommand::Log { username, oneline } => run_posts_log(username, oneline),
+        PostSubcommand::Tally(TallyConfig {
+            username,
+            sort_by_count,
+        }) => run_posts_tally(username, sort_by_count),
+    }
+}
+
+fn run_summary(username: String) {
+    println!("Running summary for {username}");
+}
+
+fn run_tally(username: String, sort_by_count: bool) {
+    println!("Running comment tally for {username}, sort by count? {sort_by_count}");
+}
+
+fn run_timeline(username: String) {
+    println!("Running timeline for {username}");
+}
+
 pub fn run(config: Config) {
-    println!("{:?}", config);
+    match config.command {
+        Command::Info { username } => run_info(username),
+        Command::Log {
+            username,
+            date,
+            grep,
+            limit,
+            oneline,
+            raw,
+        } => {
+            let date_format = date.unwrap_or(DateFormat::Absolute);
+            run_log(username, date_format, grep, limit, oneline, raw);
+        }
+        Command::Posts(subconfig) => run_posts(subconfig),
+        Command::Summary { username } => run_summary(username),
+        Command::Tally(TallyConfig {
+            username,
+            sort_by_count,
+        }) => run_tally(username, sort_by_count),
+        Command::Timeline { username } => run_timeline(username),
+    }
 }
