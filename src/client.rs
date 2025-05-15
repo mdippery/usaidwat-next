@@ -1,3 +1,4 @@
+use std::fmt;
 use crate::service::Service;
 
 type DateTime = &'static str;   // TODO: Find an appropriate DateTime type
@@ -15,6 +16,12 @@ pub struct Redditor<'a> {
 
     /// A concrete connector for retrieving data from the Reddit API.
     service: Box<dyn Service>,
+}
+
+impl<'a> fmt::Debug for Redditor<'a> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "Redditor {{ username = {} }}", self.username)
+    }
 }
 
 impl<'a> Redditor<'a> {
