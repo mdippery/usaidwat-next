@@ -1,4 +1,6 @@
 use clap::{Args, Parser, Subcommand, ValueEnum};
+use crate::client::RedditClient;
+use crate::service::RedditService;
 
 #[derive(Debug, Parser)]
 #[command(version)]
@@ -134,8 +136,15 @@ impl Runner {
         Self { config }
     }
 
-    pub fn username(&self) -> &str {
+    fn username(&self) -> &str {
         self.config.command.username()
+    }
+
+    fn user(&self) -> RedditClient {
+        RedditClient::new(
+            self.username(),
+            Box::new(RedditService::new()),
+        )
     }
 
     pub fn run(&self) {
