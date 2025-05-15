@@ -67,7 +67,7 @@ impl Command {
     pub fn username(&self) -> &str {
         match &self {
             Command::Info { username } => username,
-            Command::Log { username, ..} => username,
+            Command::Log { username, .. } => username,
             Command::Posts(subconfig) => subconfig.command.username(),
             Command::Summary { username } => username,
             Command::Tally(TallyConfig { username, .. }) => username,
@@ -112,7 +112,7 @@ impl PostSubcommand {
     pub fn username(&self) -> &str {
         match &self {
             PostSubcommand::Log { username, .. } => username,
-            PostSubcommand::Tally(TallyConfig { username, ..}) => username,
+            PostSubcommand::Tally(TallyConfig { username, .. }) => username,
         }
     }
 }
@@ -124,73 +124,94 @@ enum DateFormat {
     Relative,
 }
 
-fn run_info(username: String) {
-    println!("Running info for {username}");
+#[derive(Debug)]
+pub struct Runner {
+    config: Config,
 }
 
-fn run_log(
-    username: String,
-    date_format: DateFormat,
-    grep: Option<String>,
-    limit: Option<u32>,
-    oneline: bool,
-    raw: bool,
-) {
-    println!(
-        "Running log for {username}, date_format = {date_format:?}, grep = {grep:?}, limit = {limit:?}, oneline? {oneline}, raw? {raw}"
-    );
-}
-
-fn run_posts_log(username: String, oneline: bool) {
-    println!("Running posts log for {username}, oneline? {oneline}");
-}
-
-fn run_posts_tally(username: String, sort_by_count: bool) {
-    println!("Running posts tally for {username}, sort by count? {sort_by_count}");
-}
-
-fn run_posts(config: PostCommandConfig) {
-    match config.command {
-        PostSubcommand::Log { username, oneline } => run_posts_log(username, oneline),
-        PostSubcommand::Tally(TallyConfig {
-            username,
-            sort_by_count,
-        }) => run_posts_tally(username, sort_by_count),
+impl Runner {
+    pub fn new(config: Config) -> Self {
+        Self { config }
     }
-}
 
-fn run_summary(username: String) {
-    println!("Running summary for {username}");
-}
+    pub fn username(&self) -> &str {
+        self.config.command.username()
+    }
 
-fn run_tally(username: String, sort_by_count: bool) {
-    println!("Running comment tally for {username}, sort by count? {sort_by_count}");
-}
-
-fn run_timeline(username: String) {
-    println!("Running timeline for {username}");
-}
-
-pub fn run(config: Config) {
-    match config.command {
-        Command::Info { username } => run_info(username),
-        Command::Log {
-            username,
-            date,
-            grep,
-            limit,
-            oneline,
-            raw,
-        } => {
-            let date_format = date.unwrap_or(DateFormat::Absolute);
-            run_log(username, date_format, grep, limit, oneline, raw);
+    pub fn run(&self) {
+        match &self.config.command {
+            Command::Info { .. } => self.run_info(),
+            Command::Log {
+                date,
+                grep,
+                limit,
+                oneline,
+                raw,
+                ..
+            } => {
+                let date_format = date.as_ref().unwrap_or(&DateFormat::Absolute);
+                self.run_log(date_format, grep, limit, oneline, raw);
+            }
+            Command::Posts(subconfig) => self.run_posts(subconfig),
+            Command::Summary { .. } => self.run_summary(),
+            Command::Tally(TallyConfig { sort_by_count, .. }) => self.run_tally(sort_by_count),
+            Command::Timeline { .. } => self.run_timeline(),
         }
-        Command::Posts(subconfig) => run_posts(subconfig),
-        Command::Summary { username } => run_summary(username),
-        Command::Tally(TallyConfig {
-            username,
-            sort_by_count,
-        }) => run_tally(username, sort_by_count),
-        Command::Timeline { username } => run_timeline(username),
+    }
+
+    fn run_info(&self) {
+        println!("Running info for {}", self.username());
+    }
+
+    fn run_log(
+        &self,
+        date_format: &DateFormat,
+        grep: &Option<String>,
+        limit: &Option<u32>,
+        oneline: &bool,
+        raw: &bool,
+    ) {
+        println!(
+            "Running log for {}, date_format = {date_format:?}, grep = {grep:?}, limit = {limit:?}, oneline? {oneline}, raw? {raw}",
+            self.username(),
+        );
+    }
+
+    fn run_posts(&self, config: &PostCommandConfig) {
+        match config.command {
+            PostSubcommand::Log { oneline, .. } => self.run_posts_log(&oneline),
+            PostSubcommand::Tally(TallyConfig { sort_by_count, .. }) => {
+                self.run_posts_tally(&sort_by_count)
+            }
+        }
+    }
+
+    fn run_posts_log(&self, oneline: &bool) {
+        println!(
+            "Running posts log for {}, oneline? {oneline}",
+            self.username()
+        );
+    }
+
+    fn run_posts_tally(&self, sort_by_count: &bool) {
+        println!(
+            "Running posts tally for {}, sort by count? {sort_by_count}",
+            self.username()
+        );
+    }
+
+    fn run_summary(&self) {
+        println!("Running summary for {}", self.username());
+    }
+
+    fn run_tally(&self, sort_by_count: &bool) {
+        println!(
+            "Running comment tally for {}, sort by count? {sort_by_count}",
+            self.username()
+        );
+    }
+
+    fn run_timeline(&self) {
+        println!("Running timeline for {}", self.username());
     }
 }
