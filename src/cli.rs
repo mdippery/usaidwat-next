@@ -5,7 +5,7 @@ use clap::{Args, Parser, Subcommand, ValueEnum};
 #[command(about = "Answers the age-old question, \"Where does a Redditor comment the most?\"", long_about = None)]
 pub struct Config {
     #[command(subcommand)]
-    command: Option<Command>,
+    command: Command,
 }
 
 #[derive(Debug, Subcommand)]
@@ -76,7 +76,7 @@ struct TallyConfig {
 #[derive(Args, Debug)]
 struct PostCommandConfig {
     #[command(subcommand)]
-    command: Option<PostSubcommand>,
+    command: PostSubcommand,
 }
 
 #[derive(Debug, Subcommand)]
