@@ -8,6 +8,7 @@
 pub type DateTime = u64; // TODO: Find an appropriate DateTime type
 
 /// A Reddit user account.
+#[derive(Debug)]
 pub struct User {
     about: About,
     comments: Vec<Comment>,
@@ -15,12 +16,15 @@ pub struct User {
 }
 
 /// Reddit user account data.
+#[derive(Debug)]
 pub struct About;
 
 /// A Reddit comment.
+#[derive(Debug)]
 pub struct Comment;
 
 /// A Reddit Post.
+#[derive(Debug)]
 pub struct Submission;
 
 impl User {
