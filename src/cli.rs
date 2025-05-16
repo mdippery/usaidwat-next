@@ -1,7 +1,10 @@
+//! Drives the command-line program.
+
 use clap::{Args, Parser, Subcommand, ValueEnum};
 use crate::client::Redditor;
 use crate::service::RedditService;
 
+/// Program configuration.
 #[derive(Debug, Parser)]
 #[command(version)]
 #[command(about = "Answers the age-old question, \"Where does a Redditor comment the most?\"", long_about = None)]
@@ -126,12 +129,14 @@ enum DateFormat {
     Relative,
 }
 
+/// Runs the command-line program.
 #[derive(Debug)]
 pub struct Runner {
     config: Config,
 }
 
 impl Runner {
+    /// Create a new program runner using the given `config`.
     pub fn new(config: Config) -> Self {
         Self { config }
     }
@@ -147,6 +152,7 @@ impl Runner {
         )
     }
 
+    /// Run the command-line program using its stored configuration options.
     pub fn run(&self) {
         match &self.config.command {
             Command::Info { .. } => self.run_info(),

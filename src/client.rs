@@ -1,3 +1,5 @@
+//! Clients for reading data from the Reddit API.
+
 use std::fmt;
 use crate::service::Service;
 use crate::thing::{Comment, Submission, User};
