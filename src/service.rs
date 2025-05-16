@@ -20,6 +20,9 @@ pub trait Service {
     /// Performs a GET request to the `resource` associated with the given
     /// `username` and returns it as a parsed JSON response.
     fn get_resource(&self, username: &str, resource: &str) -> JsonResponse;
+
+    /// An appropriate user agent to use for HTTP requests.
+    fn user_agent(&self) -> String;
 }
 
 /// A service that contacts the Reddit API directly to retrieve information.
@@ -45,5 +48,23 @@ impl Service for RedditService {
         };
         let uri = format!("https://www.reddit.com/user/{username}/{resource}.json{qs}");
         self.get(uri)
+    }
+
+    fn user_agent(&self) -> String {
+        format!("usaidwat v{}", env!("CARGO_PKG_VERSION"))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use regex::Regex;
+
+    #[test]
+    fn it_returns_user_agent_with_version_number() {
+        let service = RedditService::new();
+        let user_agent = service.user_agent();
+        let version_re = Regex::new(r"^usaidwat v\d+\.\d+\.\d+(-(alpha|beta)\.\d+)?$").unwrap();
+        assert!(version_re.is_match(&user_agent));
     }
 }
