@@ -2,9 +2,7 @@
 
 use std::fmt;
 use crate::service::Service;
-use crate::thing::{Comment, Submission, User};
-
-type DateTime = &'static str;   // TODO: Find an appropriate DateTime type
+use crate::thing::{Comment, DateTime, Submission, User};
 
 /// Represents a Reddit user.
 pub struct Redditor<'a> {
@@ -37,31 +35,32 @@ impl<'a> Redditor<'a> {
 
     /// The date the account was created.
     pub fn created_at(&self) -> DateTime {
-        ""
+        self.user().about().created_at()
     }
 
     /// The age of the account, in seconds.
     pub fn age(&self) -> u64 {
-        0
+        let current_time = 0;
+        current_time - self.created_at()
     }
 
     /// Redditor's link karma
     pub fn link_karma(&self) -> u64 {
-        0
+        self.user().about().link_karma()
     }
 
     /// Redditor's comment karma
     pub fn comment_karma(&self) -> u64 {
-        0
+        self.user().about().comment_karma()
     }
 
     /// Redditor's posts
-    pub fn posts(&self) -> Vec<Submission> {
-        Vec::new()
+    pub fn submissions(&self) -> Vec<Submission> {
+        self.user().submissions()
     }
 
     /// Redditor's comments
     pub fn comments(&self) -> Vec<Comment> {
-        Vec::new()
+        self.user().comments()
     }
 }
