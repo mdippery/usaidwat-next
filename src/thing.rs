@@ -266,6 +266,8 @@ mod tests {
             let about = About::parse(&load_data("about_mipadi")).unwrap();
             let expected_created_at = DateTime::from_timestamp(1207004126, 0).unwrap();
             assert_eq!(about.created_at(), expected_created_at);
+            assert_eq!(about.created_at().to_rfc2822(), "Mon, 31 Mar 2008 22:55:26 +0000");
+            assert_eq!(about.created_at().to_rfc3339(), "2008-03-31T22:55:26+00:00");
             assert_eq!(about.link_karma(), 4892);
             assert_eq!(about.comment_karma(), 33440);
         }
@@ -314,6 +316,8 @@ mod tests {
             assert_eq!(comment.link_title, expected_link_title);
             assert_eq!(comment.link_id, "t3_142t4w");
             assert_eq!(comment.created_utc, expected_created_utc);
+            assert_eq!(comment.created_utc.to_rfc2822(), "Sat, 1 Dec 2012 20:14:28 +0000");
+            assert_eq!(comment.created_utc.to_rfc3339(), "2012-12-01T20:14:28+00:00");
             assert_eq!(comment.body, expected_body);
             assert_eq!(comment.ups, 1);
             assert_eq!(comment.downs, 0);
@@ -366,6 +370,8 @@ mod tests {
             assert_eq!(submission.title, "Science Says Being Short Makes You Depressed");
             assert_eq!(submission.selftext, "");
             assert_eq!(submission.created_utc, expected_created_utc);
+            assert_eq!(submission.created_utc.to_rfc2822(), "Tue, 20 Oct 2015 19:36:37 +0000");
+            assert_eq!(submission.created_utc.to_rfc3339(), "2015-10-20T19:36:37+00:00");
             assert_eq!(submission.num_comments, 65);
             assert_eq!(submission.ups, 12);
             assert_eq!(submission.downs, 0);
@@ -400,6 +406,8 @@ mod tests {
             assert_eq!(submission.title, "I created a tool for sampling Reddit users' karma (link and comment)");
             assert_eq!(submission.selftext, expected_selftex);
             assert_eq!(submission.created_utc, expected_created_utc);
+            assert_eq!(submission.created_utc.to_rfc2822(), "Sat, 24 May 2014 19:46:35 +0000");
+            assert_eq!(submission.created_utc.to_rfc3339(), "2014-05-24T19:46:35+00:00");
             assert_eq!(submission.num_comments, 9);
             assert_eq!(submission.ups, 6);
             assert_eq!(submission.downs, 0);
