@@ -5,10 +5,10 @@
 //! module encapsulates that idea and provides an easy way to more or less
 //! work with JSON data from the Reddit API.
 
-use serde::Deserialize;
-use serde_json::{self, Result};
-
-pub type DateTime = u64; // TODO: Find an appropriate DateTime type
+pub use chrono::{DateTime, TimeDelta, Utc};
+use serde::{Deserialize, Deserializer};
+use serde::de::Error;
+use serde_json;
 
 /// A Reddit user account.
 #[derive(Debug)]
@@ -23,7 +23,8 @@ pub struct User {
 pub struct About {
     name: String,
     id: String,
-    created_utc: DateTime,
+    #[serde(deserialize_with = "from_timestamp_u64")]
+    created_utc: DateTime<Utc>,
     link_karma: u64,
     comment_karma: u64,
 }
@@ -37,7 +38,8 @@ pub struct Comment {
     subreddit: String,
     link_title: String,
     link_id: String,
-    created_utc: f64, // TODO: Convert this to datetime
+    #[serde(deserialize_with = "from_timestamp_f64")]
+    created_utc: DateTime<Utc>,
     body: String,
     ups: u64,
     downs: u64,
@@ -56,7 +58,8 @@ pub struct Submission {
     url: String, // TODO: Convert this URL struct
     title: String,
     selftext: String,
-    created_utc: f64, // TODO: Convert this to datetime
+    #[serde(deserialize_with = "from_timestamp_f64")]
+    created_utc: DateTime<Utc>,
     num_comments: u64,
     ups: u64,
     downs: u64,
@@ -114,7 +117,7 @@ impl About {
     }
 
     /// The date on which the account was created.
-    pub fn created_at(&self) -> DateTime {
+    pub fn created_at(&self) -> DateTime<Utc> {
         self.created_utc
     }
 
@@ -169,6 +172,34 @@ impl Submission {
                     .map(|comment_wrapper| comment_wrapper.data)
                     .collect()
             })
+    }
+}
+
+// Deserializers
+// --------------------------------------------------------------------------
+
+fn from_timestamp_u64<'de, D>(deserializer: D) -> Result<DateTime<Utc>, D::Error>
+where
+    D: Deserializer<'de>
+{
+    let ts = i64::deserialize(deserializer)?;
+    DateTime::from_timestamp(ts, 0).ok_or_else(|| Error::custom(format!("Invalid Unix timestamp: {ts}")))
+}
+
+fn from_timestamp_f64<'de, D>(deserializer: D) -> Result<DateTime<Utc>, D::Error>
+where
+    D: Deserializer<'de>
+{
+    let ts_f64 = f64::deserialize(deserializer)?;
+    let ts = f64_to_i64(ts_f64).ok_or_else(|| Error::custom(format!("Invalid Unix timestamp: {ts_f64}")))?;
+    DateTime::from_timestamp(ts, 0).ok_or_else(|| Error::custom(format!("Invalid Unix timestamp: {ts}")))
+}
+
+fn f64_to_i64(n: f64) -> Option<i64> {
+    if n.is_finite() && n <= i64::MAX as f64 {
+        Some(n.trunc() as i64)
+    } else {
+        None
     }
 }
 
@@ -233,7 +264,8 @@ mod tests {
         #[test]
         fn it_parses_fields() {
             let about = About::parse(&load_data("about_mipadi")).unwrap();
-            assert_eq!(about.created_at(), 1207004126);
+            let expected_created_at = DateTime::from_timestamp(1207004126, 0).unwrap();
+            assert_eq!(about.created_at(), expected_created_at);
             assert_eq!(about.link_karma(), 4892);
             assert_eq!(about.comment_karma(), 33440);
         }
@@ -273,6 +305,7 @@ mod tests {
                 "Yep. My first experience with a Heisenbug occurred in a C++ \
                 program, and disappeared when I tried to print a variable \
                 with printf (only to reappear when that call was removed).";
+            let expected_created_utc = DateTime::from_timestamp(1354392868, 0).unwrap();
 
             let comment = &comments[0];
             assert_eq!(comment.name, "t1_c79peed");
@@ -280,7 +313,7 @@ mod tests {
             assert_eq!(comment.subreddit, "wikipedia");
             assert_eq!(comment.link_title, expected_link_title);
             assert_eq!(comment.link_id, "t3_142t4w");
-            assert_eq!(comment.created_utc, 1354392868.0);
+            assert_eq!(comment.created_utc, expected_created_utc);
             assert_eq!(comment.body, expected_body);
             assert_eq!(comment.ups, 1);
             assert_eq!(comment.downs, 0);
@@ -321,6 +354,7 @@ mod tests {
             assert_eq!(submissions.len(), 25);
 
             let submission = &submissions[0];
+            let expected_created_utc = DateTime::from_timestamp(1445369797, 0).unwrap();
             assert_eq!(submission.id, "3pj7rx");
             assert_eq!(submission.name, "t3_3pj7rx");
             assert_eq!(submission.permalink, "/r/short/comments/3pj7rx/science_says_being_short_makes_you_depressed/");
@@ -331,7 +365,7 @@ mod tests {
             assert_eq!(submission.url, "http://www.vice.com/read/it-sucks-to-be-a-short-guy-511");
             assert_eq!(submission.title, "Science Says Being Short Makes You Depressed");
             assert_eq!(submission.selftext, "");
-            assert_eq!(submission.created_utc, 1445369797.0);
+            assert_eq!(submission.created_utc, expected_created_utc);
             assert_eq!(submission.num_comments, 65);
             assert_eq!(submission.ups, 12);
             assert_eq!(submission.downs, 0);
@@ -352,6 +386,7 @@ mod tests {
                 The idea is to make it easy to chart your karma growth (or decline!) \
                 over time, and derive interesting statistics and other data from it \
                 (such as average karma gained per day, rate of change, etc.).";
+            let expected_created_utc = DateTime::from_timestamp(1400960795, 0).unwrap();
 
             let submission = &submissions[22];
             assert_eq!(submission.id, "26e9x6");
@@ -364,7 +399,7 @@ mod tests {
             assert_eq!(submission.url, "https://www.reddit.com/r/webdev/comments/26e9x6/i_created_a_tool_for_sampling_reddit_users_karma/");
             assert_eq!(submission.title, "I created a tool for sampling Reddit users' karma (link and comment)");
             assert_eq!(submission.selftext, expected_selftex);
-            assert_eq!(submission.created_utc, 1400960795.0);
+            assert_eq!(submission.created_utc, expected_created_utc);
             assert_eq!(submission.num_comments, 9);
             assert_eq!(submission.ups, 6);
             assert_eq!(submission.downs, 0);

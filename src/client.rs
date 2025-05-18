@@ -1,8 +1,9 @@
 //! Clients for reading data from the Reddit API.
 
 use crate::service::Service;
-use crate::thing::{Comment, DateTime, Submission, User};
+use crate::thing::{Comment, DateTime, Submission, TimeDelta, User, Utc};
 use std::fmt;
+use std::ops::Sub;
 
 /// Represents a Reddit user.
 pub struct Redditor<'a> {
@@ -37,14 +38,14 @@ impl<'a> Redditor<'a> {
     }
 
     /// The date the account was created.
-    pub fn created_at(&self) -> DateTime {
+    pub fn created_at(&self) -> DateTime<Utc> {
         self.user.about().created_at()
     }
 
-    /// The age of the account, in seconds.
-    pub fn age(&self) -> u64 {
-        let current_time = 0;
-        current_time - self.created_at()
+    /// The age of the account.
+    pub fn age(&self) -> TimeDelta {
+        let birthday = self.created_at();
+        Utc::now().sub(birthday)
     }
 
     /// Redditor's link karma
