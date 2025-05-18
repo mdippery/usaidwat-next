@@ -51,7 +51,7 @@ impl Service for RedditService {
     }
 
     fn user_agent(&self) -> String {
-        format!("usaidwat v{}", env!("CARGO_PKG_VERSION"))
+        format!("{} v{}", env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION"))
     }
 }
 
@@ -64,7 +64,12 @@ mod tests {
     fn it_returns_user_agent_with_version_number() {
         let service = RedditService::new();
         let user_agent = service.user_agent();
-        let version_re = Regex::new(r"^usaidwat v\d+\.\d+\.\d+(-(alpha|beta)\.\d+)?$").unwrap();
-        assert!(version_re.is_match(&user_agent));
+        let version_re = Regex::new(r"^[a-z]+ v\d+\.\d+\.\d+(-(alpha|beta)\.\d+)?$").unwrap();
+        assert!(
+            version_re.is_match(&user_agent),
+            "{} does not match {}",
+            user_agent,
+            version_re,
+        );
     }
 }
