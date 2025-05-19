@@ -35,6 +35,19 @@ impl RedditService {
     pub fn new() -> Self {
         Self {}
     }
+
+    fn query_string(&self, resource: &str) -> &str {
+        match resource {
+            "comments" => "?limit=100",
+            "submitted" => "?limit=100",
+            _ => "",
+        }
+    }
+
+    fn uri(&self, username: &str, resource: &str) -> String {
+        let qs = self.query_string(resource);
+        format!("https://www.reddit.com/user/{username}/{resource}.json{qs}")
+    }
 }
 
 impl Service for RedditService {
@@ -46,12 +59,7 @@ impl Service for RedditService {
     }
 
     fn get_resource(&self, username: &str, resource: &str) -> Option<JsonResponse> {
-        let qs = match resource {
-            "comments" => "?limit=100",
-            "submitted" => "?limit=100",
-            _ => "",
-        };
-        let uri = format!("https://www.reddit.com/user/{username}/{resource}.json{qs}");
+        let uri = self.uri(username, resource);
         self.get(uri)
     }
 }
@@ -72,5 +80,50 @@ mod tests {
             user_agent,
             version_re,
         );
+    }
+
+    #[test]
+    fn it_returns_a_query_string_with_comment_limits() {
+        let service = RedditService::new();
+        let qs = service.query_string("comments");
+        assert_eq!(qs, "?limit=100");
+    }
+
+    #[test]
+    fn it_returns_a_query_string_with_post_limits() {
+        let service = RedditService::new();
+        let qs = service.query_string("submitted");
+        assert_eq!(qs, "?limit=100");
+    }
+
+    #[test]
+    fn it_returns_an_empty_query_string_for_profiles() {
+        let service = RedditService::new();
+        let qs = service.query_string("about");
+        assert_eq!(qs, "");
+    }
+
+    #[test]
+    fn it_returns_a_uri_for_comments() {
+        let service = RedditService::new();
+        let actual_uri = service.uri("mipadi", "comments");
+        let expected_uri = "https://www.reddit.com/user/mipadi/comments.json?limit=100";
+        assert_eq!(actual_uri, expected_uri);
+    }
+
+    #[test]
+    fn it_returns_a_uri_for_posts() {
+        let service = RedditService::new();
+        let actual_uri = service.uri("mipadi", "submitted");
+        let expected_uri = "https://www.reddit.com/user/mipadi/submitted.json?limit=100";
+        assert_eq!(actual_uri, expected_uri);
+    }
+
+    #[test]
+    fn it_returns_a_uri_for_profiles() {
+        let service = RedditService::new();
+        let actual_uri = service.uri("mipadi", "about");
+        let expected_uri = "https://www.reddit.com/user/mipadi/about.json";
+        assert_eq!(actual_uri, expected_uri);
     }
 }
