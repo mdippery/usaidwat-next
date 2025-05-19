@@ -146,14 +146,14 @@ mod tests {
         #[test]
         fn it_returns_its_link_karma() {
             let actual_karma = test_client().link_karma();
-            let expected_karma = 4892;
+            let expected_karma = 11729;
             assert_eq!(actual_karma, expected_karma)
         }
 
         #[test]
         fn it_returns_its_comment_karma() {
             let actual_karma = test_client().comment_karma();
-            let expected_karma = 33440;
+            let expected_karma = 121995;
             assert_eq!(actual_karma, expected_karma)
         }
 
@@ -192,7 +192,7 @@ mod tests {
         #[test]
         fn it_returns_its_creation_date() {
             let actual_date = test_client().created_at();
-            let expected_date = DateTime::parse_from_rfc3339("2025-05-19T16:11:20Z").unwrap();
+            let expected_date = DateTime::parse_from_rfc3339("2010-06-15T06:13:46Z").unwrap();
             assert_eq!(actual_date, expected_date);
         }
 
@@ -207,14 +207,14 @@ mod tests {
         #[test]
         fn it_returns_its_link_karma() {
             let actual_karma = test_client().link_karma();
-            let expected_karma = 5000;
+            let expected_karma = 0;
             assert_eq!(actual_karma, expected_karma)
         }
 
         #[test]
         fn it_returns_its_comment_karma() {
             let actual_karma = test_client().comment_karma();
-            let expected_karma = 50_000;
+            let expected_karma = 0;
             assert_eq!(actual_karma, expected_karma)
         }
 

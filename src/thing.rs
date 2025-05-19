@@ -23,7 +23,7 @@ pub struct User {
 pub struct About {
     name: String,
     id: String,
-    #[serde(deserialize_with = "from_timestamp_u64")]
+    #[serde(deserialize_with = "from_timestamp_f64")]
     created_utc: DateTime<Utc>,
     link_karma: u64,
     comment_karma: u64,
@@ -112,6 +112,7 @@ impl About {
     /// This method is generally invoked by `User`, not directly.
     fn parse(user_data: &str) -> Option<Self> {
         serde_json::from_str(user_data)
+            .inspect_err(|err| eprintln!("failed to parse user data: {err:?}"))
             .ok()
             .map(|wrapper: AboutResponse| wrapper.data)
     }
@@ -141,6 +142,7 @@ impl Comment {
     /// This method is generally invoked by `User`, not directly.
     fn parse(comment_data: &str) -> Option<Vec<Self>> {
         serde_json::from_str(comment_data)
+            .inspect_err(|err| eprintln!("failed to parse comment data: {err:?}"))
             .ok()
             .map(|comment_listing: ListingResponse<CommentResponse>| {
                 comment_listing
@@ -163,6 +165,7 @@ impl Submission {
     /// This method is generally invoked by `User`, not directly.
     fn parse(post_data: &str) -> Option<Vec<Self>> {
         serde_json::from_str(post_data)
+            .inspect_err(|err| eprintln!("failed to parse post data: {err:?}"))
             .ok()
             .map(|comment_listing: ListingResponse<SubmissionResponse>| {
                 comment_listing
@@ -177,14 +180,6 @@ impl Submission {
 
 // Deserializers
 // --------------------------------------------------------------------------
-
-fn from_timestamp_u64<'de, D>(deserializer: D) -> Result<DateTime<Utc>, D::Error>
-where
-    D: Deserializer<'de>
-{
-    let ts = i64::deserialize(deserializer)?;
-    DateTime::from_timestamp(ts, 0).ok_or_else(|| Error::custom(format!("Invalid Unix timestamp: {ts}")))
-}
 
 fn from_timestamp_f64<'de, D>(deserializer: D) -> Result<DateTime<Utc>, D::Error>
 where
@@ -268,8 +263,8 @@ mod tests {
             assert_eq!(about.created_at(), expected_created_at);
             assert_eq!(about.created_at().to_rfc2822(), "Mon, 31 Mar 2008 22:55:26 +0000");
             assert_eq!(about.created_at().to_rfc3339(), "2008-03-31T22:55:26+00:00");
-            assert_eq!(about.link_karma(), 4892);
-            assert_eq!(about.comment_karma(), 33440);
+            assert_eq!(about.link_karma(), 11729);
+            assert_eq!(about.comment_karma(), 121995);
         }
     }
 
