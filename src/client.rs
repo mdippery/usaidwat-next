@@ -2,8 +2,10 @@
 
 use crate::service::Service;
 use crate::thing::{Comment, DateTime, Submission, TimeDelta, User, Utc};
+use relativetime::{RelativeTime, NegativeRelativeTime};
 use std::fmt;
 use std::ops::Sub;
+use std::time::Duration;
 
 /// Represents a Reddit user.
 pub struct Redditor {
@@ -56,6 +58,13 @@ impl Redditor {
     pub fn age(&self) -> TimeDelta {
         let birthday = self.created_at();
         Utc::now().sub(birthday)
+    }
+
+    /// The age of the account, relative to the current time.
+    pub fn relative_age(&self) -> String {
+        let age = self.age().as_seconds_f64();
+        let d = Duration::from_secs(age.trunc() as u64);
+        d.to_relative_in_past()
     }
 
     /// Redditor's link karma

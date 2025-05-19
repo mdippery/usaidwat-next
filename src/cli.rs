@@ -1,6 +1,7 @@
 //! Drives the command-line program.
 
 use crate::client::Redditor;
+use crate::formatter;
 use crate::service::RedditService;
 use clap::{Args, Parser, Subcommand, ValueEnum};
 
@@ -180,7 +181,7 @@ impl Runner {
     }
 
     fn run_info(&self) {
-        println!("Running info for {}", self.username());
+        println!("{}", formatter::format_info(self.user()));
     }
 
     fn run_log(
