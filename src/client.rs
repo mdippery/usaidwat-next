@@ -59,12 +59,12 @@ impl Redditor {
     }
 
     /// Redditor's link karma
-    pub fn link_karma(&self) -> u64 {
+    pub fn link_karma(&self) -> i64 {
         self.user.about().link_karma()
     }
 
     /// Redditor's comment karma
-    pub fn comment_karma(&self) -> u64 {
+    pub fn comment_karma(&self) -> i64 {
         self.user.about().comment_karma()
     }
 
@@ -166,7 +166,7 @@ mod tests {
         #[test]
         fn it_returns_its_posts() {
             let count = test_client().submissions().count();
-            assert_eq!(count, 25);
+            assert_eq!(count, 100);
         }
     }
 

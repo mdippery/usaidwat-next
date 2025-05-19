@@ -6,8 +6,8 @@
 //! work with JSON data from the Reddit API.
 
 pub use chrono::{DateTime, TimeDelta, Utc};
-use serde::{Deserialize, Deserializer};
 use serde::de::Error;
+use serde::{Deserialize, Deserializer};
 use serde_json;
 
 /// A Reddit user account.
@@ -25,8 +25,8 @@ pub struct About {
     id: String,
     #[serde(deserialize_with = "from_timestamp_f64")]
     created_utc: DateTime<Utc>,
-    link_karma: u64,
-    comment_karma: u64,
+    link_karma: i64,
+    comment_karma: i64,
 }
 
 /// A Reddit comment.
@@ -41,8 +41,9 @@ pub struct Comment {
     #[serde(deserialize_with = "from_timestamp_f64")]
     created_utc: DateTime<Utc>,
     body: String,
-    ups: u64,
-    downs: u64,
+    ups: i64,
+    downs: i64,
+    score: i64,
 }
 
 /// A Reddit Post.
@@ -61,9 +62,9 @@ pub struct Submission {
     #[serde(deserialize_with = "from_timestamp_f64")]
     created_utc: DateTime<Utc>,
     num_comments: u64,
-    ups: u64,
-    downs: u64,
-    score: u64,
+    ups: i64,
+    downs: i64,
+    score: i64,
 }
 
 impl User {
@@ -123,12 +124,12 @@ impl About {
     }
 
     /// User's current karma for submissions.
-    pub fn link_karma(&self) -> u64 {
+    pub fn link_karma(&self) -> i64 {
         self.link_karma
     }
 
     /// User's current karma for comments.
-    pub fn comment_karma(&self) -> u64 {
+    pub fn comment_karma(&self) -> i64 {
         self.comment_karma
     }
 }
@@ -183,11 +184,13 @@ impl Submission {
 
 fn from_timestamp_f64<'de, D>(deserializer: D) -> Result<DateTime<Utc>, D::Error>
 where
-    D: Deserializer<'de>
+    D: Deserializer<'de>,
 {
     let ts_f64 = f64::deserialize(deserializer)?;
-    let ts = f64_to_i64(ts_f64).ok_or_else(|| Error::custom(format!("Invalid Unix timestamp: {ts_f64}")))?;
-    DateTime::from_timestamp(ts, 0).ok_or_else(|| Error::custom(format!("Invalid Unix timestamp: {ts}")))
+    let ts = f64_to_i64(ts_f64)
+        .ok_or_else(|| Error::custom(format!("Invalid Unix timestamp: {ts_f64}")))?;
+    DateTime::from_timestamp(ts, 0)
+        .ok_or_else(|| Error::custom(format!("Invalid Unix timestamp: {ts}")))
 }
 
 fn f64_to_i64(n: f64) -> Option<i64> {
@@ -261,7 +264,10 @@ mod tests {
             let about = About::parse(&load_data("about_mipadi")).unwrap();
             let expected_created_at = DateTime::from_timestamp(1207004126, 0).unwrap();
             assert_eq!(about.created_at(), expected_created_at);
-            assert_eq!(about.created_at().to_rfc2822(), "Mon, 31 Mar 2008 22:55:26 +0000");
+            assert_eq!(
+                about.created_at().to_rfc2822(),
+                "Mon, 31 Mar 2008 22:55:26 +0000"
+            );
             assert_eq!(about.created_at().to_rfc3339(), "2008-03-31T22:55:26+00:00");
             assert_eq!(about.link_karma(), 11729);
             assert_eq!(about.comment_karma(), 121995);
@@ -295,27 +301,39 @@ mod tests {
             let comments = Comment::parse(&load_data("comments_mipadi")).unwrap();
             assert_eq!(comments.len(), 100);
 
-            let expected_link_title =
-                "Heisenbug: a software bug that seems to disappear or alter \
-                its behavior when one attempts to study it";
-            let expected_body =
-                "Yep. My first experience with a Heisenbug occurred in a C++ \
-                program, and disappeared when I tried to print a variable \
-                with printf (only to reappear when that call was removed).";
-            let expected_created_utc = DateTime::from_timestamp(1354392868, 0).unwrap();
+            let expected_link_title = "I dont want to play and we didn't even start";
+            let expected_body = "Honestly, min/maxing and system mastery is a big part of the \
+                Pathfinder community. It's a fairly crunchy system that draws in the sort of \
+                players who really like finding ways to exploit the rules. Supposedly some groups \
+                are more focused on roleplaying, but I have yet to meet a PF2 player in real life \
+                who gives a shit about pesky, whimsical things like _story_. If that's not your \
+                thing, you probably won't see eye to eye with the Pathfinder players you meet.\
+                \n\nI'm in a slightly similar boat right now: I don't care that much about \
+                min/maxing, but I put up with my Pathfinder friends because I really like our \
+                group and I like them as people well enough.";
+            let expected_created_utc = DateTime::from_timestamp(1743054429, 0).unwrap();
 
-            let comment = &comments[0];
-            assert_eq!(comment.name, "t1_c79peed");
-            assert_eq!(comment.subreddit_id, "t5_2qh3b");
-            assert_eq!(comment.subreddit, "wikipedia");
+            // Parse comment 9 because it has negative ups and I want to test for that
+            let comment = &comments[9];
+            assert_eq!(comment.id, "mjyuqdz");
+            assert_eq!(comment.name, "t1_mjyuqdz");
+            assert_eq!(comment.subreddit_id, "t5_2qh2s");
+            assert_eq!(comment.subreddit, "rpg");
             assert_eq!(comment.link_title, expected_link_title);
-            assert_eq!(comment.link_id, "t3_142t4w");
+            assert_eq!(comment.link_id, "t3_1jktw0c");
             assert_eq!(comment.created_utc, expected_created_utc);
-            assert_eq!(comment.created_utc.to_rfc2822(), "Sat, 1 Dec 2012 20:14:28 +0000");
-            assert_eq!(comment.created_utc.to_rfc3339(), "2012-12-01T20:14:28+00:00");
+            assert_eq!(
+                comment.created_utc.to_rfc2822(),
+                "Thu, 27 Mar 2025 05:47:09 +0000"
+            );
+            assert_eq!(
+                comment.created_utc.to_rfc3339(),
+                "2025-03-27T05:47:09+00:00"
+            );
             assert_eq!(comment.body, expected_body);
-            assert_eq!(comment.ups, 1);
+            assert_eq!(comment.ups, -3);
             assert_eq!(comment.downs, 0);
+            assert_eq!(comment.score, -3);
         }
 
         #[test]
@@ -350,63 +368,101 @@ mod tests {
         #[test]
         fn it_parses_fields() {
             let submissions = Submission::parse(&load_data("submitted_mipadi")).unwrap();
-            assert_eq!(submissions.len(), 25);
+            assert_eq!(submissions.len(), 100);
 
             let submission = &submissions[0];
-            let expected_created_utc = DateTime::from_timestamp(1445369797, 0).unwrap();
-            assert_eq!(submission.id, "3pj7rx");
-            assert_eq!(submission.name, "t3_3pj7rx");
-            assert_eq!(submission.permalink, "/r/short/comments/3pj7rx/science_says_being_short_makes_you_depressed/");
+            let expected_created_utc = DateTime::from_timestamp(1736196841, 0).unwrap();
+            assert_eq!(submission.id, "1hv9k9l");
+            assert_eq!(submission.name, "t3_1hv9k9l");
+            assert_eq!(
+                submission.permalink,
+                "/r/rpg/comments/1hv9k9l/collections_coinage_and_the_tyranny_of_fantasy/"
+            );
             assert_eq!(submission.author, "mipadi");
-            assert_eq!(submission.domain, "vice.com");
-            assert_eq!(submission.subreddit_id, "t5_2sgvi");
-            assert_eq!(submission.subreddit, "short");
-            assert_eq!(submission.url, "http://www.vice.com/read/it-sucks-to-be-a-short-guy-511");
-            assert_eq!(submission.title, "Science Says Being Short Makes You Depressed");
+            assert_eq!(submission.domain, "acoup.blog");
+            assert_eq!(submission.subreddit_id, "t5_2qh2s");
+            assert_eq!(submission.subreddit, "rpg");
+            assert_eq!(
+                submission.url,
+                "https://acoup.blog/2025/01/03/collections-coinage-and-the-tyranny-of-fantasy-gold/"
+            );
+            assert_eq!(
+                submission.title,
+                "Collections: Coinage and the Tyranny of Fantasy \"Gold\""
+            );
             assert_eq!(submission.selftext, "");
             assert_eq!(submission.created_utc, expected_created_utc);
-            assert_eq!(submission.created_utc.to_rfc2822(), "Tue, 20 Oct 2015 19:36:37 +0000");
-            assert_eq!(submission.created_utc.to_rfc3339(), "2015-10-20T19:36:37+00:00");
-            assert_eq!(submission.num_comments, 65);
-            assert_eq!(submission.ups, 12);
+            assert_eq!(
+                submission.created_utc.to_rfc2822(),
+                "Mon, 6 Jan 2025 20:54:01 +0000"
+            );
+            assert_eq!(
+                submission.created_utc.to_rfc3339(),
+                "2025-01-06T20:54:01+00:00"
+            );
+            assert_eq!(submission.num_comments, 22);
+            assert_eq!(submission.ups, 60);
             assert_eq!(submission.downs, 0);
-            assert_eq!(submission.score, 12);
+            assert_eq!(submission.score, 60);
         }
 
         #[test]
         fn it_parses_fields_of_self_posts() {
             let submissions = Submission::parse(&load_data("submitted_mipadi")).unwrap();
-            assert_eq!(submissions.len(), 25);
+            assert_eq!(submissions.len(), 100);
 
-            let expected_selftex =
-                "It's called [Karmanaut](https://github.com/mdippery/karmanaut), \
-                and it's written in Clojure and uses MongoDB as a data store. \
-                It's pretty simple to set up. It's best run as a cronjob ever \
-                *x* hours. Requires only Java and MongoDB (plus Leiningen to \
-                build it).\n\nEventually I plan to wire it up to a web frontend. \
-                The idea is to make it easy to chart your karma growth (or decline!) \
-                over time, and derive interesting statistics and other data from it \
-                (such as average karma gained per day, rate of change, etc.).";
-            let expected_created_utc = DateTime::from_timestamp(1400960795, 0).unwrap();
+            let expected_selftext = "I have two types of technology upgrades available for my \
+                exosuit: items listed as _protection units_, and items listed as _protection \
+                upgrades_. The ones listed as upgrades have text that generally says something \
+                like \"an almost total rework of the &lt;damage type&gt; Protection, this upgrade \
+                brings unparalleled improvements to &lt;damage type&gt; Shielding and &lt;damage \
+                type&gt; Protection\", whereas the upgrade units give a percentage of resistance.\
+                \n\nShould I install both, or do I just need to install one or the other? For \
+                example:\n\n- I have a \"High-Energy Bio-Integrity Unit\" which is a _protection \
+                upgrade_, and I can build a \"Radiation Reflector\" which is a _protection unit_. \
+                Should I install both?\n- I have a \"Specialist De-Toxifier\" and I can build a \
+                \"Toxin Suppressor\". Should I install both?\n- I have a \"Carbon Sublimation \
+                Pump\" and I can build a \"Coolant Network\". Should I install both?\n- I have a \
+                \"Nitroged-Based Thermal Stabilizer\" and I can build a \"Thermic Layer\". Should \
+                I install both?\n\nAnd then for something similar but a little different:\n\n- I \
+                have a \"Deep Water Depth Protection\" which says it is an \"almost total rework \
+                of the Aeration Membrance\", and I can also build an Aeration Membrane. Will \
+                crafting and installing an Aeration Membrane bring any extra benefits?";
+            let expected_created_utc = DateTime::from_timestamp(1721503204, 0).unwrap();
 
-            let submission = &submissions[22];
-            assert_eq!(submission.id, "26e9x6");
-            assert_eq!(submission.name, "t3_26e9x6");
-            assert_eq!(submission.permalink, "/r/webdev/comments/26e9x6/i_created_a_tool_for_sampling_reddit_users_karma/");
+            let submission = &submissions[3];
+            assert_eq!(submission.id, "1e83c2w");
+            assert_eq!(submission.name, "t3_1e83c2w");
+            assert_eq!(
+                submission.permalink,
+                "/r/NoMansSkyTheGame/comments/1e83c2w/should_i_install_both_protection_upgrades_and/"
+            );
             assert_eq!(submission.author, "mipadi");
-            assert_eq!(submission.domain, "self.webdev");
-            assert_eq!(submission.subreddit_id, "t5_2qs0q");
-            assert_eq!(submission.subreddit, "webdev");
-            assert_eq!(submission.url, "https://www.reddit.com/r/webdev/comments/26e9x6/i_created_a_tool_for_sampling_reddit_users_karma/");
-            assert_eq!(submission.title, "I created a tool for sampling Reddit users' karma (link and comment)");
-            assert_eq!(submission.selftext, expected_selftex);
+            assert_eq!(submission.domain, "self.NoMansSkyTheGame");
+            assert_eq!(submission.subreddit_id, "t5_325lr");
+            assert_eq!(submission.subreddit, "NoMansSkyTheGame");
+            assert_eq!(
+                submission.url,
+                "https://www.reddit.com/r/NoMansSkyTheGame/comments/1e83c2w/should_i_install_both_protection_upgrades_and/"
+            );
+            assert_eq!(
+                submission.title,
+                "Should I install both protection upgrades and protection units in an exosuit?"
+            );
+            assert_eq!(submission.selftext, expected_selftext);
             assert_eq!(submission.created_utc, expected_created_utc);
-            assert_eq!(submission.created_utc.to_rfc2822(), "Sat, 24 May 2014 19:46:35 +0000");
-            assert_eq!(submission.created_utc.to_rfc3339(), "2014-05-24T19:46:35+00:00");
-            assert_eq!(submission.num_comments, 9);
-            assert_eq!(submission.ups, 6);
+            assert_eq!(
+                submission.created_utc.to_rfc2822(),
+                "Sat, 20 Jul 2024 19:20:04 +0000"
+            );
+            assert_eq!(
+                submission.created_utc.to_rfc3339(),
+                "2024-07-20T19:20:04+00:00"
+            );
+            assert_eq!(submission.num_comments, 7);
+            assert_eq!(submission.ups, 1);
             assert_eq!(submission.downs, 0);
-            assert_eq!(submission.score, 6);
+            assert_eq!(submission.score, 1);
         }
 
         #[test]
