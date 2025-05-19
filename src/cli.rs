@@ -145,7 +145,9 @@ impl Runner {
         self.config.command.username()
     }
 
-    fn user(&self) -> Redditor {
+    // TODO: Should probably create this earlier and store so we can
+    //       show username errors immediately.
+    fn user(&self) -> Option<Redditor> {
         Redditor::new(
             self.username(),
             Box::new(RedditService::new()),

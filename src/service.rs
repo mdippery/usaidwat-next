@@ -4,9 +4,9 @@
 //! with the Reddit API over HTTPS, essentially a specialized HTTPS client
 //! specifically for Reddit.
 
-type Uri = String; // TODO: Find a real type
-type RawResponse = &'static str; // TODO: Find a real type
-type JsonResponse = &'static str; // TODO: Find a real type
+pub type Uri = String; // TODO: Find a real type (IntoUrl from reqwest?)
+pub type RawResponse = String; // TODO: Find a real type
+pub type JsonResponse = String; // TODO: Find a real type
 
 /// A service for retrieving information for Reddit users.
 ///
@@ -15,11 +15,11 @@ type JsonResponse = &'static str; // TODO: Find a real type
 /// and a mocked connector for testing purposes.
 pub trait Service {
     /// Performs a GET request to the given URI and returns the raw body.
-    fn get(&self, uri: Uri) -> RawResponse;
+    fn get(&self, uri: Uri) -> Option<RawResponse>;
 
     /// Performs a GET request to the `resource` associated with the given
     /// `username` and returns it as a parsed JSON response.
-    fn get_resource(&self, username: &str, resource: &str) -> JsonResponse;
+    fn get_resource(&self, username: &str, resource: &str) -> Option<JsonResponse>;
 
     /// An appropriate user agent to use for HTTP requests.
     fn user_agent(&self) -> String;
@@ -36,11 +36,14 @@ impl RedditService {
 }
 
 impl Service for RedditService {
-    fn get(&self, uri: Uri) -> RawResponse {
-        ""
+    // TODO: Figure out how to actually test this because otherwise
+    //       the type can remain completely wrong (probably should be
+    //       an Optional).
+    fn get(&self, uri: Uri) -> Option<RawResponse> {
+        Some("".to_string())
     }
 
-    fn get_resource(&self, username: &str, resource: &str) -> JsonResponse {
+    fn get_resource(&self, username: &str, resource: &str) -> Option<JsonResponse> {
         let qs = match resource {
             "comments" => "?limit=100",
             "submitted" => "?limit=100",
