@@ -6,7 +6,7 @@
 
 // TODO: Async, maybe
 use reqwest::blocking::Client;
-use reqwest::header::{CONTENT_TYPE, HeaderMap, HeaderValue, USER_AGENT};
+use reqwest::header::{self, HeaderMap, HeaderValue};
 
 pub type Uri = String; // TODO: Find a real type (IntoUrl from reqwest?)
 pub type RawResponse = String; // TODO: Find a real type
@@ -43,7 +43,7 @@ impl RedditService {
     fn headers(&self) -> HeaderMap {
         let mut headers = HeaderMap::new();
         headers.insert(
-            USER_AGENT,
+            header::USER_AGENT,
             HeaderValue::from_str(&self.user_agent()).unwrap(),
         );
         headers
@@ -77,7 +77,7 @@ impl Service for RedditService {
             //       HTML error page. Probably could be better. Maybe
             //       return a Result or the entire response, or have some
             //       testable helper method that does so.
-            match resp.headers().get(CONTENT_TYPE) {
+            match resp.headers().get(header::CONTENT_TYPE) {
                 Some(content_type) => match content_type.to_str() {
                     Ok(content_type) => {
                         if content_type.starts_with("application/json") {
