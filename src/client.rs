@@ -6,13 +6,13 @@ use std::fmt;
 use std::ops::Sub;
 
 /// Represents a Reddit user.
-pub struct Redditor<'a> {
-    username: &'a str,
+pub struct Redditor {
+    username: String,
     user: User,
     service: Box<dyn Service>,
 }
 
-impl<'a> fmt::Debug for Redditor<'a> {
+impl fmt::Debug for Redditor {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
             f,
@@ -22,7 +22,7 @@ impl<'a> fmt::Debug for Redditor<'a> {
     }
 }
 
-impl<'a> Redditor<'a> {
+impl Redditor {
     /// Creates a new client for retrieving information for Reddit users.
     ///
     /// `username` should be the Redditor's username. `service` is the
@@ -30,16 +30,21 @@ impl<'a> Redditor<'a> {
     /// information about the Redditor.
     ///
     /// Returns `None` if data cannot be parsed for the given username.
-    pub fn new(username: &'a str, service: Box<dyn Service>) -> Option<Self> {
-        let user_data = service.get_resource(username, "about")?;
-        let comment_data = service.get_resource(username, "comments")?;
-        let post_data = service.get_resource(username, "submitted")?;
+    pub fn new(username: String, service: Box<dyn Service>) -> Option<Self> {
+        let user_data = service.get_resource(&username, "about")?;
+        let comment_data = service.get_resource(&username, "comments")?;
+        let post_data = service.get_resource(&username, "submitted")?;
         let user = User::parse(&user_data, &comment_data, &post_data)?;
         Some(Self {
             username,
             user,
             service,
         })
+    }
+
+    /// The Redditor's username.
+    pub fn username(&self) -> String {
+        self.username.to_string()
     }
 
     /// The date the account was created.
@@ -113,8 +118,14 @@ mod tests {
             TestService::new("mipadi")
         }
 
-        fn test_client<'a>() -> Redditor<'a> {
-            Redditor::new("mipadi", Box::new(test_service())).unwrap()
+        fn test_client() -> Redditor {
+            Redditor::new(String::from("mipadi"), Box::new(test_service())).unwrap()
+        }
+
+        #[test]
+        fn it_returns_its_username() {
+            let actual_username = test_client().username();
+            assert_eq!(actual_username, "mipadi");
         }
 
         #[test]
@@ -168,8 +179,14 @@ mod tests {
             TestService::new("empty")
         }
 
-        fn test_client<'a>() -> Redditor<'a> {
-            Redditor::new("testuserpleaseignore", Box::new(test_service())).unwrap()
+        fn test_client() -> Redditor {
+            Redditor::new(String::from("testuserpleaseignore"), Box::new(test_service())).unwrap()
+        }
+
+        #[test]
+        fn it_returns_its_username() {
+            let actual_username = test_client().username();
+            assert_eq!(actual_username, "testuserpleaseignore");
         }
 
         #[test]
@@ -222,8 +239,8 @@ mod tests {
             TestService::new("404")
         }
 
-        fn test_client<'a>() -> Option<Redditor<'a>> {
-            Redditor::new("doesnotexist", Box::new(test_service()))
+        fn test_client() -> Option<Redditor> {
+            Redditor::new(String::from("doesnotexist"), Box::new(test_service()))
         }
 
         #[test]

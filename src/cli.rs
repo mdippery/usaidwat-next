@@ -1,8 +1,8 @@
 //! Drives the command-line program.
 
-use clap::{Args, Parser, Subcommand, ValueEnum};
 use crate::client::Redditor;
 use crate::service::RedditService;
+use clap::{Args, Parser, Subcommand, ValueEnum};
 
 /// Program configuration.
 #[derive(Debug, Parser)]
@@ -133,25 +133,28 @@ enum DateFormat {
 #[derive(Debug)]
 pub struct Runner {
     config: Config,
+    user: Redditor,
 }
 
 impl Runner {
     /// Create a new program runner using the given `config`.
-    pub fn new(config: Config) -> Self {
-        Self { config }
+    ///
+    /// # Panics
+    ///
+    /// If the user specified in `config.command` does not exist.
+    pub fn new(config: Config) -> Runner {
+        let username = config.command.username();
+        let user = Redditor::new(username.to_string(), Box::new(RedditService::new()))
+            .expect(&format!("No such user: {username}"));
+        Runner { config, user }
     }
 
     fn username(&self) -> &str {
-        self.config.command.username()
+        self.username()
     }
 
-    // TODO: Should probably create this earlier and store so we can
-    //       show username errors immediately.
-    fn user(&self) -> Option<Redditor> {
-        Redditor::new(
-            self.username(),
-            Box::new(RedditService::new()),
-        )
+    fn user(&self) -> &Redditor {
+        &self.user
     }
 
     /// Run the command-line program using its stored configuration options.
