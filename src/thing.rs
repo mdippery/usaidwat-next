@@ -30,7 +30,7 @@ pub struct About {
 }
 
 /// A Reddit comment.
-#[derive(Debug, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 pub struct Comment {
     id: String,
     name: String,
@@ -46,7 +46,7 @@ pub struct Comment {
 }
 
 /// A Reddit Post.
-#[derive(Debug, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 pub struct Submission {
     id: String,
     name: String,
@@ -93,13 +93,13 @@ impl User {
     }
 
     /// User's comments.
-    pub fn comments(&self) -> &Vec<Comment> {
-        &self.comments
+    pub fn comments(&self) -> impl Iterator<Item = Comment> {
+        self.comments.clone().into_iter()
     }
 
     /// User's submissions.
-    pub fn submissions(&self) -> &Vec<Submission> {
-        &self.submissions
+    pub fn submissions(&self) -> impl Iterator<Item = Submission> {
+        self.submissions.clone().into_iter()
     }
 }
 

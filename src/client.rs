@@ -64,12 +64,12 @@ impl<'a> Redditor<'a> {
     }
 
     /// Redditor's comments
-    pub fn comments(&self) -> &Vec<Comment> {
+    pub fn comments(&self) -> impl Iterator<Item = Comment> {
         self.user.comments()
     }
 
     /// Redditor's posts
-    pub fn submissions(&self) -> &Vec<Submission> {
+    pub fn submissions(&self) -> impl Iterator<Item = Submission> {
         self.user.submissions()
     }
 }
@@ -148,19 +148,14 @@ mod tests {
 
         #[test]
         fn it_returns_its_comments() {
-            // TODO: Make it so I can call test_client().comments();
-            //       Must change some ownership around comments(), maybe
-            //       by using Rc or Arc.
-            let client = test_client();
-            let comments = client.comments();
-            assert_eq!(comments.len(), 100);
+            let count = test_client().comments().count();
+            assert_eq!(count, 100);
         }
 
         #[test]
         fn it_returns_its_posts() {
-            let client = test_client();
-            let posts = client.submissions();
-            assert_eq!(posts.len(), 25);
+            let count = test_client().submissions().count();
+            assert_eq!(count, 25);
         }
     }
 
@@ -208,16 +203,14 @@ mod tests {
 
         #[test]
         fn it_returns_its_comments() {
-            let client = test_client();
-            let comments = client.comments();
-            assert_eq!(comments.len(), 0);
+            let count = test_client().comments().count();
+            assert_eq!(count, 0);
         }
 
         #[test]
         fn it_returns_its_posts() {
-            let client = test_client();
-            let posts = client.submissions();
-            assert_eq!(posts.len(), 0);
+            let count = test_client().submissions().count();
+            assert_eq!(count, 0);
         }
     }
 
