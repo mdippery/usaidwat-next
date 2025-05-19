@@ -149,8 +149,8 @@ impl Runner {
         Runner { config, user }
     }
 
-    fn username(&self) -> &str {
-        self.username()
+    fn username(&self) -> String {
+        self.user.username()
     }
 
     fn user(&self) -> &Redditor {
