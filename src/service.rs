@@ -4,6 +4,10 @@
 //! with the Reddit API over HTTPS, essentially a specialized HTTPS client
 //! specifically for Reddit.
 
+// TODO: Async, maybe
+use reqwest::blocking::Client;
+use reqwest::header::{CONTENT_TYPE, HeaderMap, HeaderValue, USER_AGENT};
+
 pub type Uri = String; // TODO: Find a real type (IntoUrl from reqwest?)
 pub type RawResponse = String; // TODO: Find a real type
 pub type JsonResponse = String; // TODO: Find a real type
@@ -36,6 +40,15 @@ impl RedditService {
         Self {}
     }
 
+    fn headers(&self) -> HeaderMap {
+        let mut headers = HeaderMap::new();
+        headers.insert(
+            USER_AGENT,
+            HeaderValue::from_str(&self.user_agent()).unwrap(),
+        );
+        headers
+    }
+
     fn query_string(&self, resource: &str) -> &str {
         match resource {
             "comments" => "?limit=100",
@@ -51,11 +64,28 @@ impl RedditService {
 }
 
 impl Service for RedditService {
-    // TODO: Figure out how to actually test this because otherwise
-    //       the type can remain completely wrong (probably should be
-    //       an Optional).
     fn get(&self, uri: Uri) -> Option<RawResponse> {
-        Some("".to_string())
+        let client = Client::new();
+        // TODO: Maybe return Result instead of Option
+        let resp = client.get(uri).headers(self.headers()).send().ok()?;
+
+        // TODO: Kind of a hack to ensure we get back JSON and not an
+        //       HTML error page. Probably could be better. Maybe
+        //       return a Result or the entire response, or have some
+        //       testable helper method that does so.
+        match resp.headers().get(CONTENT_TYPE) {
+            Some(content_type) => match content_type.to_str() {
+                Ok(content_type) => {
+                    if content_type.starts_with("application/json") {
+                        resp.text().ok()
+                    } else {
+                        None
+                    }
+                }
+                _ => None,
+            },
+            None => None,
+        }
     }
 
     fn get_resource(&self, username: &str, resource: &str) -> Option<JsonResponse> {
