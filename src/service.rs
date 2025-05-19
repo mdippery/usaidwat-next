@@ -22,7 +22,9 @@ pub trait Service {
     fn get_resource(&self, username: &str, resource: &str) -> Option<JsonResponse>;
 
     /// An appropriate user agent to use for HTTP requests.
-    fn user_agent(&self) -> String;
+    fn user_agent(&self) -> String {
+        format!("{} v{}", env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION"))
+    }
 }
 
 /// A service that contacts the Reddit API directly to retrieve information.
@@ -51,10 +53,6 @@ impl Service for RedditService {
         };
         let uri = format!("https://www.reddit.com/user/{username}/{resource}.json{qs}");
         self.get(uri)
-    }
-
-    fn user_agent(&self) -> String {
-        format!("{} v{}", env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION"))
     }
 }
 
