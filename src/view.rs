@@ -2,15 +2,21 @@ use crate::client::Redditor;
 use chrono::Local;
 use indoc::{formatdoc, indoc};
 
-pub fn format_info(user: &Redditor) -> String {
-    formatdoc! {"
-        Created: {} ({})
-        Link Karma: {}
-        Comment Karma: {}",
-        user.created_at().with_timezone(&Local).format("%b %d, %Y %H:%M %p"),
-        user.relative_age(),
-        user.link_karma(),
-        user.comment_karma(),
+pub trait Viewable {
+    fn view(&self) -> String;
+}
+
+impl Viewable for Redditor {
+    fn view(&self) -> String {
+        formatdoc! {"
+            Created: {} ({})
+            Link Karma: {}
+            Comment Karma: {}",
+            self.created_at().with_timezone(&Local).format("%b %d, %Y %H:%M %p"),
+            self.relative_age(),
+            self.link_karma(),
+            self.comment_karma(),
+        }
     }
 }
 
@@ -62,7 +68,7 @@ mod tests {
         #[test]
         fn it_formats_a_user() {
             let user = test_client();
-            let actual = format_info(&user);
+            let actual = user.view();
             // TODO: Eventually the "17 years" part will fail, so I
             //       really should be mocking time, but we'll cross that
             //       bridge when we come to it.
