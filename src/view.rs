@@ -22,52 +22,13 @@ impl Viewable for Redditor {
 
 #[cfg(test)]
 mod tests {
-    // TODO: All of these test services should be moved to a global module
-    //       so we can use them across tests.
-    use crate::client::Redditor;
-    use crate::service::{JsonResponse, RawResponse, Service, Uri};
-    use std::fs;
-
-    struct TestService {
-        suffix: &'static str,
-    }
-
-    impl Service for TestService {
-        fn get(&self, uri: Uri) -> Option<RawResponse> {
-            Some(fs::read_to_string(uri).expect("could not find test data"))
-        }
-
-        fn get_resource(&self, username: &str, resource: &str) -> Option<JsonResponse> {
-            let filename = format!("tests/data/{resource}_{}.json", self.suffix);
-            self.get(filename)
-        }
-
-        fn user_agent(&self) -> String {
-            format!("test-service-please-ignore v{}", env!("CARGO_PKG_VERSION"))
-        }
-    }
-
-    impl TestService {
-        fn new(suffix: &'static str) -> Self {
-            Self { suffix }
-        }
-    }
-
-    fn test_service() -> TestService {
-        TestService::new("mipadi")
-    }
-
-    fn test_client() -> Redditor {
-        Redditor::new(String::from("mipadi"), Box::new(test_service())).unwrap()
-    }
-
     mod format_info {
         use super::super::*;
-        use super::test_client;
+        use crate::client::Redditor;
 
         #[test]
         fn it_formats_a_user() {
-            let user = test_client();
+            let user = Redditor::test();
             let actual = user.view();
             // TODO: Eventually the "17 years" part will fail, so I
             //       really should be mocking time, but we'll cross that
