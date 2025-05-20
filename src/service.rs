@@ -8,9 +8,9 @@
 use reqwest::blocking::Client;
 use reqwest::header::{self, HeaderMap, HeaderValue};
 
-pub type Uri = String; // TODO: Find a real type (IntoUrl from reqwest?)
-pub type RawResponse = String; // TODO: Find a real type
-pub type JsonResponse = String; // TODO: Find a real type
+pub type Uri = String;
+pub type RawResponse = String;
+pub type JsonResponse = String;
 
 /// A service for retrieving information for Reddit users.
 ///

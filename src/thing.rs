@@ -56,7 +56,7 @@ pub struct Submission {
     domain: String,
     subreddit_id: String,
     subreddit: String,
-    url: String, // TODO: Convert this URL struct
+    url: String,
     title: String,
     selftext: String,
     #[serde(deserialize_with = "from_timestamp_f64")]
