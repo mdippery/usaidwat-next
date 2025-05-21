@@ -22,10 +22,14 @@ impl Viewable for Redditor {
 
 #[cfg(test)]
 mod tests {
+    fn load_output(filename: &str) -> String {
+        std::fs::read_to_string(format!("tests/data/{filename}.out")).unwrap()
+    }
+
     mod format_info {
         use super::super::*;
+        use super::load_output;
         use crate::client::Redditor;
-        use indoc::indoc;
 
         #[test]
         fn it_formats_a_user() {
@@ -36,10 +40,8 @@ mod tests {
             //       bridge when we come to it.
             //       Will also have to mock Local so the tests always use
             //       the same local time zone (PDT).
-            let expected = indoc! {"
-                Created: Mar 31, 2008 15:55 PM (17 years ago)
-                Link Karma: 11729
-                Comment Karma: 121995"};
+            let output = load_output("about_mipadi");
+            let expected = output.trim();
             assert_eq!(actual, expected);
         }
     }
