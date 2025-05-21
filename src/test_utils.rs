@@ -32,7 +32,7 @@ impl Redditor {
     /// Returns a valid Redditor with 100 submissions and 100 comments
     /// that can be used for testing purposes.
     pub fn test() -> Redditor {
-        Redditor::new(String::from("mipadi"), Box::new(TestService::new("mipadi"))).unwrap()
+        Redditor::new(String::from("mipadi"), TestService::new("mipadi")).unwrap()
     }
 
     /// Returns a valid Redditor with no submissions nor comments that can
@@ -40,16 +40,13 @@ impl Redditor {
     pub fn test_empty() -> Redditor {
         Redditor::new(
             String::from("testuserpleaseignore"),
-            Box::new(TestService::new("empty")),
+            TestService::new("empty"),
         )
         .unwrap()
     }
 
     /// Returns a non-existent Redditor.
     pub fn test_none() -> Option<Redditor> {
-        Redditor::new(
-            String::from("doesnotexist"),
-            Box::new(TestService::new("404")),
-        )
+        Redditor::new(String::from("doesnotexist"), TestService::new("404"))
     }
 }

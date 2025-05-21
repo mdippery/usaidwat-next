@@ -145,7 +145,7 @@ impl Runner {
     /// If the user specified in `config.command` does not exist.
     pub fn new(config: Config) -> Runner {
         let username = config.command.username();
-        let user = Redditor::new(username.to_string(), Box::new(RedditService::new()))
+        let user = Redditor::new(username.to_string(), RedditService::new())
             .expect(&format!("No such user: {username}"));
         Runner { config, user }
     }

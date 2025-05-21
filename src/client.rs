@@ -11,7 +11,6 @@ use std::time::Duration;
 pub struct Redditor {
     username: String,
     user: User,
-    service: Box<dyn Service>,
 }
 
 impl fmt::Debug for Redditor {
@@ -32,16 +31,12 @@ impl Redditor {
     /// information about the Redditor.
     ///
     /// Returns `None` if data cannot be parsed for the given username.
-    pub fn new(username: String, service: Box<dyn Service>) -> Option<Self> {
+    pub fn new<T: Service>(username: String, service: T) -> Option<Self> {
         let user_data = service.get_resource(&username, "about")?;
         let comment_data = service.get_resource(&username, "comments")?;
         let post_data = service.get_resource(&username, "submitted")?;
         let user = User::parse(&user_data, &comment_data, &post_data)?;
-        Some(Self {
-            username,
-            user,
-            service,
-        })
+        Some(Self { username, user })
     }
 
     /// The Redditor's username.
