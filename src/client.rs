@@ -2,7 +2,7 @@
 
 use crate::service::Service;
 use crate::thing::{Comment, DateTime, Submission, TimeDelta, User, Utc};
-use relativetime::{NegativeRelativeTime, RelativeTime};
+use relativetime::NegativeRelativeTime;
 use std::fmt;
 use std::ops::Sub;
 use std::time::Duration;

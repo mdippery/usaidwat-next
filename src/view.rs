@@ -1,6 +1,6 @@
 use crate::client::Redditor;
 use chrono::Local;
-use indoc::{formatdoc, indoc};
+use indoc::formatdoc;
 
 pub trait Viewable {
     fn view(&self) -> String;
@@ -25,6 +25,7 @@ mod tests {
     mod format_info {
         use super::super::*;
         use crate::client::Redditor;
+        use indoc::indoc;
 
         #[test]
         fn it_formats_a_user() {
