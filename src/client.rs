@@ -79,9 +79,19 @@ impl Redditor {
         self.user.comments()
     }
 
-    /// Redditor's posts
+    /// Redditor's posts (articles and self posts).
     pub fn submissions(&self) -> impl Iterator<Item = Submission> {
         self.user.submissions()
+    }
+
+    /// True if the user has posted at least one comment.
+    pub fn has_comments(&self) -> bool {
+        self.comments().count() > 0
+    }
+
+    /// True if the user has posted as least one article or self post.
+    pub fn has_submissions(&self) -> bool {
+        self.submissions().count() > 0
     }
 
     /// A timeline of the user's comments, grouped by days of the week
@@ -210,6 +220,16 @@ mod tests {
             let count = Redditor::test().submissions().count();
             assert_eq!(count, 100);
         }
+
+        #[test]
+        fn it_confirms_that_it_has_comments() {
+            assert!(Redditor::test().has_comments())
+        }
+
+        #[test]
+        fn it_confirms_that_it_has_submissions() {
+            assert!(Redditor::test().has_submissions())
+        }
     }
 
     mod user_with_no_data {
@@ -261,6 +281,16 @@ mod tests {
         fn it_returns_its_posts() {
             let count = Redditor::test_empty().submissions().count();
             assert_eq!(count, 0);
+        }
+
+        #[test]
+        fn it_confirms_that_it_has_comments() {
+            assert!(!Redditor::test_empty().has_comments())
+        }
+
+        #[test]
+        fn it_confirms_that_it_has_submissions() {
+            assert!(!Redditor::test_empty().has_submissions())
         }
     }
 
