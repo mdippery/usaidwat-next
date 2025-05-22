@@ -2,6 +2,8 @@
 
 use crate::service::Service;
 use crate::thing::{Comment, DateTime, Submission, TimeDelta, User, Utc};
+pub use chrono::Weekday;
+use chrono::{Datelike, Timelike};
 use relativetime::NegativeRelativeTime;
 use std::fmt;
 use std::ops::Sub;
@@ -80,6 +82,46 @@ impl Redditor {
     /// Redditor's posts
     pub fn submissions(&self) -> impl Iterator<Item = Submission> {
         self.user.submissions()
+    }
+
+    /// A timeline of the user's comments, grouped by days of the week
+    /// and hours of the day.
+    // TODO: Test!
+    pub fn timeline(&self) -> Timeline {
+        Timeline::for_user(self)
+    }
+}
+
+type Hour = u32;
+type TimeMatrix = [[u32; 24]; 7];
+
+#[derive(Debug)]
+pub struct Timeline {
+    buckets: TimeMatrix,
+}
+
+impl Timeline {
+    /// Calculate a new timeline for the given Redditor.
+    pub fn for_user(user: &Redditor) -> Self {
+        let groups = Timeline::grouped_by_weekdays_and_hours(user);
+        let buckets = Timeline::group_to_matrix(groups);
+        Timeline { buckets }
+    }
+
+    fn grouped_by_weekdays_and_hours(user: &Redditor) -> impl Iterator<Item = (Weekday, Hour)> {
+        user.comments()
+            .map(|c| (c.created_local().weekday(), c.created_local().hour()))
+    }
+
+    fn group_to_matrix(groups: impl Iterator<Item = (Weekday, Hour)>) -> TimeMatrix {
+        let mut buckets = [[0; 24]; 7];
+        for (weekday, hour) in groups {
+            let wday = weekday.num_days_from_monday();
+            assert!(wday < 7);
+            assert!(hour < 24);
+            buckets[wday as usize][hour as usize] += 1;
+        }
+        buckets
     }
 }
 

@@ -5,7 +5,7 @@
 //! module encapsulates that idea and provides an easy way to more or less
 //! work with JSON data from the Reddit API.
 
-pub use chrono::{DateTime, TimeDelta, Utc};
+pub use chrono::{DateTime, TimeDelta, Local, Utc};
 use serde::de::Error;
 use serde::{Deserialize, Deserializer};
 use serde_json;
@@ -153,6 +153,18 @@ impl Comment {
                     .map(|comment_wrapper| comment_wrapper.data)
                     .collect()
             })
+    }
+
+    /// The time the comment was created, in UTC.
+    // TODO: Test!
+    pub fn created_utc(&self) -> DateTime<Utc> {
+        self.created_utc
+    }
+
+    /// The time the comment was created, in local time.
+    // TODO: Test!
+    pub fn created_local(&self) -> DateTime<Local> {
+        self.created_utc().with_timezone(&Local)
     }
 }
 
