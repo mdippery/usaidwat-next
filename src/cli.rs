@@ -146,7 +146,8 @@ impl Runner {
     pub fn new(config: Config) -> Runner {
         let username = config.command.username();
         let user = Redditor::new(username.to_string(), RedditService::new())
-            .expect(&format!("No such user: {username}"));
+            // TODO: Just show message and exit non-zero instead of panicking
+            .expect(&format!("no such user: {username}"));
         Runner { config, user }
     }
 
