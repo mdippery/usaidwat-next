@@ -234,6 +234,13 @@ impl Runner {
     }
 
     fn run_timeline(&self) {
-        println!("{}", self.user.timeline().view(&ViewOptions::default()));
+        // TODO: This is hard to test -- should move the conditional check
+        //       into testable method, maybe Timeline::view(), although I'm
+        //       not sure the logic is appropriate there, either.
+        if self.user().comments().count() > 0 {
+            println!("{}", self.user().timeline().view(&ViewOptions::default()));
+        } else {
+            println!("{} has no comments.", self.user().username());
+        }
     }
 }
