@@ -93,7 +93,8 @@ impl Redditor {
 }
 
 type Hour = u32;
-type TimeMatrix = [[u32; 24]; 7];
+pub type TimelineDay = [u32; 24];
+type TimeMatrix = [TimelineDay; 7];
 
 #[derive(Debug)]
 pub struct Timeline {
@@ -103,9 +104,14 @@ pub struct Timeline {
 impl Timeline {
     /// Calculate a new timeline for the given Redditor.
     pub fn for_user(user: &Redditor) -> Self {
+        // TODO: Test that these calculations are correct!
         let groups = Timeline::grouped_by_weekdays_and_hours(user);
         let buckets = Timeline::group_to_matrix(groups);
         Timeline { buckets }
+    }
+
+    pub fn days(&self) -> impl Iterator<Item = (Weekday, TimelineDay)> {
+        TimelineIterator::new(&self)
     }
 
     fn grouped_by_weekdays_and_hours(user: &Redditor) -> impl Iterator<Item = (Weekday, Hour)> {
@@ -122,6 +128,33 @@ impl Timeline {
             buckets[wday as usize][hour as usize] += 1;
         }
         buckets
+    }
+}
+
+#[derive(Debug)]
+struct TimelineIterator<'a> {
+    timeline: &'a Timeline,
+    row: u8,
+}
+
+impl<'a> TimelineIterator<'a> {
+    pub fn new(timeline: &'a Timeline) -> Self {
+        Self { timeline, row: 0 }
+    }
+}
+
+impl<'a> Iterator for TimelineIterator<'a> {
+    type Item = (Weekday, TimelineDay);
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.row < 7 {
+            let wday = Weekday::try_from(self.row).unwrap();
+            let day = self.timeline.buckets[self.row as usize];
+            self.row += 1;
+            Some((wday, day))
+        } else {
+            None
+        }
     }
 }
 

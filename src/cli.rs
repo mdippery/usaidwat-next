@@ -233,8 +233,6 @@ impl Runner {
     }
 
     fn run_timeline(&self) {
-        let timeline = self.user.timeline();
-        eprintln!("timeline is {timeline:?}");
-        println!("Running timeline for {}", self.username());
+        println!("{}", self.user.timeline().view(&ViewOptions::default()));
     }
 }
