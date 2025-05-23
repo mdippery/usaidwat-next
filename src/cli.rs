@@ -6,6 +6,7 @@ use crate::service::RedditService;
 use crate::thing::Comment;
 use crate::view::{ViewOptions, Viewable};
 use clap::{Args, Parser, Subcommand, ValueEnum};
+use pager::Pager;
 
 /// Program configuration.
 #[derive(Debug, Parser)]
@@ -218,6 +219,7 @@ impl Runner {
             .collect::<Vec<_>>()
             .join("\n\n");
 
+        Pager::new().setup();
         println!("{}", output);
     }
 
