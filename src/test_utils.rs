@@ -1,6 +1,6 @@
 use crate::client::Redditor;
+use crate::clock::{Clock, DateTime, Utc};
 use crate::service::{JsonResponse, RawResponse, Service, Uri};
-#[cfg(test)]
 use std::fs;
 
 pub struct TestService {
@@ -18,7 +18,7 @@ impl Service for TestService {
         Some(fs::read_to_string(uri).expect("could not find test data"))
     }
 
-    fn get_resource(&self, username: &str, resource: &str) -> Option<JsonResponse> {
+    fn get_resource(&self, _username: &str, resource: &str) -> Option<JsonResponse> {
         let filename = format!("tests/data/{resource}_{}.json", self.suffix);
         self.get(filename)
     }
@@ -28,25 +28,54 @@ impl Service for TestService {
     }
 }
 
-impl Redditor {
+pub struct FrozenClock {
+    datetime: DateTime<Utc>,
+}
+
+impl Default for FrozenClock {
+    fn default() -> Self {
+        let datetime = DateTime::parse_from_rfc3339("2025-05-23T10:13:00-07:00")
+            .expect("invalid date supplied")
+            .with_timezone(&Utc);
+        FrozenClock { datetime }
+    }
+}
+
+impl Clock for FrozenClock {
+    fn now(&self) -> DateTime<Utc> {
+        self.datetime
+    }
+}
+
+impl Redditor<FrozenClock> {
     /// Returns a valid Redditor with 100 submissions and 100 comments
     /// that can be used for testing purposes.
-    pub fn test() -> Redditor {
-        Redditor::new(String::from("mipadi"), TestService::new("mipadi")).unwrap()
+    pub fn test() -> Redditor<FrozenClock> {
+        Redditor::new_with_clock(
+            String::from("mipadi"),
+            TestService::new("mipadi"),
+            FrozenClock::default(),
+        )
+        .unwrap()
     }
 
     /// Returns a valid Redditor with no submissions nor comments that can
     /// be used for testing purposes.
-    pub fn test_empty() -> Redditor {
-        Redditor::new(
+    pub fn test_empty() -> Redditor<FrozenClock> {
+        Redditor::new_with_clock(
             String::from("testuserpleaseignore"),
             TestService::new("empty"),
+            FrozenClock::default(),
         )
         .unwrap()
     }
 
     /// Returns a non-existent Redditor.
-    pub fn test_none() -> Option<Redditor> {
-        Redditor::new(String::from("doesnotexist"), TestService::new("404"))
+    pub fn test_none() -> Option<Redditor<FrozenClock>> {
+        Redditor::new_with_clock(
+            String::from("doesnotexist"),
+            TestService::new("404"),
+            FrozenClock::default(),
+        )
     }
 }

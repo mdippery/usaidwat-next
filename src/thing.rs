@@ -5,7 +5,8 @@
 //! module encapsulates that idea and provides an easy way to more or less
 //! work with JSON data from the Reddit API.
 
-pub use chrono::{DateTime, TimeDelta, Local, Utc};
+use crate::clock::{DateTime, Utc};
+pub use chrono::{TimeDelta, Local};
 use serde::de::Error;
 use serde::{Deserialize, Deserializer};
 use serde_json;

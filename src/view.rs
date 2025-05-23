@@ -1,6 +1,7 @@
 //! Draws viewable objects into a terminal window.
 
 use crate::client::{Redditor, Timeline};
+use crate::clock::Clock;
 use chrono::Local;
 use indoc::formatdoc;
 use std::ops::Index;
@@ -18,7 +19,7 @@ pub trait Viewable {
     fn view(&self, opts: &ViewOptions) -> String;
 }
 
-impl Viewable for Redditor {
+impl<C: Clock> Viewable for Redditor<C> {
     fn view(&self, _: &ViewOptions) -> String {
         formatdoc! {"
             Created: {} ({})
@@ -78,11 +79,6 @@ mod tests {
         fn it_formats_a_user() {
             let user = Redditor::test();
             let actual = user.view(&ViewOptions::default());
-            // TODO: Eventually the "17 years" part will fail, so I
-            //       really should be mocking time, but we'll cross that
-            //       bridge when we come to it.
-            //       Will also have to mock Local so the tests always use
-            //       the same local time zone (PDT).
             let output = load_output("about_mipadi");
             let expected = output.trim();
             assert_eq!(actual, expected);

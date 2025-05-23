@@ -1,8 +1,9 @@
 //! Drives the command-line program.
 
 use crate::client::Redditor;
-use crate::view::{Viewable, ViewOptions};
+use crate::clock::SystemClock;
 use crate::service::RedditService;
+use crate::view::{ViewOptions, Viewable};
 use clap::{Args, Parser, Subcommand, ValueEnum};
 
 /// Program configuration.
@@ -134,7 +135,7 @@ enum DateFormat {
 #[derive(Debug)]
 pub struct Runner {
     config: Config,
-    user: Redditor,
+    user: Redditor<SystemClock>,
 }
 
 impl Runner {
@@ -155,7 +156,7 @@ impl Runner {
         self.user.username()
     }
 
-    fn user(&self) -> &Redditor {
+    fn user(&self) -> &Redditor<SystemClock> {
         &self.user
     }
 
