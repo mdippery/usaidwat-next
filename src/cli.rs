@@ -220,6 +220,8 @@ impl Runner {
             .join("\n\n");
 
         Pager::new().setup();
+        // TODO: Output with color, but only if hooked up to tty
+        // TODO: Do not wrap oneline titles
         println!("{}", output);
     }
 
@@ -261,6 +263,9 @@ impl Runner {
         // TODO: This is hard to test -- should move the conditional check
         //       into testable method, maybe Timeline::view(), although I'm
         //       not sure the logic is appropriate there, either.
+
+        // TODO: Print in color with intensity proportional to number of comments
+
         if self.user().has_comments() {
             println!("{}", self.user().timeline().view(&ViewOptions::default()));
         } else {

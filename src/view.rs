@@ -93,13 +93,26 @@ impl<C: Clock> Viewable for Redditor<C> {
 
 impl Viewable for Comment {
     fn view(&self, opts: &ViewOptions) -> String {
+        if opts.oneline {
+            self.view_oneline(opts)
+        } else {
+            self.view_full(opts)
+        }
+    }
+}
+
+impl Comment {
+    fn view_full(&self, opts: &ViewOptions) -> String {
         format!("{self:?}")
+    }
+
+    fn view_oneline(&self, _: &ViewOptions) -> String {
+        format!("{} {}", self.subreddit(), self.link_title())
     }
 }
 
 impl Viewable for Timeline {
     fn view(&self, _: &ViewOptions) -> String {
-        // TODO: Print in color with intensity proportional to number of comments
         let mut s = String::from(" ");
         s += (0..24)
             .map(|i| format!("{i:>3}"))
@@ -191,10 +204,53 @@ mod tests {
     }
 
     mod format_comment {
+        use super::super::*;
+        use super::load_output;
+        use crate::client::Redditor;
+
+        // TODO: Test with and without color when possible
+
+        fn get_comment(n: usize) -> Comment {
+            Redditor::test()
+                .comments()
+                .nth(n)
+                .expect("no comment found")
+        }
+
         #[test]
         #[ignore]
-        fn it_formats_a_comment() {
+        fn it_formats_a_comment_with_relative_dates() {
+            let opts = ViewOptions::build()
+                .date_format(DateFormat::Relative)
+                .build();
+            let actual = get_comment(0).view(&opts);
             todo!("need to test!");
+        }
+
+        #[test]
+        #[ignore]
+        fn it_formats_a_comment_with_absolute_dates() {
+            let opts = ViewOptions::build()
+                .date_format(DateFormat::Absolute)
+                .build();
+            let actual = get_comment(0).view(&opts);
+            todo!("need to test!");
+        }
+
+        #[test]
+        #[ignore]
+        fn it_formats_a_comment_with_raw_bodies() {
+            let opts = ViewOptions::build().raw(true).build();
+            let actual = get_comment(0).view(&opts);
+            todo!("need to test!");
+        }
+
+        #[test]
+        fn it_formats_a_comment_on_oneline() {
+            let opts = ViewOptions::build().oneline(true).build();
+            let actual = get_comment(0).view(&opts);
+            let expected = "cyphersystem Cypher System & ChatGPT";
+            assert_eq!(actual, expected);
         }
     }
 

@@ -6,6 +6,7 @@
 //! work with JSON data from the Reddit API.
 
 use crate::clock::{DateTime, Local, Utc};
+use htmlentity::entity::{self, ICodedDataTrait};
 use serde::de::Error;
 use serde::{Deserialize, Deserializer};
 use serde_json;
@@ -163,6 +164,20 @@ impl Comment {
     /// The time the comment was created, in local time.
     pub fn created_local(&self) -> DateTime<Local> {
         self.created_utc().with_timezone(&Local)
+    }
+
+    /// The subreddit the comment was posted in.
+    pub fn subreddit(&self) -> &str {
+        &self.subreddit
+    }
+
+    /// The title of the link for which the comment was posted.
+    ///
+    /// HTML entities in the title will be converted.
+    pub fn link_title(&self) -> String {
+        entity::decode(self.link_title.as_bytes())
+            .to_string()
+            .unwrap_or(self.link_title.to_string())
     }
 
     /// The comment body, as raw Markdown text.
@@ -357,6 +372,21 @@ mod tests {
             assert_eq!(comment.ups, -3);
             assert_eq!(comment.downs, 0);
             assert_eq!(comment.score, -3);
+        }
+
+        #[test]
+        fn it_returns_its_subreddit() {
+            let comments = Comment::parse(&load_data("comments_mipadi")).unwrap();
+            let comment = &comments[0];
+            assert_eq!(comment.subreddit(), "cyphersystem");
+        }
+
+        #[test]
+        fn it_returns_its_link_title() {
+            let comments = Comment::parse(&load_data("comments_mipadi")).unwrap();
+            // Get the 0th comment because it has an ampersand and I want to test the conversion
+            let comment = &comments[0];
+            assert_eq!(comment.link_title(), "Cypher System & ChatGPT");
         }
 
         #[test]
