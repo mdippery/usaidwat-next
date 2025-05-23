@@ -187,15 +187,16 @@ impl Comment {
 
     /// True if the search pattern can be found in the comment's body.
     ///
+    /// The search is case-insensitive.
+    ///
     /// `pattern` is a fixed string; regular expression matches are not
     /// yet supported.
     pub fn matches(&self, pattern: &str) -> bool {
-        // TODO: should match case-insensitively
         // TODO: pattern should be a case-insensitive regex
         //       (or rather, that's how it is in the current Ruby tool,
         //       but I'm actually not convinced that we should search
         //       case-insensitively with a regex)
-        self.body.matches(pattern).count() > 0
+        self.body.to_lowercase().matches(&pattern.to_lowercase()).count() > 0
     }
 }
 
@@ -416,6 +417,18 @@ mod tests {
             let comment = &comments[9];
             let result = comment.matches("min/maxing");
             assert!(result, "{result} != true");
+        }
+
+        #[test]
+        fn it_matches_a_fixed_string_case_insensitively() {
+            let comments = Comment::parse(&load_data("comments_mipadi")).unwrap();
+            let comment = &comments[9];
+
+            let result = comment.matches("Pathfinder");
+            assert!(result, "'Pathfinder' not found in text");
+
+            let result = comment.matches("pathfinder");
+            assert!(result, "'pathfinder' not found in text");
         }
 
         fn it_matches_a_fixed_string_with_a_space() {
