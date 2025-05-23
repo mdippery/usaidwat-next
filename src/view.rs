@@ -25,7 +25,7 @@ impl ViewOptions {
     /// let opts = ViewOptions::build().oneline(true).raw(false).build();
     /// ```
     pub fn build() -> ViewOptionsBuilder {
-        ViewOptionsBuilder::new()
+        ViewOptionsBuilder::default()
     }
 }
 
@@ -33,7 +33,7 @@ impl ViewOptions {
 ///
 /// You probably don't want to use this directly; call [`ViewOptions::build()`]
 /// and construct it incrementally instead.
-#[derive(Debug)]
+#[derive(Debug, Default)]
 #[must_use]
 pub struct ViewOptionsBuilder {
     date_format: DateFormat,
@@ -42,14 +42,6 @@ pub struct ViewOptionsBuilder {
 }
 
 impl ViewOptionsBuilder {
-    fn new() -> Self {
-        ViewOptionsBuilder {
-            date_format: DateFormat::default(),
-            oneline: bool::default(),
-            raw: bool::default(),
-        }
-    }
-
     /// Sets the date format option to relative or absolute.
     pub fn date_format(mut self, date_format: DateFormat) -> Self {
         self.date_format = date_format;
