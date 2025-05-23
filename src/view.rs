@@ -3,6 +3,7 @@
 use crate::cli::DateFormat;
 use crate::client::{Redditor, Timeline};
 use crate::clock::Clock;
+use crate::thing::Comment;
 use chrono::Local;
 use indoc::formatdoc;
 use std::ops::Index;
@@ -87,6 +88,12 @@ impl<C: Clock> Viewable for Redditor<C> {
             self.link_karma(),
             self.comment_karma(),
         }
+    }
+}
+
+impl Viewable for Comment {
+    fn view(&self, opts: &ViewOptions) -> String {
+        format!("{self:?}")
     }
 }
 
@@ -176,6 +183,14 @@ mod tests {
             let output = load_output("about_mipadi");
             let expected = output.trim();
             assert_eq!(actual, expected);
+        }
+    }
+
+    mod format_comment {
+        #[test]
+        #[ignore]
+        fn it_formats_a_comment() {
+            todo!("need to test!");
         }
     }
 

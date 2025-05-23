@@ -164,6 +164,11 @@ impl Comment {
     pub fn created_local(&self) -> DateTime<Local> {
         self.created_utc().with_timezone(&Local)
     }
+
+    /// The comment body, as raw Markdown text.
+    pub fn body(&self) -> &str {
+        &self.body.as_ref()
+    }
 }
 
 impl Submission {
@@ -344,6 +349,22 @@ mod tests {
             assert_eq!(comment.ups, -3);
             assert_eq!(comment.downs, 0);
             assert_eq!(comment.score, -3);
+        }
+
+        #[test]
+        fn it_returns_its_body() {
+            let expected_body = "Honestly, min/maxing and system mastery is a big part of the \
+                Pathfinder community. It's a fairly crunchy system that draws in the sort of \
+                players who really like finding ways to exploit the rules. Supposedly some groups \
+                are more focused on roleplaying, but I have yet to meet a PF2 player in real life \
+                who gives a shit about pesky, whimsical things like _story_. If that's not your \
+                thing, you probably won't see eye to eye with the Pathfinder players you meet.\
+                \n\nI'm in a slightly similar boat right now: I don't care that much about \
+                min/maxing, but I put up with my Pathfinder friends because I really like our \
+                group and I like them as people well enough.";
+            let comments = Comment::parse(&load_data("comments_mipadi")).unwrap();
+            let comment = &comments[9];
+            assert_eq!(comment.body(), expected_body);
         }
 
         #[test]

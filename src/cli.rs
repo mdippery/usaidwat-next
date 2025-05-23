@@ -3,6 +3,7 @@
 use crate::client::Redditor;
 use crate::clock::SystemClock;
 use crate::service::RedditService;
+use crate::thing::Comment;
 use crate::view::{ViewOptions, Viewable};
 use clap::{Args, Parser, Subcommand, ValueEnum};
 
@@ -194,11 +195,30 @@ impl Runner {
         oneline: &bool,
         raw: &bool,
     ) {
-        let opts = ViewOptions::build().oneline(*oneline).raw(*raw);
-        println!(
-            "Running log for {}, date_format = {date_format:?}, grep = {grep:?}, limit = {limit:?}, oneline? {oneline}, raw? {raw}",
-            self.username(),
-        );
+        let opts = ViewOptions::build()
+            .oneline(*oneline)
+            .raw(*raw)
+            .date_format(date_format.clone())
+            .build();
+        let n = limit
+            .and_then(|n| Some(n as usize))
+            .unwrap_or_else(|| self.user().comments().count());
+        let comments = self.user().comments().take(n);
+
+        // TODO: Probably need to move this into a function that I can test easily
+        let comments: Box<dyn Iterator<Item = Comment>> = match grep {
+            Some(grep) => {
+                Box::new(comments.filter(move |comment| comment.body().matches(grep).count() > 0))
+            }
+            None => Box::new(comments),
+        };
+
+        let output = comments
+            .map(|comment| comment.view(&opts))
+            .collect::<Vec<_>>()
+            .join("\n\n");
+
+        println!("{}", output);
     }
 
     fn run_posts(&self, config: &PostCommandConfig) {
