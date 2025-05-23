@@ -14,8 +14,56 @@ pub struct ViewOptions {
 }
 
 impl ViewOptions {
-    pub fn from(oneline: bool, raw: bool) -> Self {
-        Self { oneline, raw }
+    /// Incrementally builds a new set of view options.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use usaidwat::view::ViewOptions;
+    /// let opts = ViewOptions::build().oneline(true).raw(false).build();
+    /// ```
+    pub fn build() -> ViewOptionsBuilder {
+        ViewOptionsBuilder::new()
+    }
+}
+
+/// A builder for view options.
+///
+/// You probably don't want to use this directly; call [`ViewOptions::build()`]
+/// and construct it incrementally instead.
+#[derive(Debug)]
+#[must_use]
+pub struct ViewOptionsBuilder {
+    oneline: bool,
+    raw: bool,
+}
+
+impl ViewOptionsBuilder {
+    fn new() -> Self {
+        ViewOptionsBuilder {
+            oneline: false,
+            raw: false,
+        }
+    }
+
+    /// Sets the "oneline" option to true or false.
+    pub fn oneline(mut self, oneline: bool) -> Self {
+        self.oneline = oneline;
+        self
+    }
+
+    /// Sets the "raw" option to true or false.
+    pub fn raw(mut self, raw: bool) -> Self {
+        self.raw = raw;
+        self
+    }
+
+    /// Finalizes the [`ViewOptions`].
+    pub fn build(self) -> ViewOptions {
+        ViewOptions {
+            oneline: self.oneline,
+            raw: self.raw,
+        }
     }
 }
 
@@ -88,8 +136,20 @@ mod tests {
         }
 
         fn it_returns_custom_options() {
-            let opts = ViewOptions::from(true, true);
+            let opts = ViewOptions::build().oneline(true).raw(true);
             assert!(opts.oneline);
+            assert!(opts.raw);
+        }
+
+        fn it_returns_custom_options_with_only_oneline() {
+            let opts = ViewOptions::build().oneline(true);
+            assert!(opts.oneline);
+            assert!(!opts.raw);
+        }
+
+        fn it_returns_custom_options_with_only_raw() {
+            let opts = ViewOptions::build().raw(true);
+            assert!(!opts.oneline);
             assert!(opts.raw);
         }
     }

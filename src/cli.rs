@@ -194,6 +194,7 @@ impl Runner {
         oneline: &bool,
         raw: &bool,
     ) {
+        let opts = ViewOptions::build().oneline(*oneline).raw(*raw);
         println!(
             "Running log for {}, date_format = {date_format:?}, grep = {grep:?}, limit = {limit:?}, oneline? {oneline}, raw? {raw}",
             self.username(),
