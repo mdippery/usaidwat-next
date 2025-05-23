@@ -209,7 +209,7 @@ impl Runner {
         // TODO: Probably need to move this into a function that I can test easily
         let comments: Box<dyn Iterator<Item = Comment>> = match grep {
             Some(grep) => {
-                Box::new(comments.filter(move |comment| comment.body().matches(grep).count() > 0))
+                Box::new(comments.filter(move |comment| comment.matches(grep)))
             }
             None => Box::new(comments),
         };

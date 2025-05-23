@@ -169,6 +169,14 @@ impl Comment {
     pub fn body(&self) -> &str {
         &self.body.as_ref()
     }
+
+    /// True if the search pattern can be found in the comment's body.
+    ///
+    /// `pattern` is a fixed string; regular expression matches are not
+    /// yet supported.
+    pub fn matches(&self, pattern: &str) -> bool {
+        self.body.matches(pattern).count() > 0
+    }
 }
 
 impl Submission {
@@ -365,6 +373,29 @@ mod tests {
             let comments = Comment::parse(&load_data("comments_mipadi")).unwrap();
             let comment = &comments[9];
             assert_eq!(comment.body(), expected_body);
+        }
+
+        #[test]
+        fn it_matches_a_fixed_string() {
+            let comments = Comment::parse(&load_data("comments_mipadi")).unwrap();
+            let comment = &comments[9];
+            let result = comment.matches("min/maxing");
+            assert!(result, "{result} != true");
+        }
+
+        fn it_matches_a_fixed_string_with_a_space() {
+            let comments = Comment::parse(&load_data("comments_mipadi")).unwrap();
+            let comment = &comments[9];
+            let result = comment.matches("see eye to eye");
+            assert!(result, "{result} != true");
+        }
+
+        #[test]
+        fn it_does_not_match_a_fixed_string() {
+            let comments = Comment::parse(&load_data("comments_mipadi")).unwrap();
+            let comment = &comments[9];
+            let result = comment.matches("D&D");
+            assert!(!result, "{result} != false");
         }
 
         #[test]
