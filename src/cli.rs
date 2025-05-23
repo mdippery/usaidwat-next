@@ -124,10 +124,10 @@ impl PostSubcommand {
     }
 }
 
-#[derive(Clone, Debug, Default, ValueEnum)]
-enum DateFormat {
-    #[default]
+#[derive(Clone, Debug, Default, PartialEq, ValueEnum)]
+pub enum DateFormat {
     Absolute,
+    #[default]
     Relative,
 }
 

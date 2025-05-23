@@ -1,5 +1,6 @@
 //! Draws viewable objects into a terminal window.
 
+use crate::cli::DateFormat;
 use crate::client::{Redditor, Timeline};
 use crate::clock::Clock;
 use chrono::Local;
@@ -9,6 +10,7 @@ use std::ops::Index;
 /// View renderer options.
 #[derive(Debug, Default)]
 pub struct ViewOptions {
+    date_format: DateFormat,
     oneline: bool,
     raw: bool,
 }
@@ -34,6 +36,7 @@ impl ViewOptions {
 #[derive(Debug)]
 #[must_use]
 pub struct ViewOptionsBuilder {
+    date_format: DateFormat,
     oneline: bool,
     raw: bool,
 }
@@ -41,9 +44,16 @@ pub struct ViewOptionsBuilder {
 impl ViewOptionsBuilder {
     fn new() -> Self {
         ViewOptionsBuilder {
-            oneline: false,
-            raw: false,
+            date_format: DateFormat::default(),
+            oneline: bool::default(),
+            raw: bool::default(),
         }
+    }
+
+    /// Sets the date format option to relative or absolute.
+    pub fn date_format(mut self, date_format: DateFormat) -> Self {
+        self.date_format = date_format;
+        self
     }
 
     /// Sets the "oneline" option to true or false.
@@ -61,6 +71,7 @@ impl ViewOptionsBuilder {
     /// Finalizes the [`ViewOptions`].
     pub fn build(self) -> ViewOptions {
         ViewOptions {
+            date_format: self.date_format,
             oneline: self.oneline,
             raw: self.raw,
         }
@@ -131,24 +142,31 @@ mod tests {
 
         fn it_returns_default_options() {
             let opts = ViewOptions::default();
+            assert_eq!(opts.date_format, DateFormat::default());
             assert!(!opts.oneline);
             assert!(!opts.raw);
         }
 
         fn it_returns_custom_options() {
-            let opts = ViewOptions::build().oneline(true).raw(true);
+            let opts = ViewOptions::build()
+                .oneline(true)
+                .raw(true)
+                .date_format(DateFormat::Absolute);
+            assert_eq!(opts.date_format, DateFormat::Absolute);
             assert!(opts.oneline);
             assert!(opts.raw);
         }
 
         fn it_returns_custom_options_with_only_oneline() {
             let opts = ViewOptions::build().oneline(true);
+            assert_eq!(opts.date_format, DateFormat::default());
             assert!(opts.oneline);
             assert!(!opts.raw);
         }
 
         fn it_returns_custom_options_with_only_raw() {
             let opts = ViewOptions::build().raw(true);
+            assert_eq!(opts.date_format, DateFormat::default());
             assert!(!opts.oneline);
             assert!(opts.raw);
         }
