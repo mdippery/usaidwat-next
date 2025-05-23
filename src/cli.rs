@@ -224,7 +224,7 @@ impl Runner {
     }
 
     fn run_summary(&self) {
-        println!("Running summary for {}", self.username());
+        todo!("summary");
     }
 
     fn run_tally(&self, sort_by_count: &bool) {
