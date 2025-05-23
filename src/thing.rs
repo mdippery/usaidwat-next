@@ -190,6 +190,11 @@ impl Comment {
     /// `pattern` is a fixed string; regular expression matches are not
     /// yet supported.
     pub fn matches(&self, pattern: &str) -> bool {
+        // TODO: should match case-insensitively
+        // TODO: pattern should be a case-insensitive regex
+        //       (or rather, that's how it is in the current Ruby tool,
+        //       but I'm actually not convinced that we should search
+        //       case-insensitively with a regex)
         self.body.matches(pattern).count() > 0
     }
 }

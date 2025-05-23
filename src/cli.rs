@@ -222,6 +222,7 @@ impl Runner {
         Pager::new().setup();
         // TODO: Output with color, but only if hooked up to tty
         // TODO: Do not wrap oneline titles
+        // TODO: Highlight matches in output, if grep is specified
         println!("{}", output);
     }
 
