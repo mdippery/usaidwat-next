@@ -344,6 +344,8 @@ mod tests {
 
     mod timeline {
         use crate::client::Redditor;
+        use chrono::Weekday;
+        use std::iter::zip;
 
         #[test]
         fn it_processes_user_data() {
@@ -382,15 +384,50 @@ mod tests {
         }
 
         #[test]
-        #[ignore]
         fn it_returns_an_iterator_of_its_data() {
-            todo!("should be tested!");
+            #[rustfmt::skip]
+            let expected_items = [
+                (Weekday::Mon, [2, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 3, 0, 0, 1, 0, 3, 0, 0, 0, 1, 3]),
+                (Weekday::Tue, [1, 0, 0, 0, 0, 0, 0, 0, 1, 4, 1, 1, 1, 1, 3, 0, 1, 0, 0, 0, 3, 1, 5, 0]),
+                (Weekday::Wed, [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 2, 4]),
+                (Weekday::Thu, [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 4, 0, 0, 2, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0]),
+                (Weekday::Fri, [0, 0, 0, 0, 0, 0, 0, 0, 4, 1, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1]),
+                (Weekday::Sat, [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 4, 0, 1, 4, 1, 0, 0, 0, 0, 0, 0, 0, 1]),
+                (Weekday::Sun, [3, 0, 0, 0, 0, 0, 0, 0, 1, 2, 0, 0, 2, 1, 0, 0, 0, 0, 0, 1, 0, 1, 2, 5]),
+            ];
+            let timeline = Redditor::test().timeline();
+            let actual_items = timeline.days();
+
+            let zipped = zip(actual_items, expected_items);
+
+            for ((actual_wday, actual), (expected_wday, expected)) in zipped {
+                assert_eq!(actual_wday, expected_wday);
+                assert_eq!(actual, expected);
+            }
         }
 
         #[test]
-        #[ignore]
         fn it_returns_an_empty_iterator_for_users_with_no_comments() {
-            todo!("should be tested!");
+            #[rustfmt::skip]
+            let expected_items = [
+                (Weekday::Mon, [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]),
+                (Weekday::Tue, [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]),
+                (Weekday::Wed, [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]),
+                (Weekday::Thu, [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]),
+                (Weekday::Fri, [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]),
+                (Weekday::Sat, [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]),
+                (Weekday::Sun, [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]),
+            ];
+
+            let timeline = Redditor::test_empty().timeline();
+            let actual_items = timeline.days();
+
+            let zipped = zip(actual_items, expected_items);
+
+            for ((actual_wday, actual), (expected_wday, expected)) in zipped {
+                assert_eq!(actual_wday, expected_wday);
+                assert_eq!(actual, expected);
+            }
         }
     }
 }
