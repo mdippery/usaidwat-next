@@ -156,13 +156,11 @@ impl Comment {
     }
 
     /// The time the comment was created, in UTC.
-    // TODO: Test!
     pub fn created_utc(&self) -> DateTime<Utc> {
         self.created_utc
     }
 
     /// The time the comment was created, in local time.
-    // TODO: Test!
     pub fn created_local(&self) -> DateTime<Local> {
         self.created_utc().with_timezone(&Local)
     }
@@ -346,6 +344,18 @@ mod tests {
             assert_eq!(comment.ups, -3);
             assert_eq!(comment.downs, 0);
             assert_eq!(comment.score, -3);
+        }
+
+        #[test]
+        #[ignore]
+        fn it_returns_its_creation_time() {
+            todo!("test created_at() method!")
+        }
+
+        #[test]
+        #[ignore]
+        fn it_returns_its_creation_time_in_local_time() {
+            todo!("test created_local() method!")
         }
 
         #[test]

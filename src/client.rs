@@ -96,7 +96,6 @@ impl Redditor {
 
     /// A timeline of the user's comments, grouped by days of the week
     /// and hours of the day.
-    // TODO: Test!
     pub fn timeline(&self) -> Timeline {
         Timeline::for_user(self)
     }
@@ -114,7 +113,6 @@ pub struct Timeline {
 impl Timeline {
     /// Calculate a new timeline for the given Redditor.
     pub fn for_user(user: &Redditor) -> Self {
-        // TODO: Test that these calculations are correct!
         let groups = Timeline::grouped_by_weekdays_and_hours(user);
         let buckets = Timeline::group_to_matrix(groups);
         Timeline { buckets }
@@ -230,6 +228,13 @@ mod tests {
         fn it_confirms_that_it_has_submissions() {
             assert!(Redditor::test().has_submissions())
         }
+
+        #[test]
+        fn it_returns_a_timeline() {
+            let _ = Redditor::test_empty().timeline();
+            // Not really anything else to test: there are more comprehensive
+            // tests for Timeline and TimelineIterator below.
+        }
     }
 
     mod user_with_no_data {
@@ -292,6 +297,13 @@ mod tests {
         fn it_confirms_that_it_has_submissions() {
             assert!(!Redditor::test_empty().has_submissions())
         }
+
+        #[test]
+        fn it_returns_a_timeline() {
+            let _ = Redditor::test_empty().timeline();
+            // Not really anything else to test: there are more comprehensive
+            // tests for Timeline and TimelineIterator below.
+        }
     }
 
     mod invalid_user {
@@ -301,6 +313,32 @@ mod tests {
         fn it_is_none() {
             let client = Redditor::test_none();
             assert!(client.is_none());
+        }
+    }
+
+    mod timeline {
+        #[test]
+        #[ignore]
+        fn it_processes_user_data() {
+            todo!("calculations should be tested!");
+        }
+
+        #[test]
+        #[ignore]
+        fn it_processes_data_for_users_with_no_comments() {
+            todo!("calculations should be tested!");
+        }
+
+        #[test]
+        #[ignore]
+        fn it_returns_an_iterator_of_its_data() {
+            todo!("should be tested!");
+        }
+
+        #[test]
+        #[ignore]
+        fn it_returns_an_empty_iterator_for_users_with_no_comments() {
+            todo!("should be tested!");
         }
     }
 }
