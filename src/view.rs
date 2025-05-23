@@ -13,6 +13,12 @@ pub struct ViewOptions {
     raw: bool,
 }
 
+impl ViewOptions {
+    pub fn from(oneline: bool, raw: bool) -> Self {
+        Self { oneline, raw }
+    }
+}
+
 /// Marks an item that can be converted into a string for display on a terminal.
 pub trait Viewable {
     /// Converts the item into a string for display on a terminal.
@@ -70,6 +76,22 @@ mod tests {
         let filename = format!("tests/data/{filename}.out");
         std::fs::read_to_string(&filename)
             .expect(&format!("could not load test data from {filename}"))
+    }
+
+    mod view_options {
+        use super::super::*;
+
+        fn it_returns_default_options() {
+            let opts = ViewOptions::default();
+            assert!(!opts.oneline);
+            assert!(!opts.raw);
+        }
+
+        fn it_returns_custom_options() {
+            let opts = ViewOptions::from(true, true);
+            assert!(opts.oneline);
+            assert!(opts.raw);
+        }
     }
 
     mod format_info {
