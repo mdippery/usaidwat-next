@@ -67,7 +67,9 @@ impl Viewable for Timeline {
 #[cfg(test)]
 mod tests {
     fn load_output(filename: &str) -> String {
-        std::fs::read_to_string(format!("tests/data/{filename}.out")).unwrap()
+        let filename = format!("tests/data/{filename}.out");
+        std::fs::read_to_string(&filename)
+            .expect(&format!("could not load test data from {filename}"))
     }
 
     mod format_info {
