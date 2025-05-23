@@ -139,6 +139,7 @@ mod tests {
     mod view_options {
         use super::super::*;
 
+        #[test]
         fn it_returns_default_options() {
             let opts = ViewOptions::default();
             assert_eq!(opts.date_format, DateFormat::default());
@@ -146,6 +147,7 @@ mod tests {
             assert!(!opts.raw);
         }
 
+        #[test]
         fn it_returns_custom_options() {
             let opts = ViewOptions::build()
                 .oneline(true)
@@ -156,6 +158,7 @@ mod tests {
             assert!(opts.raw);
         }
 
+        #[test]
         fn it_returns_custom_options_with_only_oneline() {
             let opts = ViewOptions::build().oneline(true);
             assert_eq!(opts.date_format, DateFormat::default());
@@ -163,6 +166,7 @@ mod tests {
             assert!(!opts.raw);
         }
 
+        #[test]
         fn it_returns_custom_options_with_only_raw() {
             let opts = ViewOptions::build().raw(true);
             assert_eq!(opts.date_format, DateFormat::default());
