@@ -6,7 +6,7 @@
 //! work with JSON data from the Reddit API.
 
 use crate::clock::{DateTime, Utc};
-pub use chrono::{TimeDelta, Local};
+pub use chrono::{Local, TimeDelta};
 use serde::de::Error;
 use serde::{Deserialize, Deserializer};
 use serde_json;
@@ -348,15 +348,23 @@ mod tests {
         }
 
         #[test]
-        #[ignore]
         fn it_returns_its_creation_time() {
-            todo!("test created_at() method!")
+            let comments = Comment::parse(&load_data("comments_mipadi")).unwrap();
+            let comment = &comments[9];
+            let datetime = DateTime::parse_from_rfc3339("2025-03-27T05:47:09+00:00")
+                .unwrap()
+                .with_timezone(&Utc);
+            assert_eq!(comment.created_utc(), datetime);
         }
 
         #[test]
-        #[ignore]
         fn it_returns_its_creation_time_in_local_time() {
-            todo!("test created_local() method!")
+            let comments = Comment::parse(&load_data("comments_mipadi")).unwrap();
+            let comment = &comments[9];
+            let datetime = DateTime::parse_from_rfc3339("2025-03-27T05:47:09+00:00")
+                .unwrap()
+                .with_timezone(&Local);
+            assert_eq!(comment.created_local(), datetime);
         }
 
         #[test]
