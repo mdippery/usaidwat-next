@@ -1,6 +1,6 @@
 //! All things time-related.
 
-pub use chrono::{DateTime, Utc};
+pub use chrono::{DateTime, Local, TimeDelta, Utc};
 
 /// Tells time and returns the time.
 ///

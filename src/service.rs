@@ -8,8 +8,13 @@
 use reqwest::blocking::Client;
 use reqwest::header::{self, HeaderMap, HeaderValue};
 
+/// A URI.
 pub type Uri = String;
+
+/// An HTTP, which would represent any type of data: raw text, JSON, or other.
 pub type RawResponse = String;
+
+/// A response containing JSON data.
 pub type JsonResponse = String;
 
 /// A service for retrieving information for Reddit users.

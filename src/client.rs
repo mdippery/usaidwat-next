@@ -1,8 +1,8 @@
 //! Clients for reading data from the Reddit API.
 
-use crate::clock::{Clock, DateTime, SystemClock, Utc};
+use crate::clock::{Clock, DateTime, TimeDelta, SystemClock, Utc};
 use crate::service::Service;
-use crate::thing::{Comment, Submission, TimeDelta, User};
+use crate::thing::{Comment, Submission, User};
 pub use chrono::Weekday;
 use chrono::{Datelike, Timelike};
 use relativetime::NegativeRelativeTime;
@@ -127,10 +127,17 @@ impl<C: Clock> Redditor<C> {
     }
 }
 
-type Hour = u32;
+/// A day of comments, bucketed by hour, which each hour containing the
+/// number of comments for that hour.
 pub type TimelineDay = [u32; 24];
+
+type Hour = u32;
 type TimeMatrix = [TimelineDay; 7];
 
+/// A timeline of a Redditor's comments, bucketed by day of the week and hour.
+///
+/// Can be useful to draw a "heatmap" of a Redditor's comments, similar to the
+/// GitHub activity chart.
 #[derive(Debug)]
 pub struct Timeline {
     buckets: TimeMatrix,
@@ -144,6 +151,8 @@ impl Timeline {
         Timeline { buckets }
     }
 
+    /// Iterate through timeline, returning a 2-tuple of `(Weekday, TimelineDay)`
+    /// for each day of the week.
     pub fn days(&self) -> impl Iterator<Item = (Weekday, TimelineDay)> {
         TimelineIterator::new(&self)
     }
