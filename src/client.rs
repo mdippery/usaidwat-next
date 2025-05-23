@@ -343,16 +343,42 @@ mod tests {
     }
 
     mod timeline {
+        use crate::client::Redditor;
+
         #[test]
-        #[ignore]
         fn it_processes_user_data() {
-            todo!("calculations should be tested!");
+            let client = Redditor::test();
+            let timeline = client.timeline();
+            let buckets = timeline.buckets;
+            #[rustfmt::skip]
+            let expected_buckets = [
+                [2, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 3, 0, 0, 1, 0, 3, 0, 0, 0, 1, 3],
+                [1, 0, 0, 0, 0, 0, 0, 0, 1, 4, 1, 1, 1, 1, 3, 0, 1, 0, 0, 0, 3, 1, 5, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 2, 4],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 4, 0, 0, 2, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 4, 1, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 4, 0, 1, 4, 1, 0, 0, 0, 0, 0, 0, 0, 1],
+                [3, 0, 0, 0, 0, 0, 0, 0, 1, 2, 0, 0, 2, 1, 0, 0, 0, 0, 0, 1, 0, 1, 2, 5],
+            ];
+            assert_eq!(buckets, expected_buckets);
         }
 
         #[test]
-        #[ignore]
         fn it_processes_data_for_users_with_no_comments() {
-            todo!("calculations should be tested!");
+            let client = Redditor::test_empty();
+            let timeline = client.timeline();
+            let buckets = timeline.buckets;
+            #[rustfmt::skip]
+            let expected_buckets = [
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            ];
+            assert_eq!(buckets, expected_buckets);
         }
 
         #[test]
