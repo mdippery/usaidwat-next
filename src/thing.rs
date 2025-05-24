@@ -168,21 +168,22 @@ impl Comment {
 
     /// The subreddit the comment was posted in.
     pub fn subreddit(&self) -> &str {
-        &self.subreddit
+        &self.subreddit.trim()
     }
 
     /// The title of the link for which the comment was posted.
     ///
     /// HTML entities in the title will be converted.
     pub fn link_title(&self) -> String {
-        entity::decode(self.link_title.as_bytes())
+        let link_title = self.link_title.trim();
+        entity::decode(link_title.as_bytes())
             .to_string()
-            .unwrap_or(self.link_title.to_string())
+            .unwrap_or(link_title.to_string())
     }
 
     /// The comment body, as raw Markdown text.
     pub fn body(&self) -> &str {
-        &self.body.as_ref()
+        &self.body.trim()
     }
 
     /// True if the search pattern can be found in the comment's body.
@@ -388,11 +389,23 @@ mod tests {
         }
 
         #[test]
+        #[ignore]
+        fn it_trims_whitespace_from_its_subreddit() {
+            todo!("figure out how to test this");
+        }
+
+        #[test]
         fn it_returns_its_link_title() {
             let comments = Comment::parse(&load_data("comments_mipadi")).unwrap();
             // Get the 0th comment because it has an ampersand and I want to test the conversion
             let comment = &comments[0];
             assert_eq!(comment.link_title(), "Cypher System & ChatGPT");
+        }
+
+        #[test]
+        #[ignore]
+        fn it_trims_whitespace_from_link_titles() {
+            todo!("figure out how to test this");
         }
 
         #[test]
@@ -409,6 +422,12 @@ mod tests {
             let comments = Comment::parse(&load_data("comments_mipadi")).unwrap();
             let comment = &comments[9];
             assert_eq!(comment.body(), expected_body);
+        }
+
+        #[test]
+        #[ignore]
+        fn it_trims_whitespace_from_its_body() {
+            todo!("figure out how to test this")
         }
 
         #[test]
