@@ -462,6 +462,7 @@ mod tests {
             assert!(result, "'pathfinder' not found in text");
         }
 
+        #[test]
         fn it_matches_a_fixed_string_with_a_space() {
             let comments = Comment::parse(&load_data("comments_mipadi")).unwrap();
             let comment = &comments[9];
