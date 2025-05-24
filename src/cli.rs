@@ -217,7 +217,7 @@ impl Runner {
         let output = comments
             .map(|comment| comment.view(&opts))
             .collect::<Vec<_>>()
-            .join("\n\n");
+            .join("\n\n\n");
 
         Pager::new().setup();
         // TODO: Output with color, but only if hooked up to tty

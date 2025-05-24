@@ -103,7 +103,14 @@ impl Viewable for Comment {
 
 impl Comment {
     fn view_full(&self, opts: &ViewOptions) -> String {
-        format!("{self:?}")
+        let mut s = String::from(self.subreddit()) + "\n"; // TODO: Green
+        s += &(self.link_title() + "\n"); // TODO: Purple
+        s += "<age>"; // TODO: relative age, blue
+        s += " \u{2022} "; // TODO: Cyan
+        s += &format!("{:+}", self.score()); // TODO: Blue
+        s += "\n\n";
+        s += self.body(); // TODO: Wrapped to tty width
+        s
     }
 
     fn view_oneline(&self, _: &ViewOptions) -> String {

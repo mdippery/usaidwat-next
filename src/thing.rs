@@ -181,6 +181,11 @@ impl Comment {
             .unwrap_or(link_title.to_string())
     }
 
+    /// The comment's total score.
+    pub fn score(&self) -> i64 {
+        self.score
+    }
+
     /// The comment body, as raw Markdown text.
     pub fn body(&self) -> &str {
         &self.body.trim()
@@ -379,6 +384,13 @@ mod tests {
             assert_eq!(comment.ups, -3);
             assert_eq!(comment.downs, 0);
             assert_eq!(comment.score, -3);
+        }
+
+        #[test]
+        fn it_returns_its_score() {
+            let comments = Comment::parse(&load_data("comments_mipadi")).unwrap();
+            let comment = &comments[9];
+            assert_eq!(comment.score(), -3);
         }
 
         #[test]
