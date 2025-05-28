@@ -8,6 +8,7 @@ use chrono::Local;
 use colored::Colorize;
 use indoc::formatdoc;
 use std::ops::Index;
+use textwrap::{self, Options};
 
 /// View renderer options.
 #[derive(Debug, Default)]
@@ -111,8 +112,8 @@ impl Comment {
     fn view_full<C: Clock>(&self, opts: &ViewOptions, clock: &C) -> String {
         let age = self.format_date(opts, clock);
 
-        // TODO: Wrapped to tty width, formatted as Markdown
-        let body = self.body();
+        // TODO: Formatted as Markdown (wrap after formatting unless raw)
+        let body = self.wrapped_body();
 
         formatdoc! {"
             {}
@@ -149,6 +150,14 @@ impl Comment {
         // but I want to trim off the leading space.
         let time_part = time_part.trim();
         format!("{date_part}, {time_part}")
+    }
+
+    fn wrapped_body(&self) -> String {
+        let body = self.body();
+        // Subtract 1 from terminal width because it looks nicer if the text
+        // doesn't run right up to the edge.
+        let opts = Options::new(textwrap::termwidth() - 1);
+        textwrap::fill(body, opts)
     }
 }
 
@@ -261,10 +270,24 @@ mod tests {
 
         #[test]
         fn it_formats_an_absolute_date() {
-            let opts = ViewOptions::build().date_format(DateFormat::Absolute).build();
+            let opts = ViewOptions::build()
+                .date_format(DateFormat::Absolute)
+                .build();
             let actual = get_comment(0).format_absolute_date();
             let expected = "Thu, 17 Apr 2025, 8:44 PM";
             assert_eq!(actual, expected);
+        }
+
+        #[test]
+        #[ignore]
+        fn it_wraps_raw_text() {
+            todo!("need to test");
+        }
+
+        #[test]
+        #[ignore]
+        fn it_wraps_formatted_markdown_text() {
+            todo!("need to test");
         }
 
         #[test]
