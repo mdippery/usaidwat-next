@@ -185,7 +185,11 @@ impl Runner {
     }
 
     fn run_info(&self) {
-        println!("{}", self.user().view(&ViewOptions::default()));
+        println!(
+            "{}",
+            self.user()
+                .view(&ViewOptions::default(), SystemClock::new())
+        );
     }
 
     fn run_log(
@@ -208,14 +212,12 @@ impl Runner {
 
         // TODO: Probably need to move this into a function that I can test easily
         let comments: Box<dyn Iterator<Item = Comment>> = match grep {
-            Some(grep) => {
-                Box::new(comments.filter(move |comment| comment.matches(grep)))
-            }
+            Some(grep) => Box::new(comments.filter(move |comment| comment.matches(grep))),
             None => Box::new(comments),
         };
 
         let output = comments
-            .map(|comment| comment.view(&opts))
+            .map(|comment| comment.view(&opts, SystemClock::new()))
             .collect::<Vec<_>>()
             .join("\n\n\n");
 
@@ -268,7 +270,12 @@ impl Runner {
         // TODO: Print in color with intensity proportional to number of comments
 
         if self.user().has_comments() {
-            println!("{}", self.user().timeline().view(&ViewOptions::default()));
+            println!(
+                "{}",
+                self.user()
+                    .timeline()
+                    .view(&ViewOptions::default(), SystemClock::new())
+            );
         } else {
             println!("{} has no comments.", self.user().username());
         }

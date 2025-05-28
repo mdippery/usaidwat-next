@@ -75,11 +75,16 @@ impl ViewOptionsBuilder {
 /// Marks an item that can be converted into a string for display on a terminal.
 pub trait Viewable {
     /// Converts the item into a string for display on a terminal.
-    fn view(&self, opts: &ViewOptions) -> String;
+    ///
+    /// `opts` are a set of view options that control formatting of the
+    /// resulting string. `clock` is a source from which the current
+    /// time can be derived for items that print their age or other
+    /// time-based parameters.
+    fn view<C: Clock>(&self, opts: &ViewOptions, clock: C) -> String;
 }
 
 impl Viewable for Redditor {
-    fn view(&self, _: &ViewOptions) -> String {
+    fn view<C: Clock>(&self, _: &ViewOptions, _: C) -> String {
         formatdoc! {"
             Created: {} ({})
             Link Karma: {}
@@ -93,17 +98,17 @@ impl Viewable for Redditor {
 }
 
 impl Viewable for Comment {
-    fn view(&self, opts: &ViewOptions) -> String {
+    fn view<C: Clock>(&self, opts: &ViewOptions, clock: C) -> String {
         if opts.oneline {
-            self.view_oneline(opts)
+            self.view_oneline(opts, clock)
         } else {
-            self.view_full(opts)
+            self.view_full(opts, clock)
         }
     }
 }
 
 impl Comment {
-    fn view_full(&self, opts: &ViewOptions) -> String {
+    fn view_full<C: Clock>(&self, opts: &ViewOptions, clock: C) -> String {
         formatdoc! {"
             {}
             {}
@@ -115,20 +120,20 @@ impl Comment {
             self.permalink().yellow(),
             self.link_title().magenta(),
             // TODO: Will have to come up with a way to test time using Clock
-            self.relative_age(SystemClock::new()).blue(), // TODO: also absolute age
+            self.relative_age(clock).blue(), // TODO: also absolute age
             "\u{2022}".cyan(),
             format!("{:+}", self.score()).blue(),
             self.body(), // TODO: Wrapped to tty width, formatted as Markdown
         }
     }
 
-    fn view_oneline(&self, _: &ViewOptions) -> String {
+    fn view_oneline<C: Clock>(&self, _: &ViewOptions, _: C) -> String {
         format!("{} {}", self.subreddit(), self.link_title())
     }
 }
 
 impl Viewable for Timeline {
-    fn view(&self, _: &ViewOptions) -> String {
+    fn view<C: Clock>(&self, _: &ViewOptions, _: C) -> String {
         let mut s = String::from(" ");
         s += (0..24)
             .map(|i| format!("{i:>3}"))
@@ -208,11 +213,12 @@ mod tests {
         use super::super::*;
         use super::load_output;
         use crate::client::Redditor;
+        use crate::test_utils::FrozenClock;
 
         #[test]
         fn it_formats_a_user() {
             let user = Redditor::test();
-            let actual = user.view(&ViewOptions::default());
+            let actual = user.view(&ViewOptions::default(), FrozenClock::default());
             let output = load_output("about_mipadi");
             let expected = output.trim();
             assert_eq!(actual, expected);
@@ -223,7 +229,7 @@ mod tests {
         use super::super::*;
         use super::load_output;
         use crate::client::Redditor;
-
+        use crate::test_utils::FrozenClock;
         // TODO: Test with and without color when possible
 
         fn get_comment(n: usize) -> Comment {
@@ -239,7 +245,7 @@ mod tests {
             let opts = ViewOptions::build()
                 .date_format(DateFormat::Relative)
                 .build();
-            let actual = get_comment(0).view(&opts);
+            let actual = get_comment(0).view(&opts, FrozenClock::default());
             todo!("need to test!");
         }
 
@@ -249,7 +255,7 @@ mod tests {
             let opts = ViewOptions::build()
                 .date_format(DateFormat::Absolute)
                 .build();
-            let actual = get_comment(0).view(&opts);
+            let actual = get_comment(0).view(&opts, FrozenClock::default());
             todo!("need to test!");
         }
 
@@ -257,14 +263,14 @@ mod tests {
         #[ignore]
         fn it_formats_a_comment_with_raw_bodies() {
             let opts = ViewOptions::build().raw(true).build();
-            let actual = get_comment(0).view(&opts);
+            let actual = get_comment(0).view(&opts, FrozenClock::default());
             todo!("need to test!");
         }
 
         #[test]
         fn it_formats_a_comment_on_oneline() {
             let opts = ViewOptions::build().oneline(true).build();
-            let actual = get_comment(0).view(&opts);
+            let actual = get_comment(0).view(&opts, FrozenClock::default());
             let expected = "cyphersystem Cypher System & ChatGPT";
             assert_eq!(actual, expected);
         }
@@ -274,11 +280,14 @@ mod tests {
         use super::super::*;
         use super::load_output;
         use crate::client::Redditor;
+        use crate::test_utils::FrozenClock;
 
         #[test]
         fn it_formats_a_timeline() {
             let user = Redditor::test();
-            let actual = user.timeline().view(&ViewOptions::default());
+            let actual = user
+                .timeline()
+                .view(&ViewOptions::default(), FrozenClock::default());
             let output = load_output("timeline_mipadi");
             let expected = output.trim_end();
             assert_eq!(actual, expected);
