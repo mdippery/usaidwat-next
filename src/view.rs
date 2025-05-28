@@ -7,7 +7,6 @@ use crate::thing::Comment;
 use chrono::Local;
 use colored::Colorize;
 use indoc::formatdoc;
-use std::ops::Index;
 use textwrap::{self, Options};
 
 /// View renderer options.
@@ -276,9 +275,6 @@ mod tests {
 
         #[test]
         fn it_formats_an_absolute_date() {
-            let opts = ViewOptions::build()
-                .date_format(DateFormat::Absolute)
-                .build();
             let actual = get_comment(0).format_absolute_date();
             let expected = "Thu, 17 Apr 2025, 8:44 PM";
             assert_eq!(actual, expected);

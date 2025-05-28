@@ -1,12 +1,11 @@
 //! Clients for reading data from the Reddit API.
 
-use crate::clock::{Clock, DateTime, HasAge, Utc};
+use crate::clock::{DateTime, HasAge, Utc};
 use crate::service::Service;
 use crate::thing::{Comment, Submission, User};
 pub use chrono::Weekday;
 use chrono::{Datelike, Timelike};
 use std::fmt;
-use std::ops::Sub;
 
 /// Represents a Reddit user.
 pub struct Redditor {
@@ -168,8 +167,8 @@ mod tests {
     mod user_with_data {
         use crate::client::Redditor;
         use crate::clock::HasAge;
-        use chrono::DateTime;
         use crate::test_utils::FrozenClock;
+        use chrono::DateTime;
 
         #[test]
         fn it_returns_its_username() {
@@ -186,7 +185,9 @@ mod tests {
 
         #[test]
         fn it_returns_its_age() {
-            let actual_age = Redditor::test().age(&FrozenClock::default()).as_seconds_f64();
+            let actual_age = Redditor::test()
+                .age(&FrozenClock::default())
+                .as_seconds_f64();
             let expected_age = 541016254.0;
             assert_eq!(actual_age, expected_age, "{actual_age} != {expected_age}");
         }
@@ -238,8 +239,8 @@ mod tests {
     mod user_with_no_data {
         use crate::client::Redditor;
         use crate::clock::HasAge;
-        use chrono::DateTime;
         use crate::test_utils::FrozenClock;
+        use chrono::DateTime;
 
         #[test]
         fn it_returns_its_username() {
@@ -256,7 +257,9 @@ mod tests {
 
         #[test]
         fn it_returns_its_age() {
-            let actual_age = Redditor::test_empty().age(&FrozenClock::default()).as_seconds_f64();
+            let actual_age = Redditor::test_empty()
+                .age(&FrozenClock::default())
+                .as_seconds_f64();
             let expected_age = 471437954.0;
             assert_eq!(actual_age, expected_age, "{actual_age} != {expected_age}");
         }

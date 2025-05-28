@@ -2,8 +2,6 @@ use crate::client::Redditor;
 use crate::clock::{Clock, DateTime, Utc};
 use crate::service::{JsonResponse, RawResponse, Service, Uri};
 use std::fs;
-use chrono::Date;
-use crate::cli::DateFormat;
 
 pub fn load_data(file: &str) -> String {
     fs::read_to_string(format!("tests/data/{file}.json")).expect("could not find test data")

@@ -309,8 +309,6 @@ struct SubmissionResponse {
 
 #[cfg(test)]
 mod tests {
-    use std::fs;
-
     mod about {
         use super::super::*;
         use crate::test_utils::load_data;
