@@ -1,6 +1,6 @@
 //! Clients for reading data from the Reddit API.
 
-use crate::clock::{Clock, DateTime, TimeDelta, SystemClock, Utc};
+use crate::clock::{Clock, DateTime, TimeDelta, Utc};
 use crate::service::Service;
 use crate::thing::{Comment, Submission, User};
 pub use chrono::Weekday;
@@ -11,13 +11,12 @@ use std::ops::Sub;
 use std::time::Duration;
 
 /// Represents a Reddit user.
-pub struct Redditor<C: Clock> {
+pub struct Redditor {
     username: String,
     user: User,
-    clock: C,
 }
 
-impl<C: Clock> fmt::Debug for Redditor<C> {
+impl fmt::Debug for Redditor {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
             f,
@@ -27,44 +26,20 @@ impl<C: Clock> fmt::Debug for Redditor<C> {
     }
 }
 
-impl Redditor<SystemClock> {
+impl Redditor {
     /// Creates a new client for retrieving information for Reddit users.
     ///
     /// `username` should be the Redditor's username. `service` is the
     /// actual service implementation that will be used to retrieve
     /// information about the Redditor.
     ///
-    /// The struct will use the default [`SystemClock`] to handle time.
-    ///
     /// Returns `None` if data cannot be parsed for the given username.
-    pub fn new<T: Service>(username: String, service: T) -> Option<Redditor<SystemClock>> {
-        Redditor::new_with_clock(username, service, SystemClock::new())
-    }
-}
-
-impl<C: Clock> Redditor<C> {
-    /// Creates a new client for retrieving information for Reddit users.
-    ///
-    /// `username` should be the Redditor's username. `service` is the
-    /// actual service implementation that will be used to retrieve
-    /// information about the Redditor.
-    ///
-    /// `clock` is a service that can be used to retrieve time information.
-    /// Normally callers do not need to set this manually and just want to
-    /// use [`SystemClock`], but you may want to specify a fixed clock for
-    /// use in tests.
-    ///
-    /// Returns `None` if data cannot be parsed for the given username.
-    pub fn new_with_clock<T: Service>(username: String, service: T, clock: C) -> Option<Self> {
+    pub fn new<T: Service>(username: String, service: T) -> Option<Self> {
         let user_data = service.get_resource(&username, "about")?;
         let comment_data = service.get_resource(&username, "comments")?;
         let post_data = service.get_resource(&username, "submitted")?;
         let user = User::parse(&user_data, &comment_data, &post_data)?;
-        Some(Self {
-            username,
-            user,
-            clock,
-        })
+        Some(Self { username, user })
     }
 
     /// The Redditor's username.
@@ -78,14 +53,20 @@ impl<C: Clock> Redditor<C> {
     }
 
     /// The age of the account.
-    pub fn age(&self) -> TimeDelta {
+    ///
+    /// `clock` is a source of time from which the age can be derived.
+    /// Generally `SystemTime::new()` is used.
+    pub fn age<C: Clock>(&self, clock: C) -> TimeDelta {
         let birthday = self.created_at();
-        self.clock.now().sub(birthday)
+        clock.now().sub(birthday)
     }
 
     /// The age of the account, relative to the current time.
-    pub fn relative_age(&self) -> String {
-        let age = self.age().as_seconds_f64();
+    ///
+    /// `clock` is a source of time from which the age can be derived.
+    /// Generally `SystemTime::new()` is used.
+    pub fn relative_age<C: Clock>(&self, clock: C) -> String {
+        let age = self.age(clock).as_seconds_f64();
         let d = Duration::from_secs(age.trunc() as u64);
         d.to_relative_in_past()
     }
@@ -145,7 +126,7 @@ pub struct Timeline {
 
 impl Timeline {
     /// Calculate a new timeline for the given Redditor.
-    pub fn for_user<C: Clock>(user: &Redditor<C>) -> Self {
+    pub fn for_user(user: &Redditor) -> Self {
         let groups = Timeline::grouped_by_weekdays_and_hours(user);
         let buckets = Timeline::group_to_matrix(groups);
         Timeline { buckets }
@@ -157,9 +138,7 @@ impl Timeline {
         TimelineIterator::new(&self)
     }
 
-    fn grouped_by_weekdays_and_hours<C: Clock>(
-        user: &Redditor<C>,
-    ) -> impl Iterator<Item = (Weekday, Hour)> {
+    fn grouped_by_weekdays_and_hours(user: &Redditor) -> impl Iterator<Item = (Weekday, Hour)> {
         user.comments()
             .map(|c| (c.created_local().weekday(), c.created_local().hour()))
     }
@@ -208,6 +187,8 @@ mod tests {
     mod user_with_data {
         use crate::client::Redditor;
         use chrono::DateTime;
+        use crate::clock::SystemClock;
+        use crate::test_utils::FrozenClock;
 
         #[test]
         fn it_returns_its_username() {
@@ -224,7 +205,7 @@ mod tests {
 
         #[test]
         fn it_returns_its_age() {
-            let actual_age = Redditor::test().age().as_seconds_f64();
+            let actual_age = Redditor::test().age(FrozenClock::default()).as_seconds_f64();
             let expected_age = 541016254.0;
             assert_eq!(actual_age, expected_age, "{actual_age} != {expected_age}");
         }
@@ -276,6 +257,8 @@ mod tests {
     mod user_with_no_data {
         use crate::client::Redditor;
         use chrono::DateTime;
+        use crate::clock::SystemClock;
+        use crate::test_utils::FrozenClock;
 
         #[test]
         fn it_returns_its_username() {
@@ -292,7 +275,7 @@ mod tests {
 
         #[test]
         fn it_returns_its_age() {
-            let actual_age = Redditor::test_empty().age().as_seconds_f64();
+            let actual_age = Redditor::test_empty().age(FrozenClock::default()).as_seconds_f64();
             let expected_age = 471437954.0;
             assert_eq!(actual_age, expected_age, "{actual_age} != {expected_age}");
         }

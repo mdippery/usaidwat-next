@@ -47,35 +47,25 @@ impl Clock for FrozenClock {
     }
 }
 
-impl Redditor<FrozenClock> {
+impl Redditor {
     /// Returns a valid Redditor with 100 submissions and 100 comments
     /// that can be used for testing purposes.
-    pub fn test() -> Redditor<FrozenClock> {
-        Redditor::new_with_clock(
-            String::from("mipadi"),
-            TestService::new("mipadi"),
-            FrozenClock::default(),
-        )
-        .unwrap()
+    pub fn test() -> Redditor {
+        Redditor::new(String::from("mipadi"), TestService::new("mipadi")).unwrap()
     }
 
     /// Returns a valid Redditor with no submissions nor comments that can
     /// be used for testing purposes.
-    pub fn test_empty() -> Redditor<FrozenClock> {
-        Redditor::new_with_clock(
+    pub fn test_empty() -> Redditor {
+        Redditor::new(
             String::from("testuserpleaseignore"),
             TestService::new("empty"),
-            FrozenClock::default(),
         )
         .unwrap()
     }
 
     /// Returns a non-existent Redditor.
-    pub fn test_none() -> Option<Redditor<FrozenClock>> {
-        Redditor::new_with_clock(
-            String::from("doesnotexist"),
-            TestService::new("404"),
-            FrozenClock::default(),
-        )
+    pub fn test_none() -> Option<Redditor> {
+        Redditor::new(String::from("doesnotexist"), TestService::new("404"))
     }
 }

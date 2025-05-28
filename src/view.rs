@@ -2,7 +2,7 @@
 
 use crate::cli::DateFormat;
 use crate::client::{Redditor, Timeline};
-use crate::clock::Clock;
+use crate::clock::{Clock, SystemClock};
 use crate::thing::Comment;
 use chrono::Local;
 use indoc::formatdoc;
@@ -77,14 +77,14 @@ pub trait Viewable {
     fn view(&self, opts: &ViewOptions) -> String;
 }
 
-impl<C: Clock> Viewable for Redditor<C> {
+impl Viewable for Redditor {
     fn view(&self, _: &ViewOptions) -> String {
         formatdoc! {"
             Created: {} ({})
             Link Karma: {}
             Comment Karma: {}",
             self.created_at().with_timezone(&Local).format("%b %d, %Y %H:%M %p"),
-            self.relative_age(),
+            self.relative_age(SystemClock::new()),
             self.link_karma(),
             self.comment_karma(),
         }

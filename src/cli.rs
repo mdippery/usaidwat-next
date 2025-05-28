@@ -137,7 +137,7 @@ pub enum DateFormat {
 #[derive(Debug)]
 pub struct Runner {
     config: Config,
-    user: Redditor<SystemClock>,
+    user: Redditor,
 }
 
 impl Runner {
@@ -158,7 +158,7 @@ impl Runner {
         self.user.username()
     }
 
-    fn user(&self) -> &Redditor<SystemClock> {
+    fn user(&self) -> &Redditor {
         &self.user
     }
 
