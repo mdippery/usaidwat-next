@@ -1,14 +1,12 @@
 //! Clients for reading data from the Reddit API.
 
-use crate::clock::{Clock, DateTime, TimeDelta, Utc};
+use crate::clock::{Clock, DateTime, HasAge, Utc};
 use crate::service::Service;
 use crate::thing::{Comment, Submission, User};
 pub use chrono::Weekday;
 use chrono::{Datelike, Timelike};
-use relativetime::NegativeRelativeTime;
 use std::fmt;
 use std::ops::Sub;
-use std::time::Duration;
 
 /// Represents a Reddit user.
 pub struct Redditor {
@@ -47,30 +45,6 @@ impl Redditor {
         self.username.to_string()
     }
 
-    /// The date the account was created.
-    pub fn created_at(&self) -> DateTime<Utc> {
-        self.user.about().created_at()
-    }
-
-    /// The age of the account.
-    ///
-    /// `clock` is a source of time from which the age can be derived.
-    /// Generally `SystemTime::new()` is used.
-    pub fn age<C: Clock>(&self, clock: C) -> TimeDelta {
-        let birthday = self.created_at();
-        clock.now().sub(birthday)
-    }
-
-    /// The age of the account, relative to the current time.
-    ///
-    /// `clock` is a source of time from which the age can be derived.
-    /// Generally `SystemTime::new()` is used.
-    pub fn relative_age<C: Clock>(&self, clock: C) -> String {
-        let age = self.age(clock).as_seconds_f64();
-        let d = Duration::from_secs(age.trunc() as u64);
-        d.to_relative_in_past()
-    }
-
     /// Redditor's link karma
     pub fn link_karma(&self) -> i64 {
         self.user.about().link_karma()
@@ -105,6 +79,13 @@ impl Redditor {
     /// and hours of the day.
     pub fn timeline(&self) -> Timeline {
         Timeline::for_user(self)
+    }
+}
+
+impl HasAge for Redditor {
+    /// The date the account was created.
+    fn created_at(&self) -> DateTime<Utc> {
+        self.user.about().created_at()
     }
 }
 
@@ -186,8 +167,8 @@ impl<'a> Iterator for TimelineIterator<'a> {
 mod tests {
     mod user_with_data {
         use crate::client::Redditor;
+        use crate::clock::HasAge;
         use chrono::DateTime;
-        use crate::clock::SystemClock;
         use crate::test_utils::FrozenClock;
 
         #[test]
@@ -256,8 +237,8 @@ mod tests {
 
     mod user_with_no_data {
         use crate::client::Redditor;
+        use crate::clock::HasAge;
         use chrono::DateTime;
-        use crate::clock::SystemClock;
         use crate::test_utils::FrozenClock;
 
         #[test]

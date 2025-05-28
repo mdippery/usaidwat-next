@@ -2,7 +2,7 @@
 
 use crate::cli::DateFormat;
 use crate::client::{Redditor, Timeline};
-use crate::clock::{Clock, SystemClock};
+use crate::clock::{Clock, HasAge, SystemClock};
 use crate::thing::Comment;
 use chrono::Local;
 use indoc::formatdoc;
