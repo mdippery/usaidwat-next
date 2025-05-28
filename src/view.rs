@@ -197,8 +197,11 @@ impl Viewable for Timeline {
 mod tests {
     fn load_output(filename: &str) -> String {
         let filename = format!("tests/data/{filename}.out");
-        std::fs::read_to_string(&filename)
-            .expect(&format!("could not load test data from {filename}"))
+        String::from(
+            std::fs::read_to_string(&filename)
+                .expect(&format!("could not load test data from {filename}"))
+                .trim_end()
+        )
     }
 
     mod view_options {
@@ -250,8 +253,7 @@ mod tests {
         fn it_formats_a_user() {
             let user = Redditor::test();
             let actual = user.view(&ViewOptions::default(), &FrozenClock::default());
-            let output = load_output("about_mipadi");
-            let expected = output.trim();
+            let expected = load_output("about_mipadi");
             assert_eq!(actual, expected);
         }
     }
@@ -261,6 +263,8 @@ mod tests {
         use super::load_output;
         use crate::client::Redditor;
         use crate::test_utils::FrozenClock;
+        use pretty_assertions::assert_eq;
+
         // TODO: Test with and without color when possible
 
         fn get_comment(n: usize) -> Comment {
@@ -293,31 +297,47 @@ mod tests {
         }
 
         #[test]
+        fn it_formats_a_comment_with_no_markdown_markup() {
+            let opts = ViewOptions::default();
+            let comment = get_comment(0);
+            let actual = comment.view(&opts, &FrozenClock::default());
+            let expected = load_output("comments_no_markdown");
+            assert_eq!(actual, expected);
+        }
+
+        #[test]
         #[ignore]
+        fn it_formats_a_comment_with_markdown_markup() {
+            todo!("format markdown and test!");
+        }
+
+        #[test]
+        #[ignore]
+        fn it_formats_a_comment_with_a_raw_body() {
+            let opts = ViewOptions::build().raw(true).build();
+            let actual = get_comment(2).view(&opts, &FrozenClock::default());
+            let expected = load_output("comments_raw_body");
+            assert_eq!(actual, expected);
+        }
+
+        #[test]
         fn it_formats_a_comment_with_relative_dates() {
             let opts = ViewOptions::build()
                 .date_format(DateFormat::Relative)
                 .build();
             let actual = get_comment(0).view(&opts, &FrozenClock::default());
-            todo!("need to test!");
+            let expected = load_output("comments_relative_dates");
+            assert_eq!(actual, expected);
         }
 
         #[test]
-        #[ignore]
         fn it_formats_a_comment_with_absolute_dates() {
             let opts = ViewOptions::build()
                 .date_format(DateFormat::Absolute)
                 .build();
             let actual = get_comment(0).view(&opts, &FrozenClock::default());
-            todo!("need to test!");
-        }
-
-        #[test]
-        #[ignore]
-        fn it_formats_a_comment_with_raw_bodies() {
-            let opts = ViewOptions::build().raw(true).build();
-            let actual = get_comment(0).view(&opts, &FrozenClock::default());
-            todo!("need to test!");
+            let expected = load_output("comments_absolute_dates");
+            assert_eq!(actual, expected);
         }
 
         #[test]
@@ -341,8 +361,7 @@ mod tests {
             let actual = user
                 .timeline()
                 .view(&ViewOptions::default(), &FrozenClock::default());
-            let output = load_output("timeline_mipadi");
-            let expected = output.trim_end();
+            let expected = load_output("timeline_mipadi");
             assert_eq!(actual, expected);
         }
     }
