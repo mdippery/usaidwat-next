@@ -166,6 +166,22 @@ impl Comment {
         &self.subreddit.trim()
     }
 
+    /// The full URL at which the comment can be retrieved.
+    pub fn permalink(&self) -> String {
+        self.link_id.split("_").last().and_then(|link_id| {
+            // Reddit itself uses the submission title here, but in practice,
+            // it can be anything. Since a Comment doesn't have a link back
+            // to its submission, we'll just use a placeholder instead of
+            // the submission title.
+            let placeholder = String::from("z");
+
+            let subreddit = self.subreddit();
+            let comment_id = &self.id;
+            let uri = format!("https://www.reddit.com/r/{subreddit}/comments/{link_id}/{placeholder}/{comment_id}");
+            Some(uri)
+        }).unwrap_or(String::from("?"))
+    }
+
     /// The title of the link for which the comment was posted.
     ///
     /// HTML entities in the title will be converted.
@@ -197,7 +213,11 @@ impl Comment {
         //       (or rather, that's how it is in the current Ruby tool,
         //       but I'm actually not convinced that we should search
         //       case-insensitively with a regex)
-        self.body.to_lowercase().matches(&pattern.to_lowercase()).count() > 0
+        self.body
+            .to_lowercase()
+            .matches(&pattern.to_lowercase())
+            .count()
+            > 0
     }
 }
 
@@ -320,7 +340,10 @@ mod tests {
                 about.created_utc().to_rfc2822(),
                 "Mon, 31 Mar 2008 22:55:26 +0000"
             );
-            assert_eq!(about.created_utc().to_rfc3339(), "2008-03-31T22:55:26+00:00");
+            assert_eq!(
+                about.created_utc().to_rfc3339(),
+                "2008-03-31T22:55:26+00:00"
+            );
             assert_eq!(about.link_karma(), 11729);
             assert_eq!(about.comment_karma(), 121995);
         }
@@ -406,6 +429,15 @@ mod tests {
         #[ignore]
         fn it_trims_whitespace_from_its_subreddit() {
             todo!("figure out how to test this");
+        }
+
+        #[test]
+        fn it_returns_its_permalink() {
+            let comments = Comment::parse(&load_data("comments_mipadi")).unwrap();
+            let comment = &comments[0];
+            let expected = "https://www.reddit.com/r/cyphersystem/comments/1k1iixf/z/mnpd3zh";
+            let actual = comment.permalink();
+            assert_eq!(actual, expected);
         }
 
         #[test]

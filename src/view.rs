@@ -105,6 +105,7 @@ impl Comment {
     fn view_full(&self, opts: &ViewOptions) -> String {
         let mut s = String::from(self.subreddit()) + "\n"; // TODO: Green
         s += &(self.link_title() + "\n"); // TODO: Purple
+        s += &(self.permalink() + "\n"); // TODO: Yellow
         // TODO: Will have to come up with a way to test time using Clock
         s += &self.relative_age(SystemClock::new()); // TODO: also absolute age, blue
         s += " \u{2022} "; // TODO: Cyan
