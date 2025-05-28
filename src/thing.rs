@@ -5,7 +5,7 @@
 //! module encapsulates that idea and provides an easy way to more or less
 //! work with JSON data from the Reddit API.
 
-use crate::clock::{DateTime, Local, Utc};
+use crate::clock::{DateTime, HasAge, Local, Utc};
 use htmlentity::entity::{self, ICodedDataTrait};
 use serde::de::Error;
 use serde::{Deserialize, Deserializer};
@@ -120,7 +120,7 @@ impl About {
     }
 
     /// The date on which the account was created.
-    pub fn created_at(&self) -> DateTime<Utc> {
+    pub fn created_utc(&self) -> DateTime<Utc> {
         self.created_utc
     }
 
@@ -154,11 +154,6 @@ impl Comment {
                     .map(|comment_wrapper| comment_wrapper.data)
                     .collect()
             })
-    }
-
-    /// The time the comment was created, in UTC.
-    pub fn created_utc(&self) -> DateTime<Utc> {
-        self.created_utc
     }
 
     /// The time the comment was created, in local time.
@@ -203,6 +198,13 @@ impl Comment {
         //       but I'm actually not convinced that we should search
         //       case-insensitively with a regex)
         self.body.to_lowercase().matches(&pattern.to_lowercase()).count() > 0
+    }
+}
+
+impl HasAge for Comment {
+    /// The time the comment was created, in UTC.
+    fn created_utc(&self) -> DateTime<Utc> {
+        self.created_utc
     }
 }
 
@@ -313,12 +315,12 @@ mod tests {
         fn it_parses_fields() {
             let about = About::parse(&load_data("about_mipadi")).unwrap();
             let expected_created_at = DateTime::from_timestamp(1207004126, 0).unwrap();
-            assert_eq!(about.created_at(), expected_created_at);
+            assert_eq!(about.created_utc(), expected_created_at);
             assert_eq!(
-                about.created_at().to_rfc2822(),
+                about.created_utc().to_rfc2822(),
                 "Mon, 31 Mar 2008 22:55:26 +0000"
             );
-            assert_eq!(about.created_at().to_rfc3339(), "2008-03-31T22:55:26+00:00");
+            assert_eq!(about.created_utc().to_rfc3339(), "2008-03-31T22:55:26+00:00");
             assert_eq!(about.link_karma(), 11729);
             assert_eq!(about.comment_karma(), 121995);
         }

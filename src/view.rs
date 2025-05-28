@@ -83,7 +83,7 @@ impl Viewable for Redditor {
             Created: {} ({})
             Link Karma: {}
             Comment Karma: {}",
-            self.created_at().with_timezone(&Local).format("%b %d, %Y %H:%M %p"),
+            self.created_utc().with_timezone(&Local).format("%b %d, %Y %H:%M %p"),
             self.relative_age(SystemClock::new()),
             self.link_karma(),
             self.comment_karma(),
@@ -105,11 +105,12 @@ impl Comment {
     fn view_full(&self, opts: &ViewOptions) -> String {
         let mut s = String::from(self.subreddit()) + "\n"; // TODO: Green
         s += &(self.link_title() + "\n"); // TODO: Purple
-        s += "<age>"; // TODO: relative age, blue
+        // TODO: Will have to come up with a way to test time using Clock
+        s += &self.relative_age(SystemClock::new()); // TODO: also absolute age, blue
         s += " \u{2022} "; // TODO: Cyan
         s += &format!("{:+}", self.score()); // TODO: Blue
         s += "\n\n";
-        s += self.body(); // TODO: Wrapped to tty width
+        s += self.body(); // TODO: Wrapped to tty width, formatted as Markdown
         s
     }
 

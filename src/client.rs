@@ -84,8 +84,8 @@ impl Redditor {
 
 impl HasAge for Redditor {
     /// The date the account was created.
-    fn created_at(&self) -> DateTime<Utc> {
-        self.user.about().created_at()
+    fn created_utc(&self) -> DateTime<Utc> {
+        self.user.about().created_utc()
     }
 }
 
@@ -179,7 +179,7 @@ mod tests {
 
         #[test]
         fn it_returns_its_creation_date() {
-            let actual_date = Redditor::test().created_at();
+            let actual_date = Redditor::test().created_utc();
             let expected_date = DateTime::parse_from_rfc3339("2008-03-31T22:55:26Z").unwrap();
             assert_eq!(actual_date, expected_date);
         }
@@ -249,7 +249,7 @@ mod tests {
 
         #[test]
         fn it_returns_its_creation_date() {
-            let actual_date = Redditor::test_empty().created_at();
+            let actual_date = Redditor::test_empty().created_utc();
             let expected_date = DateTime::parse_from_rfc3339("2010-06-15T06:13:46Z").unwrap();
             assert_eq!(actual_date, expected_date);
         }

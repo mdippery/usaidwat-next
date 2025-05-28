@@ -33,15 +33,15 @@ impl Clock for SystemClock {
 
 /// Marks a thing that has a notion of its age.
 pub trait HasAge {
-    /// The date the item was created.
-    fn created_at(&self) -> DateTime<Utc>;
+    /// The date the item was created, in UTC.
+    fn created_utc(&self) -> DateTime<Utc>;
 
     /// The age of the account.
     ///
     /// `clock` is a source of time from which the age can be derived.
     /// Generally [`SystemClock::new()`] is used.
     fn age<C: Clock>(&self, clock: C) -> TimeDelta {
-        let birthday = self.created_at();
+        let birthday = self.created_utc();
         clock.now().sub(birthday)
     }
 
