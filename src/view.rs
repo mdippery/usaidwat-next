@@ -110,6 +110,8 @@ impl Viewable for Comment {
 
 impl Comment {
     fn view_full<C: Clock>(&self, opts: &ViewOptions, clock: &C) -> String {
+        // TODO: Disable color if not outputting to tty
+
         let age = self.format_date(opts, clock);
 
         // TODO: Formatted as Markdown (wrap after formatting unless raw)
