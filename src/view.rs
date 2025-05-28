@@ -1,4 +1,4 @@
-//! Draws viewable objects into a terminal window.
+//! Formats viewable objects for display in a terminal.
 
 use crate::cli::DateFormat;
 use crate::client::{Redditor, Timeline};
@@ -200,7 +200,7 @@ mod tests {
         String::from(
             std::fs::read_to_string(&filename)
                 .expect(&format!("could not load test data from {filename}"))
-                .trim_end()
+                .trim_end(),
         )
     }
 
