@@ -195,7 +195,7 @@ impl Viewable for Timeline {
 #[cfg(test)]
 mod tests {
     fn load_output(filename: &str) -> String {
-        let filename = format!("tests/data/{filename}.out");
+        let filename = format!("tests/output/{filename}.out");
         String::from(
             std::fs::read_to_string(&filename)
                 .expect(&format!("could not load test data from {filename}"))
