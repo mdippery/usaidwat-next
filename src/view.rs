@@ -5,6 +5,7 @@ use crate::client::{Redditor, Timeline};
 use crate::clock::{Clock, HasAge, SystemClock};
 use crate::thing::Comment;
 use chrono::Local;
+use colored::Colorize;
 use indoc::formatdoc;
 use std::ops::Index;
 
@@ -103,16 +104,22 @@ impl Viewable for Comment {
 
 impl Comment {
     fn view_full(&self, opts: &ViewOptions) -> String {
-        let mut s = String::from(self.subreddit()) + "\n"; // TODO: Green
-        s += &(self.link_title() + "\n"); // TODO: Purple
-        s += &(self.permalink() + "\n"); // TODO: Yellow
-        // TODO: Will have to come up with a way to test time using Clock
-        s += &self.relative_age(SystemClock::new()); // TODO: also absolute age, blue
-        s += " \u{2022} "; // TODO: Cyan
-        s += &format!("{:+}", self.score()); // TODO: Blue
-        s += "\n\n";
-        s += self.body(); // TODO: Wrapped to tty width, formatted as Markdown
-        s
+        formatdoc! {"
+            {}
+            {}
+            {}
+            {} {} {}
+
+            {}",
+            self.subreddit().green(),
+            self.permalink().yellow(),
+            self.link_title().magenta(),
+            // TODO: Will have to come up with a way to test time using Clock
+            self.relative_age(SystemClock::new()).blue(), // TODO: also absolute age
+            "\u{2022}".cyan(),
+            format!("{:+}", self.score()).blue(),
+            self.body(), // TODO: Wrapped to tty width, formatted as Markdown
+        }
     }
 
     fn view_oneline(&self, _: &ViewOptions) -> String {
