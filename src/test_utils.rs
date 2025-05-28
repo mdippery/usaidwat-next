@@ -2,6 +2,12 @@ use crate::client::Redditor;
 use crate::clock::{Clock, DateTime, Utc};
 use crate::service::{JsonResponse, RawResponse, Service, Uri};
 use std::fs;
+use chrono::Date;
+use crate::cli::DateFormat;
+
+pub fn load_data(file: &str) -> String {
+    fs::read_to_string(format!("tests/data/{file}.json")).expect("could not find test data")
+}
 
 pub struct TestService {
     suffix: &'static str,
@@ -32,12 +38,18 @@ pub struct FrozenClock {
     datetime: DateTime<Utc>,
 }
 
+impl FrozenClock {
+    pub fn new(datetime: DateTime<Utc>) -> Self {
+        FrozenClock { datetime }
+    }
+}
+
 impl Default for FrozenClock {
     fn default() -> Self {
         let datetime = DateTime::parse_from_rfc3339("2025-05-23T10:13:00-07:00")
             .expect("invalid date supplied")
             .with_timezone(&Utc);
-        FrozenClock { datetime }
+        Self::new(datetime)
     }
 }
 

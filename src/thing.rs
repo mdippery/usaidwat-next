@@ -112,7 +112,7 @@ impl About {
     /// `/users/<user>/about.json`.
     ///
     /// This method is generally invoked by `User`, not directly.
-    fn parse(user_data: &str) -> Option<Self> {
+    pub fn parse(user_data: &str) -> Option<Self> {
         serde_json::from_str(user_data)
             .inspect_err(|err| eprintln!("failed to parse user data: {err:?}"))
             .ok()
@@ -142,7 +142,7 @@ impl Comment {
     /// `/users/<user>/comments.json`.
     ///
     /// This method is generally invoked by `User`, not directly.
-    fn parse(comment_data: &str) -> Option<Vec<Self>> {
+    pub fn parse(comment_data: &str) -> Option<Vec<Self>> {
         serde_json::from_str(comment_data)
             .inspect_err(|err| eprintln!("failed to parse comment data: {err:?}"))
             .ok()
@@ -236,7 +236,7 @@ impl Submission {
     /// `/users/<user>/submitted.json`.
     ///
     /// This method is generally invoked by `User`, not directly.
-    fn parse(post_data: &str) -> Option<Vec<Self>> {
+    pub fn parse(post_data: &str) -> Option<Vec<Self>> {
         serde_json::from_str(post_data)
             .inspect_err(|err| eprintln!("failed to parse post data: {err:?}"))
             .ok()
@@ -311,13 +311,9 @@ struct SubmissionResponse {
 mod tests {
     use std::fs;
 
-    fn load_data(file: &str) -> String {
-        fs::read_to_string(format!("tests/data/{file}.json")).expect("could not find test data")
-    }
-
     mod about {
         use super::super::*;
-        use super::load_data;
+        use crate::test_utils::load_data;
 
         #[test]
         fn it_cannot_parse_invalid_data() {
@@ -351,7 +347,7 @@ mod tests {
 
     mod comments {
         use super::super::*;
-        use super::load_data;
+        use crate::test_utils::load_data;
 
         #[test]
         fn it_cannot_parse_invalid_data() {
@@ -541,7 +537,7 @@ mod tests {
 
     mod submissions {
         use super::super::*;
-        use super::load_data;
+        use crate::test_utils::load_data;
 
         #[test]
         fn it_cannot_parse_invalid_data() {
