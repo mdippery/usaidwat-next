@@ -80,17 +80,17 @@ pub trait Viewable {
     /// resulting string. `clock` is a source from which the current
     /// time can be derived for items that print their age or other
     /// time-based parameters.
-    fn view<C: Clock>(&self, opts: &ViewOptions, clock: C) -> String;
+    fn view<C: Clock>(&self, opts: &ViewOptions, clock: &C) -> String;
 }
 
 impl Viewable for Redditor {
-    fn view<C: Clock>(&self, _: &ViewOptions, _: C) -> String {
+    fn view<C: Clock>(&self, _: &ViewOptions, _: &C) -> String {
         formatdoc! {"
             Created: {} ({})
             Link Karma: {}
             Comment Karma: {}",
             self.created_utc().with_timezone(&Local).format("%b %d, %Y %H:%M %p"),
-            self.relative_age(SystemClock::new()),
+            self.relative_age(&SystemClock::new()),
             self.link_karma(),
             self.comment_karma(),
         }
@@ -98,7 +98,7 @@ impl Viewable for Redditor {
 }
 
 impl Viewable for Comment {
-    fn view<C: Clock>(&self, opts: &ViewOptions, clock: C) -> String {
+    fn view<C: Clock>(&self, opts: &ViewOptions, clock: &C) -> String {
         if opts.oneline {
             self.view_oneline(opts, clock)
         } else {
@@ -108,32 +108,52 @@ impl Viewable for Comment {
 }
 
 impl Comment {
-    fn view_full<C: Clock>(&self, opts: &ViewOptions, clock: C) -> String {
+    fn view_full<C: Clock>(&self, opts: &ViewOptions, clock: &C) -> String {
+        let age = self.format_date(opts, clock);
+
+        // TODO: Wrapped to tty width, formatted as Markdown
+        let body = self.body();
+
         formatdoc! {"
             {}
             {}
             {}
             {} {} {}
 
-            {}",
+            {body}",
             self.subreddit().green(),
             self.permalink().yellow(),
             self.link_title().magenta(),
-            // TODO: Will have to come up with a way to test time using Clock
-            self.relative_age(clock).blue(), // TODO: also absolute age
+            age.blue(),
             "\u{2022}".cyan(),
             format!("{:+}", self.score()).blue(),
-            self.body(), // TODO: Wrapped to tty width, formatted as Markdown
         }
     }
 
-    fn view_oneline<C: Clock>(&self, _: &ViewOptions, _: C) -> String {
+    fn view_oneline<C: Clock>(&self, _: &ViewOptions, _: &C) -> String {
         format!("{} {}", self.subreddit(), self.link_title())
+    }
+
+    fn format_date<C: Clock>(&self, opts: &ViewOptions, clock: &C) -> String {
+        match opts.date_format {
+            DateFormat::Relative => self.relative_age(clock),
+            DateFormat::Absolute => self.format_absolute_date(),
+        }
+    }
+
+    fn format_absolute_date(&self) -> String {
+        let date = self.created_local();
+        let date_part = format!("{}", date.format("%a, %-d %b %Y"));
+        let time_part = format!("{}", date.format("%l:%M %p"));
+        // %l formats a single-digit time as, e.g., " 8",
+        // but I want to trim off the leading space.
+        let time_part = time_part.trim();
+        format!("{date_part}, {time_part}")
     }
 }
 
 impl Viewable for Timeline {
-    fn view<C: Clock>(&self, _: &ViewOptions, _: C) -> String {
+    fn view<C: Clock>(&self, _: &ViewOptions, _: &C) -> String {
         let mut s = String::from(" ");
         s += (0..24)
             .map(|i| format!("{i:>3}"))
@@ -218,7 +238,7 @@ mod tests {
         #[test]
         fn it_formats_a_user() {
             let user = Redditor::test();
-            let actual = user.view(&ViewOptions::default(), FrozenClock::default());
+            let actual = user.view(&ViewOptions::default(), &FrozenClock::default());
             let output = load_output("about_mipadi");
             let expected = output.trim();
             assert_eq!(actual, expected);
@@ -240,12 +260,20 @@ mod tests {
         }
 
         #[test]
+        fn it_formats_an_absolute_date() {
+            let opts = ViewOptions::build().date_format(DateFormat::Absolute).build();
+            let actual = get_comment(0).format_absolute_date();
+            let expected = "Thu, 17 Apr 2025, 8:44 PM";
+            assert_eq!(actual, expected);
+        }
+
+        #[test]
         #[ignore]
         fn it_formats_a_comment_with_relative_dates() {
             let opts = ViewOptions::build()
                 .date_format(DateFormat::Relative)
                 .build();
-            let actual = get_comment(0).view(&opts, FrozenClock::default());
+            let actual = get_comment(0).view(&opts, &FrozenClock::default());
             todo!("need to test!");
         }
 
@@ -255,7 +283,7 @@ mod tests {
             let opts = ViewOptions::build()
                 .date_format(DateFormat::Absolute)
                 .build();
-            let actual = get_comment(0).view(&opts, FrozenClock::default());
+            let actual = get_comment(0).view(&opts, &FrozenClock::default());
             todo!("need to test!");
         }
 
@@ -263,14 +291,14 @@ mod tests {
         #[ignore]
         fn it_formats_a_comment_with_raw_bodies() {
             let opts = ViewOptions::build().raw(true).build();
-            let actual = get_comment(0).view(&opts, FrozenClock::default());
+            let actual = get_comment(0).view(&opts, &FrozenClock::default());
             todo!("need to test!");
         }
 
         #[test]
         fn it_formats_a_comment_on_oneline() {
             let opts = ViewOptions::build().oneline(true).build();
-            let actual = get_comment(0).view(&opts, FrozenClock::default());
+            let actual = get_comment(0).view(&opts, &FrozenClock::default());
             let expected = "cyphersystem Cypher System & ChatGPT";
             assert_eq!(actual, expected);
         }
@@ -287,7 +315,7 @@ mod tests {
             let user = Redditor::test();
             let actual = user
                 .timeline()
-                .view(&ViewOptions::default(), FrozenClock::default());
+                .view(&ViewOptions::default(), &FrozenClock::default());
             let output = load_output("timeline_mipadi");
             let expected = output.trim_end();
             assert_eq!(actual, expected);

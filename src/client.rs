@@ -186,7 +186,7 @@ mod tests {
 
         #[test]
         fn it_returns_its_age() {
-            let actual_age = Redditor::test().age(FrozenClock::default()).as_seconds_f64();
+            let actual_age = Redditor::test().age(&FrozenClock::default()).as_seconds_f64();
             let expected_age = 541016254.0;
             assert_eq!(actual_age, expected_age, "{actual_age} != {expected_age}");
         }
@@ -256,7 +256,7 @@ mod tests {
 
         #[test]
         fn it_returns_its_age() {
-            let actual_age = Redditor::test_empty().age(FrozenClock::default()).as_seconds_f64();
+            let actual_age = Redditor::test_empty().age(&FrozenClock::default()).as_seconds_f64();
             let expected_age = 471437954.0;
             assert_eq!(actual_age, expected_age, "{actual_age} != {expected_age}");
         }

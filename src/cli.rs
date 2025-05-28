@@ -188,7 +188,7 @@ impl Runner {
         println!(
             "{}",
             self.user()
-                .view(&ViewOptions::default(), SystemClock::new())
+                .view(&ViewOptions::default(), &SystemClock::new())
         );
     }
 
@@ -217,7 +217,7 @@ impl Runner {
         };
 
         let output = comments
-            .map(|comment| comment.view(&opts, SystemClock::new()))
+            .map(|comment| comment.view(&opts, &SystemClock::new()))
             .collect::<Vec<_>>()
             .join("\n\n\n");
 
@@ -274,7 +274,7 @@ impl Runner {
                 "{}",
                 self.user()
                     .timeline()
-                    .view(&ViewOptions::default(), SystemClock::new())
+                    .view(&ViewOptions::default(), &SystemClock::new())
             );
         } else {
             println!("{} has no comments.", self.user().username());

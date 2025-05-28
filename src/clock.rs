@@ -40,7 +40,7 @@ pub trait HasAge {
     ///
     /// `clock` is a source of time from which the age can be derived.
     /// Generally [`SystemClock::new()`] is used.
-    fn age<C: Clock>(&self, clock: C) -> TimeDelta {
+    fn age<C: Clock>(&self, clock: &C) -> TimeDelta {
         let birthday = self.created_utc();
         clock.now().sub(birthday)
     }
@@ -50,7 +50,7 @@ pub trait HasAge {
     ///
     /// `clock` is a source of time from which the age can be derived.
     /// Generally [`SystemClock::new()`] is used.
-    fn relative_age<C: Clock>(&self, clock: C) -> String {
+    fn relative_age<C: Clock>(&self, clock: &C) -> String {
         // TODO: For FFS, sometimes this prints "1 months ago".
         //       I'm using a crate so it's the crate's fault, but I should
         //       either fix the crate or hack a fix here. So annoying.
@@ -90,7 +90,7 @@ mod tests {
             let clock = FrozenClock::new(datetime);
             let comments = Comment::parse(&load_data("comments_mipadi")).unwrap();
             let comment = &comments[3];
-            assert_eq!(comment.relative_age(clock), "1 month ago");
+            assert_eq!(comment.relative_age(&clock), "1 month ago");
         }
 
         #[test]
@@ -101,7 +101,7 @@ mod tests {
             let clock = FrozenClock::new(datetime);
             let comments = Comment::parse(&load_data("comments_mipadi")).unwrap();
             let comment = &comments[2];
-            assert_eq!(comment.relative_age(clock), "a month ago");
+            assert_eq!(comment.relative_age(&clock), "a month ago");
         }
     }
 }
