@@ -27,6 +27,7 @@ enum Command {
     },
 
     /// Display a user's comments
+    #[clap(alias = "l")]
     Log {
         /// Reddit username
         username: String,
@@ -64,6 +65,7 @@ enum Command {
     },
 
     /// Tally a user's comments by subreddit
+    #[clap(alias = "t")]
     Tally(TallyConfig),
 
     /// Display user's activity by day of week and hour
