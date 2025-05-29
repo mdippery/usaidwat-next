@@ -3,6 +3,7 @@
 use crate::cli::DateFormat;
 use crate::client::{Redditor, Timeline};
 use crate::clock::{Clock, HasAge, SystemClock};
+use crate::count::HasSubreddit;
 use crate::thing::{Comment, Submission};
 use chrono::Local;
 use colored::Colorize;

@@ -6,6 +6,7 @@
 //! work with JSON data from the Reddit API.
 
 use crate::clock::{DateTime, HasAge, Local, Utc};
+use crate::count::HasSubreddit;
 use crate::filter::Searchable;
 use htmlentity::entity::{self, ICodedDataTrait};
 use serde::de::Error;
@@ -162,11 +163,6 @@ impl Comment {
         self.created_utc().with_timezone(&Local)
     }
 
-    /// The subreddit the comment was posted in.
-    pub fn subreddit(&self) -> &str {
-        &self.subreddit.trim()
-    }
-
     /// The full URL at which the comment can be retrieved.
     pub fn permalink(&self) -> String {
         self.link_id.split("_").last().and_then(|link_id| {
@@ -222,6 +218,13 @@ impl HasAge for Comment {
     }
 }
 
+impl HasSubreddit for Comment {
+    /// The subreddit the comment was posted in.
+    fn subreddit(&self) -> &str {
+        &self.subreddit.trim()
+    }
+}
+
 impl Searchable for Comment {
     fn search_text(&self) -> String {
         self.body()
@@ -255,11 +258,6 @@ impl Submission {
         self.domain.starts_with("self.")
     }
 
-    /// The subreddit in which the submission was posted.
-    pub fn subreddit(&self) -> &str {
-        &self.subreddit
-    }
-
     /// The submission's permalink.
     pub fn permalink(&self) -> String {
         let path = &self.permalink;
@@ -285,6 +283,13 @@ impl Submission {
 impl HasAge for Submission {
     fn created_utc(&self) -> DateTime<Utc> {
         self.created_utc
+    }
+}
+
+impl HasSubreddit for Submission {
+    /// The subreddit in which the submission was posted.
+    fn subreddit(&self) -> &str {
+        &self.subreddit
     }
 }
 
