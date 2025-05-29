@@ -2,6 +2,7 @@
 
 use crate::client::Redditor;
 use crate::clock::SystemClock;
+use crate::filter::Searchable;
 use crate::service::RedditService;
 use crate::thing::Comment;
 use crate::view::{ViewOptions, Viewable};

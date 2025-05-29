@@ -6,6 +6,7 @@
 //! work with JSON data from the Reddit API.
 
 use crate::clock::{DateTime, HasAge, Local, Utc};
+use crate::filter::Searchable;
 use htmlentity::entity::{self, ICodedDataTrait};
 use serde::de::Error;
 use serde::{Deserialize, Deserializer};
@@ -201,30 +202,18 @@ impl Comment {
     pub fn body(&self) -> &str {
         &self.body.trim()
     }
-
-    /// True if the search pattern can be found in the comment's body.
-    ///
-    /// The search is case-insensitive.
-    ///
-    /// `pattern` is a fixed string; regular expression matches are not
-    /// yet supported.
-    pub fn matches(&self, pattern: &str) -> bool {
-        // TODO: pattern should be a case-insensitive regex
-        //       (or rather, that's how it is in the current Ruby tool,
-        //       but I'm actually not convinced that we should search
-        //       case-insensitively with a regex)
-        self.body
-            .to_lowercase()
-            .matches(&pattern.to_lowercase())
-            .count()
-            > 0
-    }
 }
 
 impl HasAge for Comment {
     /// The time the comment was created, in UTC.
     fn created_utc(&self) -> DateTime<Utc> {
         self.created_utc
+    }
+}
+
+impl Searchable for Comment {
+    fn search_text(&self) -> &str {
+        self.body()
     }
 }
 
