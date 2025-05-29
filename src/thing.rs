@@ -249,6 +249,38 @@ impl Submission {
                     .collect()
             })
     }
+
+    /// True if the submission is a self post.
+    pub fn is_self(&self) -> bool {
+        self.domain.starts_with("self.")
+    }
+
+    /// The subreddit in which the submission was posted.
+    pub fn subreddit(&self) -> &str {
+        &self.subreddit
+    }
+
+    /// The submission's permalink.
+    pub fn permalink(&self) -> String {
+        let path = &self.permalink;
+        format!("https://www.reddit.com{path}")
+    }
+
+    /// The submission's title.
+    pub fn title(&self) -> &str {
+        &self.title
+    }
+
+    /// The URL to which the submission points.
+    pub fn url(&self) -> &str {
+        &self.url
+    }
+}
+
+impl HasAge for Submission {
+    fn created_utc(&self) -> DateTime<Utc> {
+        self.created_utc
+    }
 }
 
 // Deserializers
@@ -653,6 +685,60 @@ mod tests {
             assert_eq!(submission.ups, 1);
             assert_eq!(submission.downs, 0);
             assert_eq!(submission.score, 1);
+        }
+
+        #[test]
+        fn it_returns_its_subreddit() {
+            let submissions = Submission::parse(&load_data("submitted_mipadi")).unwrap();
+            let submission = &submissions[0];
+            assert_eq!(submission.subreddit(), "rpg");
+        }
+
+        #[test]
+        fn it_returns_its_permalink() {
+            let submissions = Submission::parse(&load_data("submitted_mipadi")).unwrap();
+            let submission = &submissions[0];
+            let expected = "https://www.reddit.com/r/rpg/comments/1hv9k9l/collections_coinage_and_the_tyranny_of_fantasy/";
+            assert_eq!(submission.permalink(), expected);
+        }
+
+        #[test]
+        fn it_returns_its_title() {
+            let submissions = Submission::parse(&load_data("submitted_mipadi")).unwrap();
+            let submission = &submissions[0];
+            let expected = "Collections: Coinage and the Tyranny of Fantasy \"Gold\"";
+            assert_eq!(submission.title(), expected);
+        }
+
+        #[test]
+        fn it_returns_its_url() {
+            let submissions = Submission::parse(&load_data("submitted_mipadi")).unwrap();
+            let submission = &submissions[0];
+            let expected = "https://acoup.blog/2025/01/03/collections-coinage-and-the-tyranny-of-fantasy-gold/";
+            assert_eq!(submission.url(), expected);
+        }
+
+        #[test]
+        fn it_returns_true_if_it_is_a_self_post() {
+            let submissions = Submission::parse(&load_data("submitted_mipadi")).unwrap();
+            let submission = &submissions[3];
+            assert!(submission.is_self());
+        }
+
+        #[test]
+        fn it_returns_false_if_it_is_a_self_post() {
+            let submissions = Submission::parse(&load_data("submitted_mipadi")).unwrap();
+            let submission = &submissions[0];
+            assert!(!submission.is_self());
+        }
+
+        #[test]
+        fn it_returns_its_creation_time() {
+            let submissions = Submission::parse(&load_data("submitted_mipadi")).unwrap();
+            let submission = &submissions[0];
+            let expected = DateTime::parse_from_rfc3339("2025-01-06T20:54:01+00:00")
+                .expect("could not parse datetime string");
+            assert_eq!(submission.created_utc(), expected);
         }
 
         #[test]

@@ -3,7 +3,7 @@
 use crate::cli::DateFormat;
 use crate::client::{Redditor, Timeline};
 use crate::clock::{Clock, HasAge, SystemClock};
-use crate::thing::Comment;
+use crate::thing::{Comment, Submission};
 use chrono::Local;
 use colored::Colorize;
 use indoc::formatdoc;
@@ -159,6 +159,54 @@ impl Comment {
         // doesn't run right up to the edge.
         let opts = Options::new(textwrap::termwidth() - 1);
         textwrap::fill(body, opts)
+    }
+}
+
+impl Viewable for Submission {
+    fn view<C: Clock>(&self, opts: &ViewOptions, clock: &C) -> String {
+        // TODO: Only use color if printing to tty
+
+        if opts.oneline {
+            self.view_oneline()
+        } else {
+            self.view_full(clock)
+        }
+    }
+}
+
+impl Submission {
+    fn view_full<C: Clock>(&self, clock: &C) -> String {
+        String::from(
+            formatdoc! {"
+                {}
+                {}
+                {}
+                {}
+                {}",
+                self.subreddit().green(),
+                self.short_permalink().yellow(),
+                self.title().magenta(),
+                self.relative_age(clock).blue(),
+                self.link_uri(),
+            }
+            // Remove trailing space since the link will be blank for self posts
+            .trim_end(),
+        )
+    }
+
+    fn view_oneline(&self) -> String {
+        format!("{} {}", self.subreddit().green(), self.title())
+    }
+
+    fn short_permalink(&self) -> String {
+        let permalink = self.permalink();
+        let parts: Vec<_> = permalink.split("/").collect();
+        let len = parts.len().saturating_sub(2);
+        parts[..len].join("/")
+    }
+
+    fn link_uri(&self) -> &str {
+        if self.is_self() { "" } else { self.url() }
     }
 }
 
@@ -341,6 +389,76 @@ mod tests {
             let opts = ViewOptions::build().oneline(true).build();
             let actual = get_comment(0).view(&opts, &FrozenClock::default());
             let expected = "cyphersystem Cypher System & ChatGPT";
+            assert_eq!(actual, expected);
+        }
+    }
+
+    mod format_submission {
+        use super::super::*;
+        use super::load_output;
+        use crate::client::Redditor;
+        use crate::test_utils::FrozenClock;
+        use crate::thing::Submission;
+        use pretty_assertions::assert_eq;
+
+        fn get_post(n: usize) -> Submission {
+            Redditor::test()
+                .submissions()
+                .nth(n)
+                .expect("no comment found")
+        }
+
+        #[test]
+        fn it_returns_the_permalink_without_the_full_title() {
+            let post = get_post(0);
+            let expected = "https://www.reddit.com/r/rpg/comments/1hv9k9l";
+            assert_eq!(post.short_permalink(), expected);
+        }
+
+        #[test]
+        fn it_returns_the_link_uri() {
+            let post = get_post(0);
+            let expected = "https://acoup.blog/2025/01/03/collections-coinage-and-the-tyranny-of-fantasy-gold/";
+            assert_eq!(post.link_uri(), expected);
+        }
+
+        #[test]
+        fn it_returns_an_empty_link_uri_for_self_posts() {
+            let post = get_post(3);
+            assert_eq!(post.link_uri(), "")
+        }
+
+        #[test]
+        fn it_formats_a_post() {
+            let post = get_post(0);
+            let expected = load_output("posts");
+            let actual = post.view(&ViewOptions::default(), &FrozenClock::default());
+            assert_eq!(actual, expected);
+        }
+
+        #[test]
+        fn it_formats_a_self_post() {
+            let post = get_post(3);
+            let expected = load_output("posts_self");
+            let actual = post.view(&ViewOptions::default(), &FrozenClock::default());
+            assert_eq!(actual, expected);
+        }
+
+        #[test]
+        fn it_formats_a_post_on_oneline() {
+            let opts = ViewOptions::build().oneline(true).build();
+            let post = get_post(0);
+            let expected = load_output("posts_oneline");
+            let actual = post.view(&opts, &FrozenClock::default());
+            assert_eq!(actual, expected);
+        }
+
+        #[test]
+        fn it_wraps_long_post_titles_for_oneline_posts() {
+            let opts = ViewOptions::build().oneline(true).build();
+            let post = get_post(4);
+            let expected = load_output("posts_oneline_long");
+            let actual = post.view(&opts, &FrozenClock::default());
             assert_eq!(actual, expected);
         }
     }

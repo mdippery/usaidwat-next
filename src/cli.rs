@@ -200,6 +200,8 @@ impl Runner {
         oneline: &bool,
         raw: &bool,
     ) {
+        // TODO: Filter by subreddit
+
         let opts = ViewOptions::build()
             .oneline(*oneline)
             .raw(*raw)
@@ -210,7 +212,8 @@ impl Runner {
             .unwrap_or_else(|| self.user().comments().count());
         let comments = self.user().comments().take(n);
 
-        // TODO: Probably need to move this into a function that I can test easily
+        // TODO: Really need to extract this filtering out into a module I
+        //       can test easily, along with filtering by subreddit.
         let comments: Box<dyn Iterator<Item = Comment>> = match grep {
             Some(grep) => Box::new(comments.filter(move |comment| comment.matches(grep))),
             None => Box::new(comments),
@@ -222,7 +225,7 @@ impl Runner {
             .join("\n\n\n");
 
         Pager::new().setup();
-        // TODO: Output with color, but only if hooked up to tty
+        // TODO: Only output color if hooked up to tty
         // TODO: Do not wrap oneline titles
         // TODO: Highlight matches in output, if grep is specified
         println!("{}", output);
@@ -238,10 +241,21 @@ impl Runner {
     }
 
     fn run_posts_log(&self, oneline: &bool) {
-        println!(
-            "Running posts log for {}, oneline? {oneline}",
-            self.username()
-        );
+        // TODO: Support absolute dates
+        //       Never did in the Ruby tool but it would be nice to do here.
+        // TODO: Filter by subreddit
+
+        let opts = ViewOptions::build().oneline(*oneline).build();
+        let posts = self.user().submissions();
+
+        let output = posts
+            .map(|post| post.view(&opts, &SystemClock::new()))
+            .collect::<Vec<_>>()
+            .join("\n\n\n");
+
+        Pager::new().setup();
+        // TODO: Only output color if hooked up to tty
+        println!("{}", output);
     }
 
     fn run_posts_tally(&self, sort_by_count: &bool) {

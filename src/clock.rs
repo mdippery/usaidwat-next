@@ -82,6 +82,21 @@ mod tests {
         use crate::thing::Comment;
 
         #[test]
+        #[ignore]
+        fn it_returns_its_age() {
+            todo!("test this!");
+        }
+
+        #[test]
+        #[ignore]
+        fn it_returns_its_age_as_a_relative_string() {
+            todo!("test this!");
+        }
+
+        // TODO: Implement HasAge instead of using Comment so I can make
+        //       Comment::parse() and others private again.
+
+        #[test]
         #[ignore] // TODO: Currently fails because the relativetime crate has a bug
         fn it_correctly_formats_singular_time_units() {
             let datetime = DateTime::parse_from_rfc3339("2025-05-28T10:51:00-07:00")
