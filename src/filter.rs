@@ -3,7 +3,7 @@
 /// A thing that can be searched.
 pub trait Searchable {
     /// The haystack that can be searched for a needle.
-    fn search_text(&self) -> &str;
+    fn search_text(&self) -> String;
 
     /// True if the search pattern can be found in the [`Searchable::search_text()`].
     ///
@@ -31,8 +31,8 @@ mod tests {
     struct TestSearchable;
 
     impl Searchable for TestSearchable {
-        fn search_text(&self) -> &str {
-            "peter piper picked a peck of pickled peppers"
+        fn search_text(&self) -> String {
+            String::from("peter piper picked a peck of pickled peppers")
         }
     }
 

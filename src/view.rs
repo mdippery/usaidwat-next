@@ -158,7 +158,7 @@ impl Comment {
         // Subtract 1 from terminal width because it looks nicer if the text
         // doesn't run right up to the edge.
         let opts = Options::new(textwrap::termwidth() - 1);
-        textwrap::fill(body, opts)
+        textwrap::fill(&body, opts)
     }
 }
 

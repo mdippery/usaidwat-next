@@ -199,8 +199,19 @@ impl Comment {
     }
 
     /// The comment body, as raw Markdown text.
-    pub fn body(&self) -> &str {
-        &self.body.trim()
+    ///
+    /// Reddit converts some raw Markdown characters to HTML entities;
+    /// for example, `>` in raw Markdown markup will be returned from
+    /// Reddit as `&gt;` to be compatible with HTML and XML. This method
+    /// will convert HTML entities like `&gt;` into their corresponding
+    /// characters, but it will not do any additional parsing of Markdown
+    /// text. In other words, the text returned by this method is suitable
+    /// for passing into a Markdown parser.
+    pub fn body(&self) -> String {
+        let body = self.body.trim();
+        entity::decode(body.as_bytes())
+            .to_string()
+            .unwrap_or(body.to_string())
     }
 }
 
@@ -212,7 +223,7 @@ impl HasAge for Comment {
 }
 
 impl Searchable for Comment {
-    fn search_text(&self) -> &str {
+    fn search_text(&self) -> String {
         self.body()
     }
 }
@@ -257,6 +268,11 @@ impl Submission {
 
     /// The submission's title.
     pub fn title(&self) -> &str {
+        // TODO: Convert HTML entities.
+        //       We already do this for comments so split that logic into
+        //       a trait with a default title() implementation.
+        //       Make sure to test this conversation! (As well as that of
+        //       Comment.)
         &self.title
     }
 
@@ -367,6 +383,7 @@ mod tests {
     mod comments {
         use super::super::*;
         use crate::test_utils::load_data;
+        use pretty_assertions::assert_eq;
 
         #[test]
         fn it_cannot_parse_invalid_data() {
@@ -482,6 +499,33 @@ mod tests {
                 group and I like them as people well enough.";
             let comments = Comment::parse(&load_data("comments_mipadi")).unwrap();
             let comment = &comments[9];
+            assert_eq!(comment.body(), expected_body);
+        }
+
+        #[test]
+        fn it_converts_html_entities_in_its_body() {
+            let expected_body = "> I also learned that I don’t really care about the incredibly \
+                tight kind of balance Pathfinder 2e offers. It made us quite a bit more worried \
+                about breaking the game when we wanted to change something and it felt like a lot \
+                of the wacky, creative solutions possible in other games were sacrificed for \
+                balance, which wasn’t a tradeoff we were happy with.\
+                \n\nOn paper I've always thought that I like the tight balance of games like \
+                Pathfinder. But after playing Pathfinder for a while, I've come to feel that \
+                RPGs are fun when they have a bit of swinginess. The best moments in my 25 \
+                years of playing RPGs have occurred when someone pulled off an amazing crit, or \
+                rolled a natural 1 when they absolutely had to hit the enemy, or failed a save \
+                they had a 90% of passing. Those are the times when the game goes in an \
+                interesting, fun, memorable direction (even if it does occasionally lead to \
+                some cheap deaths).\
+                \n\nConversely, Pathfinder plays like a board game. And don't get me wrong, I \
+                love board games, too, but RPGs—even Pathfinder—rarely have enough depth to be an \
+                interesting board game, and so they just play out tediously and predictably. My \
+                Pathfinder group is _so good_ at Pathfinder, we've mastered the system, and as \
+                a consequence, the game is really stale and unchallenging.\
+                \n\n(I also have other problems with Pathfinder, like the fact that there is \
+                simply way too much shit to keep track of…but I digress.)";
+            let comments = Comment::parse(&load_data("comments_mipadi")).unwrap();
+            let comment = &comments[3];
             assert_eq!(comment.body(), expected_body);
         }
 
