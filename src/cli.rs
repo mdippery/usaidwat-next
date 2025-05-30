@@ -241,7 +241,6 @@ impl Runner {
             .join(joiner);
 
         Pager::new().pager_envs(conf::pager_env(oneline)).setup();
-        // TODO: Only output color if hooked up to tty
         // TODO: Highlight matches in output, if grep is specified
         println!("{}", output);
     }
@@ -268,7 +267,6 @@ impl Runner {
             .join(joiner);
 
         Pager::new().pager_envs(conf::pager_env(oneline)).setup();
-        // TODO: Only output color if hooked up to tty
         println!("{}", output);
     }
 

@@ -111,8 +111,6 @@ impl Viewable for Comment {
 
 impl Comment {
     fn view_full<C: Clock>(&self, opts: &ViewOptions, clock: &C) -> String {
-        // TODO: Disable color if not outputting to tty
-
         let age = self.format_date(opts, clock);
 
         // TODO: Formatted as Markdown (wrap after formatting unless raw)
@@ -281,6 +279,16 @@ mod tests {
         )
     }
 
+    fn with_no_color<F, T>(f: F) -> T
+    where
+        F: FnOnce() -> T,
+    {
+        colored::control::set_override(false);
+        let result = f();
+        colored::control::unset_override();
+        result
+    }
+
     mod view_options {
         use super::super::*;
 
@@ -337,7 +345,7 @@ mod tests {
 
     mod format_comment {
         use super::super::*;
-        use super::load_output;
+        use super::{load_output, with_no_color};
         use crate::client::Redditor;
         use crate::test_utils::FrozenClock;
         use pretty_assertions::assert_eq;
@@ -418,8 +426,21 @@ mod tests {
         fn it_formats_a_comment_on_oneline() {
             let opts = ViewOptions::build().oneline(true).build();
             let actual = get_comment(0).view(&opts, &FrozenClock::default());
-            // TODO: Test without color
             let expected = "\u{1b}[32mcyphersystem\u{1b}[0m Cypher System & ChatGPT";
+            assert_eq!(actual, expected);
+        }
+
+        #[test]
+        // TODO: Fix test
+        // Running this causes the previous test to fail. I suspect tests are run
+        // in parallel and colored::control::set_override() is not threadsafe.
+        // Don't worry about this for now, but we should test uncolored output
+        // eventually.
+        #[ignore]
+        fn it_formats_a_comment_on_oneline_without_color() {
+            let opts = ViewOptions::build().oneline(true).build();
+            let expected = "cyphersystem Cypher System & ChatGPT";
+            let actual = with_no_color(|| get_comment(0).view(&opts, &FrozenClock::default()));
             assert_eq!(actual, expected);
         }
     }
