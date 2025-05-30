@@ -213,7 +213,6 @@ impl Submission {
 }
 
 impl Viewable for IntoIter<SubredditCount> {
-    // TODO: Test!
     fn view<C: Clock>(&self, _: &ViewOptions, _: &C) -> String {
         // TODO: Ugly! Various iteration methods below move this value,
         //       so we have to clone. Probably would be better to implement
