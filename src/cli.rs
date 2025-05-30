@@ -2,6 +2,7 @@
 
 use crate::client::Redditor;
 use crate::clock::SystemClock;
+use crate::count::{SortAlgorithm, SubredditCounter};
 use crate::filter::Searchable;
 use crate::service::RedditService;
 use crate::thing::Comment;
@@ -98,6 +99,16 @@ struct TallyConfig {
     sort_by_count: bool,
 }
 
+impl TallyConfig {
+    fn sort_algorithm(&self) -> SortAlgorithm {
+        if self.sort_by_count {
+            SortAlgorithm::Numerically
+        } else {
+            SortAlgorithm::Lexicographically
+        }
+    }
+}
+
 #[derive(Args, Debug)]
 struct PostCommandConfig {
     #[command(subcommand)]
@@ -182,7 +193,7 @@ impl Runner {
             }
             Command::Posts(subconfig) => self.run_posts(subconfig),
             Command::Summary { .. } => self.run_summary(),
-            Command::Tally(TallyConfig { sort_by_count, .. }) => self.run_tally(sort_by_count),
+            Command::Tally(config) => self.run_tally(&config.sort_algorithm()),
             Command::Timeline { .. } => self.run_timeline(),
         }
     }
@@ -235,11 +246,9 @@ impl Runner {
     }
 
     fn run_posts(&self, config: &PostCommandConfig) {
-        match config.command {
+        match &config.command {
             PostSubcommand::Log { oneline, .. } => self.run_posts_log(&oneline),
-            PostSubcommand::Tally(TallyConfig { sort_by_count, .. }) => {
-                self.run_posts_tally(&sort_by_count)
-            }
+            PostSubcommand::Tally(config) => self.run_posts_tally(&config.sort_algorithm()),
         }
     }
 
@@ -261,22 +270,38 @@ impl Runner {
         println!("{}", output);
     }
 
-    fn run_posts_tally(&self, sort_by_count: &bool) {
-        println!(
-            "Running posts tally for {}, sort by count? {sort_by_count}",
-            self.username()
-        );
+    fn run_posts_tally(&self, sort_algorithm: &SortAlgorithm) {
+        // TODO: Need to test this conditional logic
+
+        if self.user().has_submissions() {
+            let posts = self.user().submissions();
+            let tallies = SubredditCounter::from_iter(posts).sort_by(sort_algorithm);
+            println!(
+                "{}",
+                tallies.view(&ViewOptions::default(), &SystemClock::default())
+            );
+        } else {
+            println!("{} has no posts.", self.user().username());
+        }
     }
 
     fn run_summary(&self) {
         todo!("summary");
     }
 
-    fn run_tally(&self, sort_by_count: &bool) {
-        println!(
-            "Running comment tally for {}, sort by count? {sort_by_count}",
-            self.username()
-        );
+    fn run_tally(&self, sort_algorithm: &SortAlgorithm) {
+        // TODO: Need to test this conditional logic
+
+        if self.user.has_comments() {
+            let comments = self.user().comments();
+            let tallies = SubredditCounter::from_iter(comments).sort_by(sort_algorithm);
+            println!(
+                "{}",
+                tallies.view(&ViewOptions::default(), &SystemClock::default())
+            );
+        } else {
+            println!("{} has no comments.", self.user().username());
+        }
     }
 
     fn run_timeline(&self) {

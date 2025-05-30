@@ -12,8 +12,10 @@ pub trait HasSubreddit {
 
 /// Differentiates between the different sorting algorithms used to
 /// return subreddit counts.
+#[derive(Debug, Default)]
 pub enum SortAlgorithm {
     /// Sort counts by name of subreddit.
+    #[default]
     Lexicographically,
 
     /// Sort counts by number of comments or submissions in each subreddit.
@@ -44,7 +46,7 @@ impl SubredditCounter {
     /// the subreddit.
     ///
     /// Returns an iterator over the (subreddit name, count) pairs.
-    pub fn sort_by(&self, algo: SortAlgorithm) -> IntoIter<SubredditCount> {
+    pub fn sort_by(&self, algo: &SortAlgorithm) -> IntoIter<SubredditCount> {
         match algo {
             SortAlgorithm::Numerically => self
                 .counts
@@ -136,7 +138,7 @@ mod tests {
         .map(|(subreddit, count)| ((*subreddit).to_string(), *count as usize))
         .collect();
         let actual: Vec<SubredditCount> = SubredditCounter::from_iter(redditor.comments())
-            .sort_by(SortAlgorithm::Lexicographically)
+            .sort_by(&SortAlgorithm::Lexicographically)
             .collect();
         assert_eq!(actual, expected);
     }
@@ -162,7 +164,7 @@ mod tests {
         .map(|(subreddit, count)| ((*subreddit).to_string(), *count as usize))
         .collect();
         let actual: Vec<SubredditCount> = SubredditCounter::from_iter(redditor.comments())
-            .sort_by(SortAlgorithm::Numerically)
+            .sort_by(&SortAlgorithm::Numerically)
             .collect();
         assert_eq!(actual, expected);
     }
