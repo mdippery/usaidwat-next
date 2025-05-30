@@ -11,7 +11,6 @@ use crate::filter::Searchable;
 use crate::text;
 use serde::de::Error;
 use serde::{Deserialize, Deserializer};
-use serde_json;
 
 /// A Reddit user account.
 #[derive(Debug)]
