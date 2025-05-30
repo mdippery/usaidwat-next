@@ -268,13 +268,11 @@ impl Submission {
     }
 
     /// The submission's title.
-    pub fn title(&self) -> &str {
-        // TODO: Convert HTML entities.
-        //       We already do this for comments so split that logic into
-        //       a trait with a default title() implementation.
-        //       Make sure to test this conversation! (As well as that of
-        //       Comment.)
-        &self.title
+    pub fn title(&self) -> String {
+        let title = self.title.trim();
+        entity::decode(title.as_bytes())
+            .to_string()
+            .unwrap_or(title.to_string())
     }
 
     /// The URL to which the submission points.
@@ -749,6 +747,12 @@ mod tests {
             let submission = &submissions[0];
             let expected = "Collections: Coinage and the Tyranny of Fantasy \"Gold\"";
             assert_eq!(submission.title(), expected);
+        }
+
+        #[test]
+        #[ignore]
+        fn it_converts_html_entities_in_its_title() {
+            todo!("find or create post data with &gt; or &amp; in title");
         }
 
         #[test]
