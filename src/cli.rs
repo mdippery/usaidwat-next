@@ -141,9 +141,14 @@ impl PostSubcommand {
     }
 }
 
+/// Determines if dates should be displayed as an absolute date ("January 1, 2025")
+/// or relative to the current time ("5 months ago").
 #[derive(Clone, Debug, Default, PartialEq, ValueEnum)]
 pub enum DateFormat {
+    /// Display dates as an absolute date ("January 1, 2025").
     Absolute,
+
+    /// Display dates relative to the current time ("5 months ago").
     #[default]
     Relative,
 }
