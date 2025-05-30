@@ -91,7 +91,7 @@ impl Viewable for Redditor {
             Link Karma: {}
             Comment Karma: {}",
             self.created_utc().with_timezone(&Local).format("%b %d, %Y %H:%M %p"),
-            self.relative_age(&SystemClock::new()),
+            self.relative_age(&SystemClock::default()),
             self.link_karma(),
             self.comment_karma(),
         }

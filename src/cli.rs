@@ -191,7 +191,7 @@ impl Runner {
         println!(
             "{}",
             self.user()
-                .view(&ViewOptions::default(), &SystemClock::new())
+                .view(&ViewOptions::default(), &SystemClock::default())
         );
     }
 
@@ -223,7 +223,7 @@ impl Runner {
         };
 
         let output = comments
-            .map(|comment| comment.view(&opts, &SystemClock::new()))
+            .map(|comment| comment.view(&opts, &SystemClock::default()))
             .collect::<Vec<_>>()
             .join("\n\n\n");
 
@@ -252,7 +252,7 @@ impl Runner {
         let posts = self.user().submissions();
 
         let output = posts
-            .map(|post| post.view(&opts, &SystemClock::new()))
+            .map(|post| post.view(&opts, &SystemClock::default()))
             .collect::<Vec<_>>()
             .join("\n\n\n");
 
@@ -291,7 +291,7 @@ impl Runner {
                 "{}",
                 self.user()
                     .timeline()
-                    .view(&ViewOptions::default(), &SystemClock::new())
+                    .view(&ViewOptions::default(), &SystemClock::default())
             );
         } else {
             println!("{} has no comments.", self.user().username());

@@ -15,15 +15,8 @@ pub trait Clock {
 }
 
 /// Interacts with the system clock to get the current time.
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct SystemClock;
-
-impl SystemClock {
-    /// Creates a new clock to interact with the system time.
-    pub fn new() -> Self {
-        SystemClock {}
-    }
-}
 
 impl Clock for SystemClock {
     fn now(&self) -> DateTime<Utc> {
@@ -39,7 +32,7 @@ pub trait HasAge {
     /// The age of the account.
     ///
     /// `clock` is a source of time from which the age can be derived.
-    /// Generally [`SystemClock::new()`] is used.
+    /// Generally [`SystemClock::default()`] is used.
     fn age<C: Clock>(&self, clock: &C) -> TimeDelta {
         let birthday = self.created_utc();
         clock.now().sub(birthday)
@@ -49,7 +42,7 @@ pub trait HasAge {
     /// human-readable string.
     ///
     /// `clock` is a source of time from which the age can be derived.
-    /// Generally [`SystemClock::new()`] is used.
+    /// Generally [`SystemClock::default()`] is used.
     fn relative_age<C: Clock>(&self, clock: &C) -> String {
         // TODO: For FFS, sometimes this prints "1 months ago".
         //       I'm using a crate so it's the crate's fault, but I should
@@ -68,7 +61,7 @@ mod tests {
 
         #[test]
         fn it_returns_the_system_time() {
-            let clock = SystemClock::new();
+            let clock = SystemClock::default();
             let delta = Utc::now().sub(clock.now());
             let secs = delta.num_seconds();
             assert_eq!(secs, 0);
