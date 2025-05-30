@@ -174,10 +174,6 @@ impl Runner {
         Runner { config, user }
     }
 
-    fn username(&self) -> String {
-        self.user.username()
-    }
-
     fn user(&self) -> &Redditor {
         &self.user
     }

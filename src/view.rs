@@ -3,7 +3,7 @@
 use crate::cli::DateFormat;
 use crate::client::{Redditor, Timeline};
 use crate::clock::{Clock, HasAge, SystemClock};
-use crate::count::{HasSubreddit, SubredditCount, SubredditCounter};
+use crate::count::{HasSubreddit, SubredditCount};
 use crate::thing::{Comment, Submission};
 use chrono::Local;
 use colored::Colorize;
@@ -16,6 +16,7 @@ use textwrap::{self, Options};
 pub struct ViewOptions {
     date_format: DateFormat,
     oneline: bool,
+    #[allow(dead_code)] // This will be used eventually
     raw: bool,
 }
 

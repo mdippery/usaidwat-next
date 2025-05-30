@@ -23,6 +23,7 @@ pub struct User {
 
 /// Reddit user account data.
 #[derive(Debug, Deserialize)]
+#[allow(dead_code)]
 pub struct About {
     name: String,
     id: String,
@@ -34,6 +35,7 @@ pub struct About {
 
 /// A Reddit comment.
 #[derive(Clone, Debug, Deserialize)]
+#[allow(dead_code)]
 pub struct Comment {
     id: String,
     name: String,
@@ -51,6 +53,7 @@ pub struct Comment {
 
 /// A Reddit Post.
 #[derive(Clone, Debug, Deserialize)]
+#[allow(dead_code)]
 pub struct Submission {
     id: String,
     name: String,

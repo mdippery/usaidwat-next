@@ -24,6 +24,7 @@ pub trait Searchable {
     }
 }
 
+#[cfg(test)]
 mod tests {
     use super::*;
 
