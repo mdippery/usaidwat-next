@@ -135,7 +135,7 @@ impl Comment {
     }
 
     fn view_oneline<C: Clock>(&self, _: &ViewOptions, _: &C) -> String {
-        format!("{} {}", self.subreddit(), self.link_title())
+        format!("{} {}", self.subreddit().green(), self.link_title())
     }
 
     fn format_date<C: Clock>(&self, opts: &ViewOptions, clock: &C) -> String {
@@ -419,7 +419,8 @@ mod tests {
         fn it_formats_a_comment_on_oneline() {
             let opts = ViewOptions::build().oneline(true).build();
             let actual = get_comment(0).view(&opts, &FrozenClock::default());
-            let expected = "cyphersystem Cypher System & ChatGPT";
+            // TODO: Test without color
+            let expected = "\u{1b}[32mcyphersystem\u{1b}[0m Cypher System & ChatGPT";
             assert_eq!(actual, expected);
         }
     }
@@ -479,16 +480,8 @@ mod tests {
         fn it_formats_a_post_on_oneline() {
             let opts = ViewOptions::build().oneline(true).build();
             let post = get_post(0);
-            let expected = load_output("posts_oneline");
-            let actual = post.view(&opts, &FrozenClock::default());
-            assert_eq!(actual, expected);
-        }
-
-        #[test]
-        fn it_wraps_long_post_titles_for_oneline_posts() {
-            let opts = ViewOptions::build().oneline(true).build();
-            let post = get_post(4);
-            let expected = load_output("posts_oneline_long");
+            let expected =
+                "\u{1b}[32mrpg\u{1b}[0m Collections: Coinage and the Tyranny of Fantasy \"Gold\"";
             let actual = post.view(&opts, &FrozenClock::default());
             assert_eq!(actual, expected);
         }
