@@ -1,6 +1,7 @@
 pub mod cli;
 pub mod client;
 pub mod clock;
+pub mod conf;
 pub mod count;
 pub mod filter;
 pub mod service;

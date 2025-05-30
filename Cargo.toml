@@ -21,4 +21,5 @@ textwrap = { version = "0.16.2", features = ["terminal_size"] }
 [dev-dependencies]
 pretty_assertions = "1.4.1"
 regex = "1.11.1"
+temp-env = "0.3.6"
 uuid = { version = "1.16.0", features = ["v4"] }

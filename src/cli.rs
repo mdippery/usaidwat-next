@@ -2,6 +2,7 @@
 
 use crate::client::Redditor;
 use crate::clock::SystemClock;
+use crate::conf;
 use crate::count::{SortAlgorithm, SubredditCounter};
 use crate::filter::Searchable;
 use crate::service::RedditService;
@@ -9,8 +10,6 @@ use crate::thing::Comment;
 use crate::view::{ViewOptions, Viewable};
 use clap::{Args, Parser, Subcommand, ValueEnum};
 use pager::Pager;
-use std::env;
-use std::ffi::OsString;
 
 /// Program configuration.
 #[derive(Debug, Parser)]
@@ -178,60 +177,6 @@ impl Runner {
         &self.user
     }
 
-    // I'm not sure all of this logic really makes sense -- some of it may be
-    // specific to my own personal preferences -- but let's use this until
-    // someone complains.
-    //
-    // In the Ruby tool, I do, in fact, force "RS" if --oneline is selected,
-    // similarly to what I do here, so perhaps the logic following the
-    // retrieval of $LESS should simply be
-    //
-    //     let less = if *oneline { "RS" } else { less };
-    //
-    // However, since I send ANSI color codes whenever we are hooked up to a
-    // tty, I definitely want "R" to be included, so if I instead respect
-    // the user's possible absence of "R", I should make sure I only send
-    // ANSI color codes when "R" is included in $LESS.
-    //
-    // Specifically, the Ruby tool includes this code (spread around the
-    // codebase, but listed here contiguously for clarity):
-    //
-    //    ENV['LESS'] = 'RS' if options[:oneline]
-    //    ENV['LESS'] = 'FSRX' unless ENV['LESS']
-    //
-    // Oy vey.
-    //
-    // Also, I should test this with various values of $LESS. For example,
-    // my $LESS is simply set to "R", but I should test output when the
-    // default option of "FSRX is used.
-    // TODO: Refactor this into testable function.
-    fn pager_env(&self, oneline: &bool) -> impl IntoIterator<Item = impl Into<OsString>> {
-        // Get the value of $LESS, defaulting to "FSRX" if $LESS is unset.
-        let less = env::var_os("LESS").unwrap_or(
-            "FSRX"
-                .parse()
-                .expect("could not parse 'FSRX' into OsString"),
-        );
-        let less = less.to_string_lossy();
-
-        // Always interpret ANSI color escape sequences.
-        let less = if !less.contains("R") {
-            less + "R"
-        } else {
-            less
-        };
-
-        // When printing to one line, really print to one line, and force scrolling
-        // to right if lines are too long.
-        let less = if *oneline && !less.contains("S") {
-            less + "S"
-        } else {
-            less
-        };
-
-        vec![format!("LESS={less}")]
-    }
-
     /// Run the command-line program using its stored configuration options.
     pub fn run(&self) {
         match &self.config.command {
@@ -295,7 +240,7 @@ impl Runner {
             .collect::<Vec<_>>()
             .join(joiner);
 
-        Pager::new().pager_envs(self.pager_env(oneline)).setup();
+        Pager::new().pager_envs(conf::pager_env(oneline)).setup();
         // TODO: Only output color if hooked up to tty
         // TODO: Highlight matches in output, if grep is specified
         println!("{}", output);
@@ -322,7 +267,7 @@ impl Runner {
             .collect::<Vec<_>>()
             .join(joiner);
 
-        Pager::new().pager_envs(self.pager_env(oneline)).setup();
+        Pager::new().pager_envs(conf::pager_env(oneline)).setup();
         // TODO: Only output color if hooked up to tty
         println!("{}", output);
     }
