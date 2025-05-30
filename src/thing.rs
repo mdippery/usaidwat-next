@@ -8,7 +8,8 @@
 use crate::clock::{DateTime, HasAge, Local, Utc};
 use crate::count::HasSubreddit;
 use crate::filter::Searchable;
-use htmlentity::entity::{self, ICodedDataTrait};
+use crate::text;
+use crate::text::convert_html_entities;
 use serde::de::Error;
 use serde::{Deserialize, Deserializer};
 use serde_json;
@@ -186,10 +187,7 @@ impl Comment {
     ///
     /// HTML entities in the title will be converted.
     pub fn link_title(&self) -> String {
-        let link_title = self.link_title.trim();
-        entity::decode(link_title.as_bytes())
-            .to_string()
-            .unwrap_or(link_title.to_string())
+        text::convert_html_entities(&self.link_title)
     }
 
     /// The comment's total score.
@@ -207,10 +205,7 @@ impl Comment {
     /// text. In other words, the text returned by this method is suitable
     /// for passing into a Markdown parser.
     pub fn body(&self) -> String {
-        let body = self.body.trim();
-        entity::decode(body.as_bytes())
-            .to_string()
-            .unwrap_or(body.to_string())
+        convert_html_entities(&self.body)
     }
 }
 
@@ -269,10 +264,7 @@ impl Submission {
 
     /// The submission's title.
     pub fn title(&self) -> String {
-        let title = self.title.trim();
-        entity::decode(title.as_bytes())
-            .to_string()
-            .unwrap_or(title.to_string())
+        text::convert_html_entities(&self.title)
     }
 
     /// The URL to which the submission points.
