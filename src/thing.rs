@@ -8,8 +8,7 @@
 use crate::clock::{DateTime, HasAge, Local, Utc};
 use crate::count::HasSubreddit;
 use crate::filter::Searchable;
-use crate::text;
-use crate::text::convert_html_entities;
+use crate::text::HtmlConvertible;
 use serde::de::Error;
 use serde::{Deserialize, Deserializer};
 use serde_json;
@@ -187,7 +186,7 @@ impl Comment {
     ///
     /// HTML entities in the title will be converted.
     pub fn link_title(&self) -> String {
-        text::convert_html_entities(&self.link_title)
+        self.link_title.convert_html_entities()
     }
 
     /// The comment's total score.
@@ -205,7 +204,7 @@ impl Comment {
     /// text. In other words, the text returned by this method is suitable
     /// for passing into a Markdown parser.
     pub fn body(&self) -> String {
-        convert_html_entities(&self.body)
+        self.body.convert_html_entities()
     }
 }
 
@@ -264,7 +263,7 @@ impl Submission {
 
     /// The submission's title.
     pub fn title(&self) -> String {
-        text::convert_html_entities(&self.title)
+        self.title.convert_html_entities()
     }
 
     /// The URL to which the submission points.
