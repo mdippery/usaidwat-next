@@ -7,17 +7,17 @@ pub fn load_data(file: &str) -> String {
     fs::read_to_string(format!("tests/data/{file}.json")).expect("could not find test data")
 }
 
-pub struct TestService {
-    suffix: &'static str,
+pub struct TestService<'a> {
+    suffix: &'a str,
 }
 
-impl TestService {
-    pub fn new(suffix: &'static str) -> Self {
+impl<'a> TestService<'a> {
+    pub fn new(suffix: &'a str) -> Self {
         Self { suffix }
     }
 }
 
-impl Service for TestService {
+impl<'a> Service for TestService<'a> {
     fn get(&self, uri: Uri) -> Option<RawResponse> {
         Some(fs::read_to_string(uri).expect("could not find test data"))
     }
