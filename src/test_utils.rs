@@ -24,7 +24,7 @@ impl Service for TestService {
 
     fn get_resource(&self, _username: &str, resource: &str) -> Option<JsonResponse> {
         let filename = format!("tests/data/{resource}_{}.json", self.suffix);
-        self.get(filename)
+        self.get(&filename)
     }
 
     fn user_agent(&self) -> String {

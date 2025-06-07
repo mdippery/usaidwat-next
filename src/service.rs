@@ -9,12 +9,12 @@ use reqwest::blocking::Client;
 use reqwest::header::{self, HeaderMap, HeaderValue};
 
 /// A URI.
-pub type Uri = String;
+pub type Uri<'a> = &'a str;
 
-/// An HTTP, which would represent any type of data: raw text, JSON, or other.
+/// An HTTP response, which would represent any type of data: raw text, JSON, or other.
 pub type RawResponse = String;
 
-/// A response containing JSON data.
+/// An HTTP response containing JSON data.
 pub type JsonResponse = String;
 
 /// A service for retrieving information for Reddit users.
@@ -100,7 +100,7 @@ impl Service for RedditService {
 
     fn get_resource(&self, username: &str, resource: &str) -> Option<JsonResponse> {
         let uri = self.uri(username, resource);
-        self.get(uri)
+        self.get(&uri)
     }
 }
 
