@@ -218,11 +218,10 @@ impl Runner {
     ) {
         // TODO: Filter by subreddit
 
-        let opts = ViewOptions::build()
+        let opts = ViewOptions::default()
             .oneline(*oneline)
             .raw(*raw)
-            .date_format(date_format.clone())
-            .build();
+            .date_format(date_format.clone());
         let n = limit
             .and_then(|n| Some(n as usize))
             .unwrap_or_else(|| self.user().comments().count());
@@ -258,7 +257,7 @@ impl Runner {
         //       Never did in the Ruby tool but it would be nice to do here.
         // TODO: Filter by subreddit
 
-        let opts = ViewOptions::build().oneline(*oneline).build();
+        let opts = ViewOptions::default().oneline(*oneline);
         let posts = self.user().submissions();
 
         let joiner = if *oneline { "\n" } else { "\n\n\n" };

@@ -12,6 +12,17 @@ use std::vec::IntoIter;
 use textwrap::{self, Options};
 
 /// View renderer options.
+///
+/// `ViewOptions` follows a builder pattern, allowing callers to incrementally
+/// build up a set of options from a default set, starting with [`ViewOptions::default()`].
+///
+/// # Examples
+///
+/// ```
+/// use usaidwat::cli::DateFormat;
+/// use usaidwat::view::ViewOptions;
+/// let opts = ViewOptions::default().date_format(DateFormat::Relative).raw(true);
+/// ```
 #[derive(Debug, Default)]
 pub struct ViewOptions {
     date_format: DateFormat,
@@ -21,57 +32,21 @@ pub struct ViewOptions {
 }
 
 impl ViewOptions {
-    /// Incrementally builds a new set of view options.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use usaidwat::view::ViewOptions;
-    /// let opts = ViewOptions::build().oneline(true).raw(false).build();
-    /// ```
-    pub fn build() -> ViewOptionsBuilder {
-        ViewOptionsBuilder::default()
-    }
-}
-
-/// A builder for view options.
-///
-/// You probably don't want to use this directly; call [`ViewOptions::build()`]
-/// and construct it incrementally instead.
-#[derive(Debug, Default)]
-#[must_use]
-pub struct ViewOptionsBuilder {
-    date_format: DateFormat,
-    oneline: bool,
-    raw: bool,
-}
-
-impl ViewOptionsBuilder {
     /// Sets the date format option to relative or absolute.
-    pub fn date_format(mut self, date_format: DateFormat) -> Self {
-        self.date_format = date_format;
-        self
+    pub fn date_format(self, date_format: DateFormat) -> Self {
+        Self {
+            date_format,
+            ..self
+        }
     }
 
     /// Sets the "oneline" option to true or false.
-    pub fn oneline(mut self, oneline: bool) -> Self {
-        self.oneline = oneline;
-        self
+    pub fn oneline(self, oneline: bool) -> Self {
+        Self { oneline, ..self }
     }
 
-    /// Sets the "raw" option to true or false.
-    pub fn raw(mut self, raw: bool) -> Self {
-        self.raw = raw;
-        self
-    }
-
-    /// Finalizes the [`ViewOptions`].
-    pub fn build(self) -> ViewOptions {
-        ViewOptions {
-            date_format: self.date_format,
-            oneline: self.oneline,
-            raw: self.raw,
-        }
+    pub fn raw(self, raw: bool) -> Self {
+        Self { raw, ..self }
     }
 }
 
@@ -303,7 +278,7 @@ mod tests {
 
         #[test]
         fn it_returns_custom_options() {
-            let opts = ViewOptions::build()
+            let opts = ViewOptions::default()
                 .oneline(true)
                 .raw(true)
                 .date_format(DateFormat::Absolute);
@@ -314,7 +289,7 @@ mod tests {
 
         #[test]
         fn it_returns_custom_options_with_only_oneline() {
-            let opts = ViewOptions::build().oneline(true);
+            let opts = ViewOptions::default().oneline(true);
             assert_eq!(opts.date_format, DateFormat::default());
             assert!(opts.oneline);
             assert!(!opts.raw);
@@ -322,7 +297,7 @@ mod tests {
 
         #[test]
         fn it_returns_custom_options_with_only_raw() {
-            let opts = ViewOptions::build().raw(true);
+            let opts = ViewOptions::default().raw(true);
             assert_eq!(opts.date_format, DateFormat::default());
             assert!(!opts.oneline);
             assert!(opts.raw);
@@ -397,7 +372,7 @@ mod tests {
         #[test]
         #[ignore]
         fn it_formats_a_comment_with_a_raw_body() {
-            let opts = ViewOptions::build().raw(true).build();
+            let opts = ViewOptions::default().raw(true);
             let actual = get_comment(2).view(&opts, &FrozenClock::default());
             let expected = load_output("comments_raw_body");
             assert_eq!(actual, expected);
@@ -405,9 +380,7 @@ mod tests {
 
         #[test]
         fn it_formats_a_comment_with_relative_dates() {
-            let opts = ViewOptions::build()
-                .date_format(DateFormat::Relative)
-                .build();
+            let opts = ViewOptions::default().date_format(DateFormat::Relative);
             let actual = get_comment(0).view(&opts, &FrozenClock::default());
             let expected = load_output("comments_relative_dates");
             assert_eq!(actual, expected);
@@ -415,9 +388,7 @@ mod tests {
 
         #[test]
         fn it_formats_a_comment_with_absolute_dates() {
-            let opts = ViewOptions::build()
-                .date_format(DateFormat::Absolute)
-                .build();
+            let opts = ViewOptions::default().date_format(DateFormat::Absolute);
             let actual = get_comment(0).view(&opts, &FrozenClock::default());
             let expected = load_output("comments_absolute_dates");
             assert_eq!(actual, expected);
@@ -425,7 +396,7 @@ mod tests {
 
         #[test]
         fn it_formats_a_comment_on_oneline() {
-            let opts = ViewOptions::build().oneline(true).build();
+            let opts = ViewOptions::default().oneline(true);
             let actual = get_comment(0).view(&opts, &FrozenClock::default());
             let expected = "\u{1b}[32mcyphersystem\u{1b}[0m Cypher System & ChatGPT";
             assert_eq!(actual, expected);
@@ -439,7 +410,7 @@ mod tests {
         // eventually.
         #[ignore]
         fn it_formats_a_comment_on_oneline_without_color() {
-            let opts = ViewOptions::build().oneline(true).build();
+            let opts = ViewOptions::default().oneline(true);
             let expected = "cyphersystem Cypher System & ChatGPT";
             let actual = with_no_color(|| get_comment(0).view(&opts, &FrozenClock::default()));
             assert_eq!(actual, expected);
@@ -499,7 +470,7 @@ mod tests {
 
         #[test]
         fn it_formats_a_post_on_oneline() {
-            let opts = ViewOptions::build().oneline(true).build();
+            let opts = ViewOptions::default().oneline(true);
             let post = get_post(0);
             let expected =
                 "\u{1b}[32mrpg\u{1b}[0m Collections: Coinage and the Tyranny of Fantasy \"Gold\"";
