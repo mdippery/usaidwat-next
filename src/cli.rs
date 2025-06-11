@@ -9,15 +9,26 @@ use crate::service::RedditService;
 use crate::thing::Comment;
 use crate::view::{ViewOptions, Viewable};
 use clap::{Args, Parser, Subcommand, ValueEnum};
+use clap_verbosity_flag::Verbosity;
 use pager::Pager;
 
 /// Program configuration.
 #[derive(Debug, Parser)]
 #[command(version)]
-#[command(about = "Answers the age-old question, \"Where does a Redditor comment the most?\"", long_about = None)]
+#[command(about = "Answers the age-old question, \"Where does a Redditor comment the most?\"", long_about = None
+)]
 pub struct Config {
+    #[command(flatten)]
+    verbosity: Verbosity,
+
     #[command(subcommand)]
     command: Command,
+}
+
+impl Config {
+    pub fn verbosity(&self) -> Verbosity {
+        self.verbosity
+    }
 }
 
 #[derive(Debug, Subcommand)]

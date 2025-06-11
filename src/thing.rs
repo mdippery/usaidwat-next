@@ -9,6 +9,7 @@ use crate::clock::{DateTime, HasAge, Local, Utc};
 use crate::count::HasSubreddit;
 use crate::filter::Searchable;
 use crate::text;
+use log::error;
 use serde::de::Error;
 use serde::{Deserialize, Deserializer};
 
@@ -118,7 +119,7 @@ impl About {
     /// This method is generally invoked by `User`, not directly.
     pub fn parse(user_data: &str) -> Option<Self> {
         serde_json::from_str(user_data)
-            .inspect_err(|err| eprintln!("failed to parse user data: {err:?}"))
+            .inspect_err(|err| error!("failed to parse user data: {err:?}"))
             .ok()
             .map(|wrapper: AboutResponse| wrapper.data)
     }
@@ -148,7 +149,7 @@ impl Comment {
     /// This method is generally invoked by `User`, not directly.
     pub fn parse(comment_data: &str) -> Option<Vec<Self>> {
         serde_json::from_str(comment_data)
-            .inspect_err(|err| eprintln!("failed to parse comment data: {err:?}"))
+            .inspect_err(|err| error!("failed to parse comment data: {err:?}"))
             .ok()
             .map(|comment_listing: ListingResponse<CommentResponse>| {
                 comment_listing
@@ -237,7 +238,7 @@ impl Submission {
     /// This method is generally invoked by `User`, not directly.
     pub fn parse(post_data: &str) -> Option<Vec<Self>> {
         serde_json::from_str(post_data)
-            .inspect_err(|err| eprintln!("failed to parse post data: {err:?}"))
+            .inspect_err(|err| error!("failed to parse post data: {err:?}"))
             .ok()
             .map(|comment_listing: ListingResponse<SubmissionResponse>| {
                 comment_listing
