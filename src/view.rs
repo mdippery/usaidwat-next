@@ -9,7 +9,6 @@ use chrono::Local;
 use colored::Colorize;
 use indoc::formatdoc;
 use std::vec::IntoIter;
-use textwrap::{self, Options};
 
 /// View renderer options.
 ///
@@ -89,8 +88,7 @@ impl Comment {
     fn view_full<C: Clock>(&self, opts: &ViewOptions, clock: &C) -> String {
         let age = self.format_date(opts, clock);
 
-        // TODO: Formatted as Markdown (wrap after formatting unless raw)
-        let body = self.wrapped_body();
+        let body = self.body();
 
         formatdoc! {"
             {}
@@ -127,14 +125,6 @@ impl Comment {
         // but I want to trim off the leading space.
         let time_part = time_part.trim();
         format!("{date_part}, {time_part}")
-    }
-
-    fn wrapped_body(&self) -> String {
-        let body = self.body();
-        // Subtract 1 from terminal width because it looks nicer if the text
-        // doesn't run right up to the edge.
-        let opts = Options::new(textwrap::termwidth() - 1);
-        textwrap::fill(&body, opts)
     }
 }
 
@@ -246,15 +236,6 @@ impl Viewable for Timeline {
 
 #[cfg(test)]
 mod tests {
-    fn load_output(filename: &str) -> String {
-        let filename = format!("tests/output/{filename}.out");
-        String::from(
-            std::fs::read_to_string(&filename)
-                .expect(&format!("could not load test data from {filename}"))
-                .trim_end(),
-        )
-    }
-
     fn with_no_color<F, T>(f: F) -> T
     where
         F: FnOnce() -> T,
@@ -306,9 +287,8 @@ mod tests {
 
     mod format_info {
         use super::super::*;
-        use super::load_output;
         use crate::client::Redditor;
-        use crate::test_utils::FrozenClock;
+        use crate::test_utils::{FrozenClock, load_output};
 
         #[test]
         fn it_formats_a_user() {
@@ -321,9 +301,9 @@ mod tests {
 
     mod format_comment {
         use super::super::*;
-        use super::{load_output, with_no_color};
+        use super::with_no_color;
         use crate::client::Redditor;
-        use crate::test_utils::FrozenClock;
+        use crate::test_utils::{FrozenClock, do_logging, load_output};
         use pretty_assertions::assert_eq;
 
         // TODO: Test with and without color when possible
@@ -356,11 +336,12 @@ mod tests {
 
         #[test]
         fn it_formats_a_comment_with_no_markdown_markup() {
+            do_logging();
             let opts = ViewOptions::default();
             let comment = get_comment(0);
             let actual = comment.view(&opts, &FrozenClock::default());
             let expected = load_output("comments_no_markdown");
-            assert_eq!(actual, expected);
+            assert_eq!(actual, expected, "\nleft:\n{actual}\n\nright:\n{expected}");
         }
 
         #[test]
@@ -380,18 +361,20 @@ mod tests {
 
         #[test]
         fn it_formats_a_comment_with_relative_dates() {
+            do_logging();
             let opts = ViewOptions::default().date_format(DateFormat::Relative);
             let actual = get_comment(0).view(&opts, &FrozenClock::default());
             let expected = load_output("comments_relative_dates");
-            assert_eq!(actual, expected);
+            assert_eq!(actual, expected, "\nleft:\n{actual}\n\nright:\n{expected}");
         }
 
         #[test]
         fn it_formats_a_comment_with_absolute_dates() {
+            do_logging();
             let opts = ViewOptions::default().date_format(DateFormat::Absolute);
             let actual = get_comment(0).view(&opts, &FrozenClock::default());
             let expected = load_output("comments_absolute_dates");
-            assert_eq!(actual, expected);
+            assert_eq!(actual, expected, "\nleft:\n{actual}\n\nright:\n{expected}");
         }
 
         #[test]
@@ -419,9 +402,8 @@ mod tests {
 
     mod format_submission {
         use super::super::*;
-        use super::load_output;
         use crate::client::Redditor;
-        use crate::test_utils::FrozenClock;
+        use crate::test_utils::{FrozenClock, load_output};
         use crate::thing::Submission;
         use pretty_assertions::assert_eq;
 
@@ -481,10 +463,9 @@ mod tests {
 
     mod format_tallies {
         use super::super::*;
-        use super::load_output;
         use crate::client::Redditor;
         use crate::count::{SortAlgorithm, SubredditCounter};
-        use crate::test_utils::FrozenClock;
+        use crate::test_utils::{FrozenClock, load_output};
         use pretty_assertions::assert_eq;
 
         #[test]
@@ -548,9 +529,8 @@ mod tests {
 
     mod format_timeline {
         use super::super::*;
-        use super::load_output;
         use crate::client::Redditor;
-        use crate::test_utils::FrozenClock;
+        use crate::test_utils::{FrozenClock, load_output};
 
         #[test]
         fn it_formats_a_timeline() {

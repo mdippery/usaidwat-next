@@ -1,0 +1,29 @@
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean lacinia velit sit amet dolor interdum, at rutrum tellus auctor. Cras vitae hendrerit lectus, a maximus metus. Nam quis volutpat arcu. Duis eleifend ante diam, sit amet condimentum odio aliquet vel. Cras maximus accumsan turpis, vel imperdiet turpis laoreet eget. Integer elementum turpis eu massa aliquam lacinia. Donec nec scelerisque massa. Suspendisse vel turpis quis felis hendrerit gravida. Nam ac luctus lectus. Nam consequat, massa eu ultricies vulputate, urna leo elementum felis, eget maximus nulla arcu id eros. Curabitur consequat dolor eu ex vulputate elementum. Nullam iaculis dictum libero sit amet suscipit. Nam ac bibendum nisi. Donec in nibh vitae risus molestie fringilla.
+
+Nullam condimentum est vel leo gravida, id ornare tellus eleifend. Sed fermentum, quam sed iaculis congue, orci lacus finibus ipsum, sit amet cursus mi sem ut lacus. Nulla eget diam ex. In rhoncus maximus sem, eget placerat eros molestie at. Curabitur placerat lectus pellentesque, eleifend erat porta, posuere tellus. Etiam facilisis fringilla quam sit amet faucibus. Vivamus pretium lectus eget lectus molestie, sit amet elementum metus tempor. Phasellus finibus risus eget rutrum suscipit. Quisque feugiat rhoncus est et dictum. Quisque auctor malesuada ornare. Mauris ipsum felis, bibendum sit amet dui eget, volutpat tincidunt orci. Sed dui tortor, laoreet sed lorem sit amet, vestibulum maximus eros. Nunc pulvinar congue mollis. In blandit feugiat faucibus. Praesent vel convallis nulla.
+
+    impl MarkdownParser {
+        pub fn new(textwidth: usize) -> Self {
+            MarkdownParser { textwidth }
+        }
+    
+        /// Converts Markdown markup into a formatted string.
+        pub fn parse(&self, markup: &str) -> String {
+            let tree = markdown::to_mdast(markup, &self.parse_options()).unwrap();
+            let mut visitor = MarkdownVisitor::new(self.textwidth);
+            tree.accept(&mut visitor);
+            visitor.text()
+        }
+    
+        fn parse_options(&self) -> ParseOptions {
+            ParseOptions {
+                constructs: Constructs {
+                    autolink: false,
+                    ..Constructs::default()
+                },
+                ..ParseOptions::default()
+            }
+        }
+    }
+
+Nam euismod, ex nec condimentum rhoncus, elit libero suscipit nulla, eget convallis mi erat nec ante. Mauris lobortis lectus nec massa ullamcorper euismod. Aliquam tincidunt, ipsum sed dictum hendrerit, lorem arcu accumsan massa, sollicitudin tincidunt tellus ex at quam. Aliquam erat volutpat. Praesent in hendrerit nisl. In sed est ultricies, cursus erat sed, ullamcorper lectus. Etiam feugiat dui eget odio facilisis, id volutpat dui posuere. Proin lobortis ultricies ultrices. Curabitur at ante dignissim, vulputate ipsum id, facilisis erat. Etiam vestibulum a risus sit amet pellentesque. In ornare aliquam risus non suscipit. Vestibulum sed facilisis nisl. Ut justo enim, ullamcorper et maximus vitae, varius at felis.

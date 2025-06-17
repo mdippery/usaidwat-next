@@ -3,8 +3,21 @@ use crate::clock::{Clock, DateTime, Utc};
 use crate::service::{JsonResponse, RawResponse, Service, Uri};
 use std::fs;
 
+pub fn do_logging() {
+    let _ = env_logger::builder().is_test(true).try_init();
+}
+
 pub fn load_data(file: &str) -> String {
     fs::read_to_string(format!("tests/data/{file}.json")).expect("could not find test data")
+}
+
+pub fn load_output(filename: &str) -> String {
+    let filename = format!("tests/output/{filename}.out");
+    String::from(
+        fs::read_to_string(&filename)
+            .expect(&format!("could not load test data from {filename}"))
+            .trim_end(),
+    )
 }
 
 pub struct TestService<'a> {

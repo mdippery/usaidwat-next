@@ -8,7 +8,7 @@
 use crate::clock::{DateTime, HasAge, Local, Utc};
 use crate::count::HasSubreddit;
 use crate::filter::Searchable;
-use crate::text;
+use crate::{markdown, text};
 use log::error;
 use serde::de::Error;
 use serde::{Deserialize, Deserializer};
@@ -194,7 +194,16 @@ impl Comment {
         self.score
     }
 
-    /// The comment body, as raw Markdown text.
+    /// The comment body, as formatted Markdown text.
+    ///
+    /// The formatted text converts Markdown markup into terminal escape
+    /// codes for elegant display in a terminal.
+    pub fn body(&self) -> String {
+        markdown::parse(&self.body, textwrap::termwidth())
+    }
+
+    /// The comment body, as raw Markdown text, with HTML entities converted
+    /// to their respective characters.
     ///
     /// Reddit converts some raw Markdown characters to HTML entities;
     /// for example, `>` in raw Markdown markup will be returned from
@@ -203,7 +212,7 @@ impl Comment {
     /// characters, but it will not do any additional parsing of Markdown
     /// text. In other words, the text returned by this method is suitable
     /// for passing into a Markdown parser.
-    pub fn body(&self) -> String {
+    pub fn raw_body(&self) -> String {
         text::convert_html_entities(&self.body)
     }
 }
@@ -379,7 +388,7 @@ mod tests {
 
     mod comments {
         use super::super::*;
-        use crate::test_utils::load_data;
+        use crate::test_utils::{load_data, load_output};
         use pretty_assertions::assert_eq;
 
         #[test]
@@ -485,45 +494,20 @@ mod tests {
 
         #[test]
         fn it_returns_its_body() {
-            let expected_body = "Honestly, min/maxing and system mastery is a big part of the \
-                Pathfinder community. It's a fairly crunchy system that draws in the sort of \
-                players who really like finding ways to exploit the rules. Supposedly some groups \
-                are more focused on roleplaying, but I have yet to meet a PF2 player in real life \
-                who gives a shit about pesky, whimsical things like _story_. If that's not your \
-                thing, you probably won't see eye to eye with the Pathfinder players you meet.\
-                \n\nI'm in a slightly similar boat right now: I don't care that much about \
-                min/maxing, but I put up with my Pathfinder friends because I really like our \
-                group and I like them as people well enough.";
+            let expected = load_output("comments_body");
             let comments = Comment::parse(&load_data("comments_mipadi")).unwrap();
             let comment = &comments[9];
-            assert_eq!(comment.body(), expected_body);
+            let actual = comment.body();
+            assert_eq!(actual, expected, "\nleft:\n{actual}\n\nright:\n{expected}");
         }
 
         #[test]
         fn it_converts_html_entities_in_its_body() {
-            let expected_body = "> I also learned that I don’t really care about the incredibly \
-                tight kind of balance Pathfinder 2e offers. It made us quite a bit more worried \
-                about breaking the game when we wanted to change something and it felt like a lot \
-                of the wacky, creative solutions possible in other games were sacrificed for \
-                balance, which wasn’t a tradeoff we were happy with.\
-                \n\nOn paper I've always thought that I like the tight balance of games like \
-                Pathfinder. But after playing Pathfinder for a while, I've come to feel that \
-                RPGs are fun when they have a bit of swinginess. The best moments in my 25 \
-                years of playing RPGs have occurred when someone pulled off an amazing crit, or \
-                rolled a natural 1 when they absolutely had to hit the enemy, or failed a save \
-                they had a 90% of passing. Those are the times when the game goes in an \
-                interesting, fun, memorable direction (even if it does occasionally lead to \
-                some cheap deaths).\
-                \n\nConversely, Pathfinder plays like a board game. And don't get me wrong, I \
-                love board games, too, but RPGs—even Pathfinder—rarely have enough depth to be an \
-                interesting board game, and so they just play out tediously and predictably. My \
-                Pathfinder group is _so good_ at Pathfinder, we've mastered the system, and as \
-                a consequence, the game is really stale and unchallenging.\
-                \n\n(I also have other problems with Pathfinder, like the fact that there is \
-                simply way too much shit to keep track of…but I digress.)";
+            let expected = load_output("comments_html_entities");
             let comments = Comment::parse(&load_data("comments_mipadi")).unwrap();
             let comment = &comments[3];
-            assert_eq!(comment.body(), expected_body);
+            let actual = comment.body();
+            assert_eq!(actual, expected, "\nleft:\n{actual}\n\nright:\n{expected}");
         }
 
         #[test]
