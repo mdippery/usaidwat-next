@@ -174,15 +174,20 @@ pub struct Runner {
 impl Runner {
     /// Create a new program runner using the given `config`.
     ///
-    /// # Panics
-    ///
-    /// If the user specified in `config.command` does not exist.
-    pub fn new(config: Config) -> Runner {
+    /// Returns an error with a helpful message if the user does not exist.
+    pub fn new(config: Config) -> Result<Runner, String> {
         let username = config.command.username();
-        let user = Redditor::new(username.to_string(), RedditService::new())
-            // TODO: Just show message and exit non-zero instead of panicking
-            .expect(&format!("no such user: {username}"));
-        Runner { config, user }
+
+        // TODO: Redditor::new() should return a Result instead of an Option.
+        // Then Redditor::new() can be responsible for supplying an error
+        // message, and we can just use the ? operator here to propagate
+        // the error.
+        let user = Redditor::new(username.to_string(), RedditService::new());
+        if let Some(user) = user {
+            Ok(Runner { config, user })
+        } else {
+            Err(format!("no such user: {username}"))
+        }
     }
 
     fn user(&self) -> &Redditor {
