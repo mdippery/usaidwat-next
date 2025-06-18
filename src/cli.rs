@@ -227,8 +227,6 @@ impl Runner {
         oneline: &bool,
         raw: &bool,
     ) {
-        // TODO: Filter by subreddit
-
         let opts = ViewOptions::default()
             .oneline(*oneline)
             .raw(*raw)
@@ -252,7 +250,6 @@ impl Runner {
             .join(joiner);
 
         Pager::new().pager_envs(conf::pager_env(oneline)).setup();
-        // TODO: Highlight matches in output, if grep is specified
         println!("{}", output);
     }
 
@@ -264,10 +261,6 @@ impl Runner {
     }
 
     fn run_posts_log(&self, oneline: &bool) {
-        // TODO: Support absolute dates
-        //       Never did in the Ruby tool but it would be nice to do here.
-        // TODO: Filter by subreddit
-
         let opts = ViewOptions::default().oneline(*oneline);
         let posts = self.user().submissions();
 

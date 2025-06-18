@@ -12,10 +12,6 @@ pub trait Searchable {
     /// `pattern` is a fixed string; regular expression matches are not
     /// yet supported.
     fn matches(&self, pattern: &str) -> bool {
-        // TODO: pattern should be a case-insensitive regex
-        //       (or rather, that's how it is in the current Ruby tool,
-        //       but I'm actually not convinced that we should search
-        //       case-insensitively with a regex)
         self.search_text()
             .to_lowercase()
             .matches(&pattern.to_lowercase())
