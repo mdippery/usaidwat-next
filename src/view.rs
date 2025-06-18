@@ -88,7 +88,11 @@ impl Comment {
     fn view_full<C: Clock>(&self, opts: &ViewOptions, clock: &C) -> String {
         let age = self.format_date(opts, clock);
 
-        let body = self.body();
+        let body = if opts.raw {
+            self.raw_body()
+        } else {
+            self.body()
+        };
 
         formatdoc! {"
             {}
@@ -323,9 +327,12 @@ mod tests {
         }
 
         #[test]
-        #[ignore]
         fn it_wraps_raw_text() {
-            todo!("need to test");
+            let opts = ViewOptions::default().raw(true);
+            let comment = get_comment(1);
+            let actual = comment.view(&opts, &FrozenClock::default());
+            let expected = load_output("comments_raw_body");
+            assert_eq!(actual, expected, "\nleft:\n{actual}\n\nright:\n{expected}");
         }
 
         #[test]

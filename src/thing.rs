@@ -213,7 +213,10 @@ impl Comment {
     /// text. In other words, the text returned by this method is suitable
     /// for passing into a Markdown parser.
     pub fn raw_body(&self) -> String {
-        text::convert_html_entities(&self.body)
+        textwrap::fill(
+            &text::convert_html_entities(&self.body),
+            textwrap::termwidth(),
+        )
     }
 }
 
