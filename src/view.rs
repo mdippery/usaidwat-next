@@ -327,7 +327,7 @@ mod tests {
         }
 
         #[test]
-        fn it_wraps_raw_text() {
+        fn it_formats_a_comment_with_a_raw_body() {
             let opts = ViewOptions::default().raw(true);
             let comment = get_comment(1);
             let actual = comment.view(&opts, &FrozenClock::default());
@@ -336,9 +336,12 @@ mod tests {
         }
 
         #[test]
-        #[ignore]
-        fn it_wraps_formatted_markdown_text() {
-            todo!("need to test");
+        fn it_formats_a_comment_with_markdown_markup() {
+            let opts = ViewOptions::default();
+            let comment = get_comment(3);
+            let actual = comment.view(&opts, &FrozenClock::default());
+            let expected = load_output("comments_markdown_body");
+            assert_eq!(actual, expected, "\nleft:\n{actual}\n\nright:\n{expected}");
         }
 
         #[test]
@@ -349,21 +352,6 @@ mod tests {
             let actual = comment.view(&opts, &FrozenClock::default());
             let expected = load_output("comments_no_markdown");
             assert_eq!(actual, expected, "\nleft:\n{actual}\n\nright:\n{expected}");
-        }
-
-        #[test]
-        #[ignore]
-        fn it_formats_a_comment_with_markdown_markup() {
-            todo!("format markdown and test!");
-        }
-
-        #[test]
-        #[ignore]
-        fn it_formats_a_comment_with_a_raw_body() {
-            let opts = ViewOptions::default().raw(true);
-            let actual = get_comment(2).view(&opts, &FrozenClock::default());
-            let expected = load_output("comments_raw_body");
-            assert_eq!(actual, expected);
         }
 
         #[test]
