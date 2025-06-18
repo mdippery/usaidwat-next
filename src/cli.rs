@@ -318,8 +318,6 @@ impl Runner {
         //       into testable method, maybe Timeline::view(), although I'm
         //       not sure the logic is appropriate there, either.
 
-        // TODO: Print in color with intensity proportional to number of comments
-
         if self.user().has_comments() {
             println!(
                 "{}",
