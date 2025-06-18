@@ -14,6 +14,6 @@ fn main() {
         .init();
     match Runner::new(config) {
         Ok(runner) => runner.run(),
-        Err(message) => die(1, &message),
+        Err(message) => die(67, &message),
     }
 }
