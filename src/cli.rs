@@ -201,7 +201,7 @@ impl Runner {
                 raw,
                 ..
             } => {
-                let date_format = date.as_ref().unwrap_or(&DateFormat::Absolute);
+                let date_format = date.as_ref().unwrap_or(&DateFormat::Relative);
                 self.run_log(date_format, grep, limit, oneline, raw);
             }
             Command::Posts(subconfig) => self.run_posts(subconfig),
