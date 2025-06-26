@@ -12,12 +12,17 @@ use htmlentity::entity::{self, ICodedDataTrait};
 ///
 /// # Examples
 ///
+/// `convert_html_entities` will convert HTML entities into their respective
+/// single-character equivalents:
+///
 /// ```
 /// use usaidwat::text::convert_html_entities;
 /// let raw = "&lt;This &amp; That&gt;";
 /// let converted = convert_html_entities(raw);
 /// assert_eq!(converted, "<This & That>");
 /// ```
+///
+/// It will also remove leading and trailing whitespace:
 ///
 /// ```
 /// use usaidwat::text::convert_html_entities;
@@ -26,12 +31,16 @@ use htmlentity::entity::{self, ICodedDataTrait};
 /// assert_eq!(converted, "<This & That>");
 /// ```
 ///
+/// It won't change characters that are not HTML entities:
+///
 /// ```
 /// use usaidwat::text::convert_html_entities;
 /// let raw = "A Plaintext Post";
 /// let converted = convert_html_entities(raw);
 /// assert_eq!(converted, raw);
 /// ```
+///
+/// It will even handle empty strings:
 ///
 /// ```
 /// use usaidwat::text::convert_html_entities;
