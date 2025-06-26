@@ -235,6 +235,7 @@ impl Runner {
         let opts = ViewOptions::default()
             .oneline(*oneline)
             .raw(*raw)
+            .grep(grep.clone())
             .date_format(date_format.clone());
         let n = limit
             .and_then(|n| Some(n as usize))

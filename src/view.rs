@@ -26,6 +26,7 @@ use std::vec::IntoIter;
 pub struct ViewOptions {
     date_format: DateFormat,
     oneline: bool,
+    grep: Option<String>,
     #[allow(dead_code)] // This will be used eventually
     raw: bool,
 }
@@ -44,6 +45,12 @@ impl ViewOptions {
         Self { oneline, ..self }
     }
 
+    /// Sets the "grep" option.
+    pub fn grep(self, grep: Option<String>) -> Self {
+        Self { grep, ..self }
+    }
+
+    /// Sets the "raw" option to true or false.
     pub fn raw(self, raw: bool) -> Self {
         Self { raw, ..self }
     }
@@ -92,6 +99,14 @@ impl Comment {
             self.raw_body()
         } else {
             self.body()
+        };
+
+        let body = if !opts.raw
+            && let Some(grep) = &opts.grep
+        {
+            body.replace(grep, &format!("{}", grep.red()))
+        } else {
+            body
         };
 
         formatdoc! {"
@@ -377,6 +392,14 @@ mod tests {
             let opts = ViewOptions::default().oneline(true);
             let actual = get_comment(0).view(&opts, &FrozenClock::default());
             let expected = "\u{1b}[32mcyphersystem\u{1b}[0m Cypher System & ChatGPT";
+            assert_eq!(actual, expected);
+        }
+
+        #[test]
+        fn it_formats_a_comment_with_grep() {
+            let opts = ViewOptions::default().grep(Some(String::from("Pathfinder")));
+            let actual = get_comment(3).view(&opts, &FrozenClock::default());
+            let expected = load_output("comments_markdown_body_grep");
             assert_eq!(actual, expected);
         }
 
