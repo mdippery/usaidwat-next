@@ -1,5 +1,6 @@
 //! Drives the command-line program.
 
+pub use crate::client::Error;
 use crate::client::Redditor;
 use crate::clock::SystemClock;
 use crate::conf;
@@ -28,6 +29,10 @@ pub struct Config {
 impl Config {
     pub fn verbosity(&self) -> Verbosity {
         self.verbosity
+    }
+
+    pub fn username(&self) -> String {
+        String::from(self.command.username())
     }
 }
 
@@ -175,16 +180,10 @@ impl Runner {
     /// Create a new program runner using the given `config`.
     ///
     /// Returns an error with a helpful message if the user does not exist.
-    pub fn new(config: Config) -> Result<Runner, String> {
+    pub fn new(config: Config) -> Result<Runner, Error> {
         let username = config.command.username();
-
-        // TODO: Use the ? operator here to propagate the error.
-        let user = Redditor::new(username.to_string(), RedditService::new());
-        if let Ok(user) = user {
-            Ok(Runner { config, user })
-        } else {
-            Err(format!("no such user: {username}"))
-        }
+        let user = Redditor::new(username.to_string(), RedditService::new())?;
+        Ok(Self { config, user })
     }
 
     fn user(&self) -> &Redditor {
