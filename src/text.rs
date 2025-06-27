@@ -1,6 +1,7 @@
 //! Helpful utilities for working with text.
 
 use htmlentity::entity::{self, ICodedDataTrait};
+use regex::Regex;
 
 /// Converts HTML entities into their single-character equivalents.
 ///
@@ -53,4 +54,30 @@ pub fn convert_html_entities(text: &str) -> String {
     entity::decode(text.as_bytes())
         .to_string()
         .unwrap_or(text.to_string())
+}
+
+/// A string-like structure with parts that can be matched against a
+/// regex and replaced.
+pub trait RegexReplaceable {
+    /// Search the target for `needle` and replace matches with `repl`,
+    /// returning a new version of the target.
+    fn replace_all(&self, needle: &str, repl: &str) -> Self;
+}
+
+impl RegexReplaceable for String {
+    /// Search the string for `needle` and replace matches with `repl`,
+    /// returning a new string with the replaced text.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use usaidwat::text::RegexReplaceable;
+    /// let before = String::from("I HAAAAAAAATE REGEXES!");
+    /// let after = before.replace_all("(?i)ha+te", "LOVE");
+    /// assert_eq!(after, "I LOVE REGEXES!");
+    /// ```
+    fn replace_all(&self, needle: &str, repl: &str) -> Self {
+        let re = Regex::new(needle).unwrap();
+        re.replace_all(self, repl).to_string()
+    }
 }

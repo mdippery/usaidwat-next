@@ -4,6 +4,7 @@ use crate::cli::DateFormat;
 use crate::client::{Redditor, Timeline};
 use crate::clock::{Clock, HasAge, SystemClock};
 use crate::count::{HasSubreddit, SubredditCount};
+use crate::text::RegexReplaceable;
 use crate::thing::{Comment, Submission};
 use chrono::Local;
 use colored::Colorize;
@@ -104,7 +105,7 @@ impl Comment {
         let body = if !opts.raw
             && let Some(grep) = &opts.grep
         {
-            body.replace(grep, &format!("{}", grep.red()))
+            body.replace_all(&format!("(?i)(?<s>{grep})"), &format!("{}", "$s".red()))
         } else {
             body
         };
@@ -398,6 +399,14 @@ mod tests {
         #[test]
         fn it_formats_a_comment_with_grep() {
             let opts = ViewOptions::default().grep(Some(String::from("Pathfinder")));
+            let actual = get_comment(3).view(&opts, &FrozenClock::default());
+            let expected = load_output("comments_markdown_body_grep");
+            assert_eq!(actual, expected);
+        }
+
+        #[test]
+        fn it_formats_a_comment_with_grep_case_insensitively() {
+            let opts = ViewOptions::default().grep(Some(String::from("pathfinder")));
             let actual = get_comment(3).view(&opts, &FrozenClock::default());
             let expected = load_output("comments_markdown_body_grep");
             assert_eq!(actual, expected);
