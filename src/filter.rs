@@ -11,11 +11,12 @@ pub trait Searchable {
     ///
     /// The search is case-insensitive.
     ///
-    /// `pattern` is can be a regular expression.
+    /// `pattern` can be a regular expression.
     fn matches(&self, pattern: &str) -> bool {
-        // TODO: Handle errors
-        let re = Regex::new(&format!("(?i){pattern}")).unwrap();
-        re.is_match(&self.search_text())
+        match Regex::new(&format!("(?i){pattern}")) {
+            Ok(re) => re.is_match(&self.search_text()),
+            Err(_) => self.search_text().find(pattern).is_some(),
+        }
     }
 }
 
@@ -72,5 +73,11 @@ mod tests {
     fn it_matches_regexes_case_insensitively() {
         let t = TestSearchable::default();
         assert!(t.matches("Piper"));
+    }
+
+    #[test]
+    fn it_treats_invalid_regexes_as_a_fixed_string() {
+        let t = TestSearchable::default();
+        assert!(!t.matches("pic{?}kl**ed"));
     }
 }

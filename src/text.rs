@@ -70,14 +70,37 @@ impl RegexReplaceable for String {
     ///
     /// # Examples
     ///
+    /// `replace_all()` matches using a regex and returns a string with
+    /// replacements:
+    ///
     /// ```
     /// use usaidwat::text::RegexReplaceable;
     /// let before = String::from("I HAAAAAAAATE REGEXES!");
     /// let after = before.replace_all("(?i)ha+te", "LOVE");
     /// assert_eq!(after, "I LOVE REGEXES!");
     /// ```
+    ///
+    /// It works even if `needle` is not a valid regex:
+    ///
+    /// ```
+    /// use usaidwat::text::RegexReplaceable;
+    /// let before = String::from("I HAAAAAAAATE REGEXES!");
+    /// let after = before.replace_all("(?i)ha{?}te", "LOVE");
+    /// assert_eq!(after, before);
+    /// ```
+    ///
+    /// It can replace fixed strings, too:
+    ///
+    /// ```
+    /// use usaidwat::text::RegexReplaceable;
+    /// let before = String::from("I HAAAAAAAATE REGEXES!");
+    /// let after = before.replace_all("HAAAAAAAATE", "LOVE");
+    /// assert_eq!(after, "I LOVE REGEXES!");
+    /// ```
     fn replace_all(&self, needle: &str, repl: &str) -> Self {
-        let re = Regex::new(needle).unwrap();
-        re.replace_all(self, repl).to_string()
+        match Regex::new(needle) {
+            Ok(re) => re.replace_all(self, repl).to_string(),
+            Err(_) => self.replace(needle, repl),
+        }
     }
 }
