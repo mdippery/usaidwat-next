@@ -178,12 +178,9 @@ impl Runner {
     pub fn new(config: Config) -> Result<Runner, String> {
         let username = config.command.username();
 
-        // TODO: Redditor::new() should return a Result instead of an Option.
-        // Then Redditor::new() can be responsible for supplying an error
-        // message, and we can just use the ? operator here to propagate
-        // the error.
+        // TODO: Use the ? operator here to propagate the error.
         let user = Redditor::new(username.to_string(), RedditService::new());
-        if let Some(user) = user {
+        if let Ok(user) = user {
             Ok(Runner { config, user })
         } else {
             Err(format!("no such user: {username}"))

@@ -1,6 +1,6 @@
 use crate::client::Redditor;
 use crate::clock::{Clock, DateTime, Utc};
-use crate::service::{JsonResponse, RawResponse, Service, Uri};
+use crate::service::{Result, Service, Uri};
 use std::fs;
 
 pub fn do_logging() {
@@ -31,11 +31,11 @@ impl<'a> TestService<'a> {
 }
 
 impl<'a> Service for TestService<'a> {
-    fn get(&self, uri: Uri) -> Option<RawResponse> {
-        Some(fs::read_to_string(uri).expect("could not find test data"))
+    fn get(&self, uri: Uri) -> Result {
+        Ok(fs::read_to_string(uri).expect("could not find test data"))
     }
 
-    fn get_resource(&self, _username: &str, resource: &str) -> Option<JsonResponse> {
+    fn get_resource(&self, _username: &str, resource: &str) -> Result {
         let filename = format!("tests/data/{resource}_{}.json", self.suffix);
         self.get(&filename)
     }
@@ -89,6 +89,6 @@ impl Redditor {
 
     /// Returns a non-existent Redditor.
     pub fn test_none() -> Option<Redditor> {
-        Redditor::new(String::from("doesnotexist"), TestService::new("404"))
+        Redditor::new(String::from("doesnotexist"), TestService::new("404")).ok()
     }
 }

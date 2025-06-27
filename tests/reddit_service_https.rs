@@ -29,9 +29,9 @@ fn it_retrieves_posts() {
 }
 
 #[test]
-fn it_returns_none_for_invalid_users() {
+fn it_returns_an_error_for_invalid_users() {
     let service = RedditService::new();
     let user = Uuid::new_v4().to_string();
     let resp = service.get_resource(&user, "about");
-    assert!(resp.is_none(), "response was {resp:?}");
+    assert!(resp.is_err(), "response was {resp:?}");
 }

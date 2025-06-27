@@ -84,6 +84,7 @@ impl User {
     ///
     /// Obviously parsing can fail so this method returns an `Option`.
     pub fn parse(user_data: &str, comment_data: &str, post_data: &str) -> Option<Self> {
+        // TODO: Return Result instead of error
         let about = About::parse(user_data)?;
         let comments = Comment::parse(comment_data)?;
         let submissions = Submission::parse(post_data)?;

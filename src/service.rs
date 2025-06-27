@@ -4,18 +4,67 @@
 //! with the Reddit API over HTTPS, essentially a specialized HTTPS client
 //! specifically for Reddit.
 
+use std::fmt::Formatter;
 // TODO: Async, maybe
 use reqwest::blocking::Client;
 use reqwest::header::{self, HeaderMap, HeaderValue};
+use std::result;
 
 /// A URI.
 pub type Uri<'a> = &'a str;
 
-/// An HTTP response, which would represent any type of data: raw text, JSON, or other.
-pub type RawResponse = String;
+/// A service error.
+#[derive(Debug)]
+pub enum Error {
+    /// An error retrieving the body of a response.
+    Body(reqwest::Error),
 
-/// An HTTP response containing JSON data.
-pub type JsonResponse = String;
+    /// An error that occurred while making an HTTP request.
+    Request(reqwest::Error),
+
+    /// An unsuccessful HTTP status code in an HTTP response.
+    Http(reqwest::StatusCode),
+
+    /// A missing Content-Type header in a response.
+    MissingContentType,
+
+    /// An invalid Content-Type header.
+    InvalidContentType(header::ToStrError),
+
+    /// A Content-Type that is not understood by the service.
+    UnexpectedContentType(String),
+}
+
+impl std::fmt::Display for Error {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Error::Body(err) => write!(f, "Error retrieving body of HTTP response: {err}"),
+            Error::Request(err) => write!(f, "Error while making HTTP request: {err}"),
+            Error::Http(status) => write!(f, "Request returned HTTP {status}"),
+            Error::MissingContentType => write!(f, "Missing Content-Type header"),
+            Error::InvalidContentType(err) => write!(f, "Invalid Content-Type header value: {err}"),
+            Error::UnexpectedContentType(content_type) => {
+                write!(f, "Unexpected content type: {content_type}")
+            }
+        }
+    }
+}
+
+impl std::error::Error for Error {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        match self {
+            Error::Body(err) => Some(err),
+            Error::Request(err) => Some(err),
+            Error::Http(_) => None,
+            Error::MissingContentType => None,
+            Error::InvalidContentType(err) => Some(err),
+            Error::UnexpectedContentType(_) => None,
+        }
+    }
+}
+
+/// The result of an HTTP request.
+pub type Result = result::Result<String, Error>;
 
 /// A service for retrieving information for Reddit users.
 ///
@@ -24,11 +73,11 @@ pub type JsonResponse = String;
 /// and a mocked connector for testing purposes.
 pub trait Service {
     /// Performs a GET request to the given URI and returns the raw body.
-    fn get(&self, uri: Uri) -> Option<RawResponse>;
+    fn get(&self, uri: Uri) -> Result;
 
     /// Performs a GET request to the `resource` associated with the given
     /// `username` and returns it as a parsed JSON response.
-    fn get_resource(&self, username: &str, resource: &str) -> Option<JsonResponse>;
+    fn get_resource(&self, username: &str, resource: &str) -> Result;
 
     /// An appropriate user agent to use for HTTP requests.
     fn user_agent(&self) -> String {
@@ -69,25 +118,32 @@ impl RedditService {
 }
 
 impl Service for RedditService {
-    fn get(&self, uri: Uri) -> Option<RawResponse> {
+    fn get(&self, uri: Uri) -> Result {
         let client = Client::new();
-        // TODO: Maybe return Result instead of Option
-        let resp = client.get(uri).headers(self.headers()).send().ok()?;
+        let resp = client
+            .get(uri)
+            .headers(self.headers())
+            .send()
+            .map_err(Error::Request)?;
 
-        // TODO: Ugh, this is ugly -- clean it up!
         if !resp.status().is_success() {
-            None
+            Err(Error::Http(resp.status()))
         } else {
-            let content_type = resp.headers().get(header::CONTENT_TYPE)?.to_str().ok()?;
-            if (!content_type.starts_with("application/json")) {
-                None
+            let content_type = resp
+                .headers()
+                .get(header::CONTENT_TYPE)
+                .ok_or(Error::MissingContentType)?
+                .to_str()
+                .map_err(Error::InvalidContentType)?;
+            if !content_type.starts_with("application/json") {
+                Err(Error::UnexpectedContentType(content_type.to_string()))
             } else {
-                resp.text().ok()
+                resp.text().map_err(Error::Body)
             }
         }
     }
 
-    fn get_resource(&self, username: &str, resource: &str) -> Option<JsonResponse> {
+    fn get_resource(&self, username: &str, resource: &str) -> Result {
         let uri = self.uri(username, resource);
         self.get(&uri)
     }

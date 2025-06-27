@@ -1,11 +1,46 @@
 //! Clients for reading data from the Reddit API.
 
 use crate::clock::{DateTime, HasAge, Utc};
-use crate::service::Service;
+use crate::service::{self, Service};
 use crate::thing::{Comment, Submission, User};
 pub use chrono::Weekday;
 use chrono::{Datelike, Timelike};
 use std::fmt;
+use std::fmt::Formatter;
+
+/// A client error.
+#[derive(Debug)]
+pub enum Error {
+    /// An error from the underlying HTTP service.
+    Service(service::Error),
+
+    /// An error parsing data.
+    Parse,
+}
+
+impl From<service::Error> for Error {
+    fn from(error: service::Error) -> Self {
+        Error::Service(error)
+    }
+}
+
+impl fmt::Display for Error {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        match self {
+            Error::Service(err) => write!(f, "Service error: {err:?}"),
+            Error::Parse => write!(f, "Failed to parse user data"),
+        }
+    }
+}
+
+impl std::error::Error for Error {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        match self {
+            Error::Service(err) => Some(err),
+            Error::Parse => None,
+        }
+    }
+}
 
 /// Represents a Reddit user.
 pub struct Redditor {
@@ -30,13 +65,13 @@ impl Redditor {
     /// actual service implementation that will be used to retrieve
     /// information about the Redditor.
     ///
-    /// Returns `None` if data cannot be parsed for the given username.
-    pub fn new<T: Service>(username: String, service: T) -> Option<Self> {
+    /// Returns an [`Error`] if data cannot be parsed for the given username.
+    pub fn new<T: Service>(username: String, service: T) -> Result<Self, Error> {
         let user_data = service.get_resource(&username, "about")?;
         let comment_data = service.get_resource(&username, "comments")?;
         let post_data = service.get_resource(&username, "submitted")?;
-        let user = User::parse(&user_data, &comment_data, &post_data)?;
-        Some(Self { username, user })
+        let user = User::parse(&user_data, &comment_data, &post_data).ok_or(Error::Parse)?;
+        Ok(Self { username, user })
     }
 
     /// The Redditor's username.
