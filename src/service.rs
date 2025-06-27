@@ -78,22 +78,11 @@ impl Service for RedditService {
         if !resp.status().is_success() {
             None
         } else {
-            // TODO: Kind of a hack to ensure we get back JSON and not an
-            //       HTML error page. Probably could be better. Maybe
-            //       return a Result or the entire response, or have some
-            //       testable helper method that does so.
-            match resp.headers().get(header::CONTENT_TYPE) {
-                Some(content_type) => match content_type.to_str() {
-                    Ok(content_type) => {
-                        if content_type.starts_with("application/json") {
-                            resp.text().ok()
-                        } else {
-                            None
-                        }
-                    }
-                    _ => None,
-                },
-                None => None,
+            let content_type = resp.headers().get(header::CONTENT_TYPE)?.to_str().ok()?;
+            if (!content_type.starts_with("application/json")) {
+                None
+            } else {
+                resp.text().ok()
             }
         }
     }
