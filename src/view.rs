@@ -105,7 +105,7 @@ impl Comment {
         let body = if !opts.raw
             && let Some(grep) = &opts.grep
         {
-            body.replace_all(&format!("(?i)(?<s>{grep})"), &format!("{}", "$s".red()))
+            body.replace_all(&format!("(?i)(?<s>{grep})"), &"$s".red().to_string())
         } else {
             body
         };
