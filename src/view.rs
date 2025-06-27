@@ -9,7 +9,7 @@ use crate::thing::{Comment, Submission};
 use chrono::Local;
 use colored::Colorize;
 use indoc::formatdoc;
-use std::vec::IntoIter;
+use itertools::Itertools;
 
 /// View renderer options.
 ///
@@ -196,31 +196,17 @@ impl Submission {
     }
 }
 
-impl Viewable for IntoIter<SubredditCount> {
+impl Viewable for Vec<SubredditCount> {
     fn view<C: Clock>(&self, _: &ViewOptions, _: &C) -> String {
-        // TODO: Ugly! Various iteration methods below move this value,
-        //       so we have to clone. Probably would be better to implement
-        //       view() on the SubredditCount itself, but then we're going
-        //       to have to maintain the state of the selected sort, and
-        //       that's a little ugly... Cloning works for now but this
-        //       should definitely be fixed.
+        let width = self
+            .iter()
+            .map(|(subreddit, _)| subreddit.len())
+            .max()
+            .unwrap_or(0);
 
-        let width_iter = self.clone();
-        let iter = self.clone();
-
-        let width = width_iter
-            .max_by_key(|(subreddit, _)| subreddit.len())
-            .map(|(subreddit, _)| subreddit)
-            .unwrap_or_else(String::new)
-            .len();
-
-        let mut s = String::new();
-
-        for (subreddit, count) in iter {
-            s += &format!("{subreddit:width$}  {count:>3}\n");
-        }
-
-        String::from(s.trim_end())
+        self.iter()
+            .map(|(subreddit, count)| format!("{subreddit:width$}  {count:>3}"))
+            .join("\n")
     }
 }
 
@@ -501,7 +487,9 @@ mod tests {
             let counts = SubredditCounter::from_iter(redditor.comments())
                 .sort_by(&SortAlgorithm::Lexicographically);
             let expected = load_output("tally_comments_abc");
-            let actual = counts.view(&ViewOptions::default(), &FrozenClock::default());
+            let actual = counts
+                .collect::<Vec<_>>()
+                .view(&ViewOptions::default(), &FrozenClock::default());
             assert_eq!(actual, expected);
         }
 
@@ -511,7 +499,9 @@ mod tests {
             let counts = SubredditCounter::from_iter(redditor.comments())
                 .sort_by(&SortAlgorithm::Numerically);
             let expected = load_output("tally_comments_count");
-            let actual = counts.view(&ViewOptions::default(), &FrozenClock::default());
+            let actual = counts
+                .collect::<Vec<_>>()
+                .view(&ViewOptions::default(), &FrozenClock::default());
             assert_eq!(actual, expected);
         }
 
@@ -520,7 +510,9 @@ mod tests {
             let redditor = Redditor::test_empty();
             let counts =
                 SubredditCounter::from_iter(redditor.comments()).sort_by(&SortAlgorithm::default());
-            let actual = counts.view(&ViewOptions::default(), &FrozenClock::default());
+            let actual = counts
+                .collect::<Vec<_>>()
+                .view(&ViewOptions::default(), &FrozenClock::default());
             assert_eq!(actual, "");
         }
 
@@ -530,7 +522,9 @@ mod tests {
             let counts = SubredditCounter::from_iter(redditor.submissions())
                 .sort_by(&SortAlgorithm::Lexicographically);
             let expected = load_output("tally_posts_abc");
-            let actual = counts.view(&ViewOptions::default(), &FrozenClock::default());
+            let actual = counts
+                .collect::<Vec<_>>()
+                .view(&ViewOptions::default(), &FrozenClock::default());
             assert_eq!(actual, expected);
         }
 
@@ -540,7 +534,9 @@ mod tests {
             let counts = SubredditCounter::from_iter(redditor.submissions())
                 .sort_by(&SortAlgorithm::Numerically);
             let expected = load_output("tally_posts_count");
-            let actual = counts.view(&ViewOptions::default(), &FrozenClock::default());
+            let actual = counts
+                .collect::<Vec<_>>()
+                .view(&ViewOptions::default(), &FrozenClock::default());
             assert_eq!(actual, expected);
         }
 
@@ -549,7 +545,9 @@ mod tests {
             let redditor = Redditor::test_empty();
             let counts = SubredditCounter::from_iter(redditor.submissions())
                 .sort_by(&SortAlgorithm::default());
-            let actual = counts.view(&ViewOptions::default(), &FrozenClock::default());
+            let actual = counts
+                .collect::<Vec<_>>()
+                .view(&ViewOptions::default(), &FrozenClock::default());
             assert_eq!(actual, "");
         }
     }

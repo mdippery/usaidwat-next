@@ -288,7 +288,9 @@ impl Runner {
             let tallies = SubredditCounter::from_iter(posts).sort_by(sort_algorithm);
             println!(
                 "{}",
-                tallies.view(&ViewOptions::default(), &SystemClock::default())
+                tallies
+                    .collect::<Vec<_>>()
+                    .view(&ViewOptions::default(), &SystemClock::default())
             );
         } else {
             println!("{} has no posts.", self.user().username());
@@ -307,7 +309,9 @@ impl Runner {
             let tallies = SubredditCounter::from_iter(comments).sort_by(sort_algorithm);
             println!(
                 "{}",
-                tallies.view(&ViewOptions::default(), &SystemClock::default())
+                tallies
+                    .collect::<Vec<_>>()
+                    .view(&ViewOptions::default(), &SystemClock::default())
             );
         } else {
             println!("{} has no comments.", self.user().username());
