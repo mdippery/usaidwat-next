@@ -9,9 +9,34 @@ use crate::clock::{DateTime, HasAge, Local, Utc};
 use crate::count::HasSubreddit;
 use crate::filter::Searchable;
 use crate::{markdown, text};
-use log::error;
-use serde::de::Error;
 use serde::{Deserialize, Deserializer};
+use std::fmt::Formatter;
+
+/// An error processing or creating a thing.
+#[derive(Debug)]
+pub enum Error {
+    /// A parsing error.
+    Parse(serde_json::Error),
+}
+
+impl std::fmt::Display for Error {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Error::Parse(err) => write!(f, "Parsing error occurred: {err}"),
+        }
+    }
+}
+
+impl std::error::Error for Error {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        match self {
+            Error::Parse(err) => Some(err),
+        }
+    }
+}
+
+/// A standard parsing result.
+pub type Result<T> = std::result::Result<T, Error>;
 
 /// A Reddit user account.
 #[derive(Debug)]
@@ -83,12 +108,11 @@ impl User {
     /// a call to `/users/<user>/submitted.json`.
     ///
     /// Obviously parsing can fail so this method returns an `Option`.
-    pub fn parse(user_data: &str, comment_data: &str, post_data: &str) -> Option<Self> {
-        // TODO: Return Result instead of error
+    pub fn parse(user_data: &str, comment_data: &str, post_data: &str) -> Result<Self> {
         let about = About::parse(user_data)?;
         let comments = Comment::parse(comment_data)?;
         let submissions = Submission::parse(post_data)?;
-        Some(User {
+        Ok(User {
             about,
             comments,
             submissions,
@@ -118,11 +142,10 @@ impl About {
     /// `/users/<user>/about.json`.
     ///
     /// This method is generally invoked by `User`, not directly.
-    pub fn parse(user_data: &str) -> Option<Self> {
+    pub fn parse(user_data: &str) -> Result<Self> {
         serde_json::from_str(user_data)
-            .inspect_err(|err| error!("failed to parse user data: {err:?}"))
-            .ok()
             .map(|wrapper: AboutResponse| wrapper.data)
+            .map_err(Error::Parse)
     }
 
     /// The date on which the account was created.
@@ -148,10 +171,8 @@ impl Comment {
     /// `/users/<user>/comments.json`.
     ///
     /// This method is generally invoked by `User`, not directly.
-    pub fn parse(comment_data: &str) -> Option<Vec<Self>> {
+    pub fn parse(comment_data: &str) -> Result<Vec<Self>> {
         serde_json::from_str(comment_data)
-            .inspect_err(|err| error!("failed to parse comment data: {err:?}"))
-            .ok()
             .map(|comment_listing: ListingResponse<CommentResponse>| {
                 comment_listing
                     .data
@@ -160,6 +181,7 @@ impl Comment {
                     .map(|comment_wrapper| comment_wrapper.data)
                     .collect()
             })
+            .map_err(Error::Parse)
     }
 
     /// The time the comment was created, in local time.
@@ -249,10 +271,8 @@ impl Submission {
     /// `/users/<user>/submitted.json`.
     ///
     /// This method is generally invoked by `User`, not directly.
-    pub fn parse(post_data: &str) -> Option<Vec<Self>> {
+    pub fn parse(post_data: &str) -> Result<Vec<Self>> {
         serde_json::from_str(post_data)
-            .inspect_err(|err| error!("failed to parse post data: {err:?}"))
-            .ok()
             .map(|comment_listing: ListingResponse<SubmissionResponse>| {
                 comment_listing
                     .data
@@ -261,6 +281,7 @@ impl Submission {
                     .map(|comment_wrapper| comment_wrapper.data)
                     .collect()
             })
+            .map_err(Error::Parse)
     }
 
     /// True if the submission is a self post.
@@ -301,15 +322,15 @@ impl HasSubreddit for Submission {
 // Deserializers
 // --------------------------------------------------------------------------
 
-fn from_timestamp_f64<'de, D>(deserializer: D) -> Result<DateTime<Utc>, D::Error>
+fn from_timestamp_f64<'de, D>(deserializer: D) -> std::result::Result<DateTime<Utc>, D::Error>
 where
     D: Deserializer<'de>,
 {
     let ts_f64 = f64::deserialize(deserializer)?;
     let ts = f64_to_i64(ts_f64)
-        .ok_or_else(|| Error::custom(format!("Invalid Unix timestamp: {ts_f64}")))?;
+        .ok_or_else(|| serde::de::Error::custom(format!("Invalid Unix timestamp: {ts_f64}")))?;
     DateTime::from_timestamp(ts, 0)
-        .ok_or_else(|| Error::custom(format!("Invalid Unix timestamp: {ts}")))
+        .ok_or_else(|| serde::de::Error::custom(format!("Invalid Unix timestamp: {ts}")))
 }
 
 fn f64_to_i64(n: f64) -> Option<i64> {
@@ -363,13 +384,13 @@ mod tests {
         #[test]
         fn it_cannot_parse_invalid_data() {
             let about = About::parse(&load_data("about_404"));
-            assert!(about.is_none(), "should be None, was {about:?}");
+            assert!(about.is_err(), "should be Err, was {about:?}");
         }
 
         #[test]
         fn it_can_parse_valid_data() {
             let about = About::parse(&load_data("about_mipadi"));
-            assert!(about.is_some());
+            assert!(about.is_ok());
         }
 
         #[test]
@@ -398,19 +419,19 @@ mod tests {
         #[test]
         fn it_cannot_parse_invalid_data() {
             let comments = Comment::parse(&load_data("comments_404"));
-            assert!(comments.is_none(), "should be None, was {comments:?}");
+            assert!(comments.is_err(), "should be Err, was {comments:?}");
         }
 
         #[test]
         fn it_can_parse_valid_data() {
             let comments = Comment::parse(&load_data("comments_mipadi"));
-            assert!(comments.is_some());
+            assert!(comments.is_ok());
         }
 
         #[test]
         fn it_can_parse_empty_data() {
             let comments = Comment::parse(&load_data("comments_empty"));
-            assert!(comments.is_some());
+            assert!(comments.is_ok());
         }
 
         #[test]
@@ -590,19 +611,19 @@ mod tests {
         #[test]
         fn it_cannot_parse_invalid_data() {
             let submissions = Submission::parse(&load_data("submitted_404"));
-            assert!(submissions.is_none(), "should be None, was {submissions:?}");
+            assert!(submissions.is_err(), "should be Err, was {submissions:?}");
         }
 
         #[test]
         fn it_can_parse_valid_data() {
             let submissions = Submission::parse(&load_data("submitted_mipadi"));
-            assert!(submissions.is_some());
+            assert!(submissions.is_ok());
         }
 
         #[test]
         fn it_can_parse_empty_data() {
             let submissions = Submission::parse(&load_data("submitted_empty"));
-            assert!(submissions.is_some());
+            assert!(submissions.is_ok());
         }
 
         #[test]

@@ -2,11 +2,9 @@
 
 use crate::clock::{DateTime, HasAge, Utc};
 use crate::service::{self, Service};
-use crate::thing::{Comment, Submission, User};
+use crate::thing::{self, Comment, Submission, User};
 pub use chrono::Weekday;
 use chrono::{Datelike, Timelike};
-use std::fmt;
-use std::fmt::Formatter;
 
 /// A client error.
 #[derive(Debug)]
@@ -15,7 +13,7 @@ pub enum Error {
     Service(service::Error),
 
     /// An error parsing data.
-    Parse,
+    Parse(thing::Error),
 }
 
 impl From<service::Error> for Error {
@@ -24,11 +22,17 @@ impl From<service::Error> for Error {
     }
 }
 
-impl fmt::Display for Error {
-    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+impl From<thing::Error> for Error {
+    fn from(error: thing::Error) -> Self {
+        Error::Parse(error)
+    }
+}
+
+impl std::fmt::Display for Error {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Error::Service(err) => write!(f, "Service error: {err:?}"),
-            Error::Parse => write!(f, "Failed to parse user data"),
+            Error::Service(err) => write!(f, "Service error: {err}"),
+            Error::Parse(err) => write!(f, "Parse error: {err}"),
         }
     }
 }
@@ -37,7 +41,7 @@ impl std::error::Error for Error {
     fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
         match self {
             Error::Service(err) => Some(err),
-            Error::Parse => None,
+            Error::Parse(err) => Some(err),
         }
     }
 }
@@ -48,8 +52,8 @@ pub struct Redditor {
     user: User,
 }
 
-impl fmt::Debug for Redditor {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+impl std::fmt::Debug for Redditor {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
             "Redditor {{ username = {}, user = {:?} }}",
@@ -70,7 +74,7 @@ impl Redditor {
         let user_data = service.get_resource(&username, "about")?;
         let comment_data = service.get_resource(&username, "comments")?;
         let post_data = service.get_resource(&username, "submitted")?;
-        let user = User::parse(&user_data, &comment_data, &post_data).ok_or(Error::Parse)?;
+        let user = User::parse(&user_data, &comment_data, &post_data)?;
         Ok(Self { username, user })
     }
 
