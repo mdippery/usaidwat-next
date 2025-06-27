@@ -552,7 +552,7 @@ mod tests {
             let comments = Comment::parse(&load_data("comments_mipadi")).unwrap();
             let comment = &comments[9];
             let result = comment.matches("D&D");
-            assert!(!result, "{result} != false");
+            assert!(!result, "{} should not match 'D&D'", comment.search_text());
         }
 
         #[test]

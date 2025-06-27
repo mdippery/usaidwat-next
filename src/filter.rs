@@ -1,5 +1,7 @@
 //! General-purpose search utilities.
 
+use regex::Regex;
+
 /// A thing that can be searched.
 pub trait Searchable {
     /// The haystack that can be searched for a needle.
@@ -9,14 +11,11 @@ pub trait Searchable {
     ///
     /// The search is case-insensitive.
     ///
-    /// `pattern` is a fixed string; regular expression matches are not
-    /// yet supported.
+    /// `pattern` is can be a regular expression.
     fn matches(&self, pattern: &str) -> bool {
-        self.search_text()
-            .to_lowercase()
-            .matches(&pattern.to_lowercase())
-            .count()
-            > 0
+        // TODO: Handle errors
+        let re = Regex::new(&format!("(?i){pattern}")).unwrap();
+        re.is_match(&self.search_text())
     }
 }
 
@@ -61,5 +60,17 @@ mod tests {
     fn it_returns_false_if_there_are_no_matches() {
         let t = TestSearchable::default();
         assert!(!t.matches("usaidwait"));
+    }
+
+    #[test]
+    fn it_matches_regexes() {
+        let t = TestSearchable::default();
+        assert!(t.matches("pep{2,}ers"));
+    }
+
+    #[test]
+    fn it_matches_regexes_case_insensitively() {
+        let t = TestSearchable::default();
+        assert!(t.matches("Piper"));
     }
 }
