@@ -3,9 +3,9 @@
 use crate::cli::DateFormat;
 use crate::client::{Redditor, Timeline};
 use crate::clock::{Clock, HasAge, SystemClock};
-use crate::count::{HasSubreddit, SubredditCount};
+use crate::count::SubredditCount;
 use crate::text::RegexReplaceable;
-use crate::thing::{Comment, Submission};
+use crate::thing::{Comment, HasSubreddit, Submission};
 use chrono::Local;
 use colored::Colorize;
 use indoc::formatdoc;

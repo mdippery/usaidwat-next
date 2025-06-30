@@ -6,7 +6,6 @@
 //! work with JSON data from the Reddit API.
 
 use crate::clock::{DateTime, HasAge, Local, Utc};
-use crate::count::HasSubreddit;
 use crate::filter::Searchable;
 use crate::{markdown, text};
 use serde::{Deserialize, Deserializer};
@@ -37,6 +36,12 @@ impl std::error::Error for Error {
 
 /// A standard parsing result.
 pub type Result<T> = std::result::Result<T, Error>;
+
+/// A thing that is attached to a subreddit.
+pub trait HasSubreddit {
+    /// The subreddit the thing appears in.
+    fn subreddit(&self) -> &str;
+}
 
 /// A Reddit user account.
 #[derive(Debug)]

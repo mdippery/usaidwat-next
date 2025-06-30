@@ -1,14 +1,9 @@
 //! General-purpose counting capabilities.
 
+use crate::thing::HasSubreddit;
 use counter::Counter;
 use itertools::Itertools;
 use std::vec::IntoIter;
-
-/// A thing that is attached to a subreddit.
-pub trait HasSubreddit {
-    /// The subreddit the thing appears in.
-    fn subreddit(&self) -> &str;
-}
 
 /// Differentiates between the different sorting algorithms used to
 /// return subreddit counts.
