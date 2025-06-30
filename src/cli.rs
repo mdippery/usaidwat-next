@@ -144,6 +144,9 @@ enum PostSubcommand {
         /// Reddit username
         username: String,
 
+        // Only show posts from these subreddits
+        subreddits: Vec<String>,
+
         /// Output log in a more compact form
         #[arg(long, default_value_t = false)]
         oneline: bool,
@@ -267,17 +270,30 @@ impl Runner {
 
     fn run_posts(&self, config: &PostCommandConfig) -> CliResult {
         match &config.command {
-            PostSubcommand::Log { oneline, .. } => self.run_posts_log(&oneline),
+            PostSubcommand::Log {
+                subreddits,
+                oneline,
+                ..
+            } => self.run_posts_log(subreddits, &oneline),
             PostSubcommand::Tally(config) => self.run_posts_tally(&config.sort_algorithm()),
         }
     }
 
-    fn run_posts_log(&self, oneline: &bool) -> CliResult {
+    fn run_posts_log(&self, subreddits: &Vec<String>, oneline: &bool) -> CliResult {
         let opts = ViewOptions::default().oneline(*oneline);
-        let posts = self.user().submissions();
+
+        let filter = StringSet::from(subreddits).ok_or(format!(
+            "invalid subreddit filter: {}",
+            subreddits.join(" ")
+        ))?;
+
+        let posts = RedditFilter::new(self.user().submissions())
+            .filter(&filter)
+            .collect();
 
         let joiner = if *oneline { "\n" } else { "\n\n\n" };
         let output = posts
+            .iter()
             .map(|post| post.view(&opts, &SystemClock::default()))
             .collect::<Vec<_>>()
             .join(joiner);

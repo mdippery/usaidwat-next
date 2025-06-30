@@ -324,6 +324,16 @@ impl HasSubreddit for Submission {
     }
 }
 
+impl Searchable for Submission {
+    fn search_text(&self) -> String {
+        // We really don't use this and only implement it so we can pass
+        // Submissions to SubredditFilter, but using the title as the
+        // searchable text seems like the most reasonable thing to do,
+        // and might be useful in the future.
+        String::from(&self.title)
+    }
+}
+
 // Deserializers
 // --------------------------------------------------------------------------
 
