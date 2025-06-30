@@ -5,9 +5,8 @@ use crate::client::Redditor;
 use crate::clock::SystemClock;
 use crate::conf;
 use crate::count::{SortAlgorithm, SubredditCounter};
-use crate::filter::Searchable;
+use crate::filter::RedditFilter;
 use crate::service::RedditService;
-use crate::thing::Comment;
 use crate::view::{ViewOptions, Viewable};
 use clap::{Args, Parser, Subcommand, ValueEnum};
 use clap_verbosity_flag::Verbosity;
@@ -238,15 +237,11 @@ impl Runner {
             .unwrap_or_else(|| self.user().comments().count());
         let comments = self.user().comments().take(n);
 
-        // TODO: Really need to extract this filtering out into a module I
-        //       can test easily, along with filtering by subreddit.
-        let comments: Box<dyn Iterator<Item = Comment>> = match grep {
-            Some(grep) => Box::new(comments.filter(move |comment| comment.matches(grep))),
-            None => Box::new(comments),
-        };
+        let comments = RedditFilter::new(comments).grep(grep).collect();
 
         let joiner = if *oneline { "\n" } else { "\n\n\n" };
         let output = comments
+            .iter()
             .map(|comment| comment.view(&opts, &SystemClock::default()))
             .collect::<Vec<_>>()
             .join(joiner);

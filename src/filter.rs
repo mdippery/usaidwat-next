@@ -21,6 +21,44 @@ pub trait Searchable {
     }
 }
 
+/// A container for filtering Reddit things.
+pub struct RedditFilter<I>
+where
+    I: Iterator,
+    I::Item: Searchable,
+{
+    things: I,
+}
+
+impl<I> RedditFilter<I>
+where
+    I: Iterator,
+    I::Item: Searchable,
+{
+    /// Creates a new `RedditFilter` that wraps the given iterator.
+    pub fn new(things: I) -> Self {
+        Self { things }
+    }
+
+    /// Returns all items with searchable text that matches the given needle.
+    pub fn grep(self, needle: &Option<String>) -> RedditFilter<impl Iterator<Item = I::Item>> {
+        let things = match needle {
+            None => self.things.collect::<Vec<_>>(),
+            Some(needle) => self
+                .things
+                .filter(|thing| thing.matches(needle))
+                .collect::<Vec<_>>(),
+        };
+        let things = things.into_iter();
+        RedditFilter { things }
+    }
+
+    /// Collects all items into a vector.
+    pub fn collect(self) -> Vec<I::Item> {
+        self.things.collect()
+    }
+}
+
 /// A set of strings.
 ///
 /// This set can function like a normal set, but it can also store _negated_
@@ -194,6 +232,92 @@ mod tests {
         fn it_treats_invalid_regexes_as_a_fixed_string() {
             let t = TestSearchable::default();
             assert!(!t.matches("pic{?}kl**ed"));
+        }
+    }
+
+    mod reddit_filter {
+        use super::super::*;
+
+        #[derive(Debug)]
+        struct TestSearchable {
+            string: String,
+        }
+
+        impl TestSearchable {
+            pub fn from(string: &str) -> Self {
+                TestSearchable {
+                    string: String::from(string),
+                }
+            }
+        }
+
+        impl Searchable for TestSearchable {
+            fn search_text(&self) -> String {
+                self.string.clone()
+            }
+        }
+
+        #[test]
+        fn it_finds_items_matching_a_string() {
+            let strings = vec![
+                "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+                "In sodales urna et libero commodo varius.",
+                "Morbi vitae varius orci.",
+                "Sed luctus turpis ac fringilla maximus.",
+                "In libero nisl, condimentum in gravida eget, bibendum id lectus.",
+                "Nunc sit amet odio dolor.",
+                "Nunc quis urna vel sem iaculis dapibus.",
+                "Donec justo metus, vulputate a purus at, tincidunt porttitor erat.",
+                "Quisque in metus molestie, dictum metus nec, malesuada tortor.",
+                "Nam sed turpis eu tortor semper rhoncus.",
+                "Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas.",
+            ];
+            let texts = strings.iter().map(|s| TestSearchable::from(s));
+            let grep = Some(String::from("\\bnunc\\b"));
+            let matches = RedditFilter::new(texts).grep(&grep);
+            assert_eq!(matches.collect().len(), 2);
+        }
+
+        #[test]
+        fn it_returns_everything_if_there_is_no_needle() {
+            let strings = vec![
+                "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+                "In sodales urna et libero commodo varius.",
+                "Morbi vitae varius orci.",
+                "Sed luctus turpis ac fringilla maximus.",
+                "In libero nisl, condimentum in gravida eget, bibendum id lectus.",
+                "Nunc sit amet odio dolor.",
+                "Nunc quis urna vel sem iaculis dapibus.",
+                "Donec justo metus, vulputate a purus at, tincidunt porttitor erat.",
+                "Quisque in metus molestie, dictum metus nec, malesuada tortor.",
+                "Nam sed turpis eu tortor semper rhoncus.",
+                "Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas.",
+            ];
+            let texts = strings.iter().map(|s| TestSearchable::from(s));
+            let grep = None;
+            let matches = RedditFilter::new(texts).grep(&grep);
+            assert_eq!(matches.collect().len(), strings.len());
+        }
+
+        #[test]
+        fn it_returns_nothing_if_there_are_no_matches() {
+            let strings = vec![
+                "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+                "In sodales urna et libero commodo varius.",
+                "Morbi vitae varius orci.",
+                "Sed luctus turpis ac fringilla maximus.",
+                "In libero nisl, condimentum in gravida eget, bibendum id lectus.",
+                "Nunc sit amet odio dolor.",
+                "Nunc quis urna vel sem iaculis dapibus.",
+                "Donec justo metus, vulputate a purus at, tincidunt porttitor erat.",
+                "Quisque in metus molestie, dictum metus nec, malesuada tortor.",
+                "Nam sed turpis eu tortor semper rhoncus.",
+                "Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas.",
+            ];
+            let texts = strings.iter().map(|s| TestSearchable::from(s));
+            let grep = Some(String::from("some text"));
+            let matches = RedditFilter::new(texts).grep(&grep);
+            assert_eq!(matches.collect().len(), 0);
         }
     }
 
