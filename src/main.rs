@@ -1,7 +1,13 @@
 use clap::Parser;
 use reqwest::StatusCode;
-use usaidwat::cli::{Config, Error, Runner, die};
+use std::process;
+use usaidwat::cli::{Config, Error, Runner};
 use usaidwat::service;
+
+fn die(error_code: i32, message: &str) {
+    eprintln!("{}", message);
+    process::exit(error_code);
+}
 
 fn dispatch_err(username: &str, err: &Error) {
     let message = match err {
@@ -20,7 +26,10 @@ fn main() {
         .filter_level(config.verbosity().into())
         .init();
     match Runner::new(config) {
-        Ok(runner) => runner.run(),
+        Ok(runner) => match runner.run() {
+            Err(message) => die(1, &message),
+            Ok(result) => result,
+        },
         Err(err) => dispatch_err(&username, &err),
     }
 }

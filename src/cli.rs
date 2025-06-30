@@ -11,14 +11,9 @@ use crate::view::{ViewOptions, Viewable};
 use clap::{Args, Parser, Subcommand, ValueEnum};
 use clap_verbosity_flag::Verbosity;
 use pager::Pager;
-use std::process;
 
-// TODO: We should probably move this back to main and have Runner.run()
-//       return a Result, but we can work on that later.
-pub fn die(error_code: i32, message: &str) {
-    eprintln!("{}", message);
-    process::exit(error_code);
-}
+/// Result of running a command.
+pub type CliResult = Result<(), String>;
 
 /// Program configuration.
 #[derive(Debug, Parser)]
@@ -201,7 +196,7 @@ impl Runner {
     }
 
     /// Run the command-line program using its stored configuration options.
-    pub fn run(&self) {
+    pub fn run(&self) -> CliResult {
         match &self.config.command {
             Command::Info { .. } => self.run_info(),
             Command::Log {
@@ -214,7 +209,7 @@ impl Runner {
                 ..
             } => {
                 let date_format = date.as_ref().unwrap_or(&DateFormat::Relative);
-                self.run_log(subreddits, date_format, grep, limit, oneline, raw);
+                self.run_log(subreddits, date_format, grep, limit, oneline, raw)
             }
             Command::Posts(subconfig) => self.run_posts(subconfig),
             Command::Summary { .. } => self.run_summary(),
@@ -223,12 +218,13 @@ impl Runner {
         }
     }
 
-    fn run_info(&self) {
+    fn run_info(&self) -> CliResult {
         println!(
             "{}",
             self.user()
                 .view(&ViewOptions::default(), &SystemClock::default())
         );
+        Ok(())
     }
 
     fn run_log(
@@ -239,24 +235,17 @@ impl Runner {
         limit: &Option<u32>,
         oneline: &bool,
         raw: &bool,
-    ) {
+    ) -> CliResult {
         let opts = ViewOptions::default()
             .oneline(*oneline)
             .raw(*raw)
             .grep(grep.clone())
             .date_format(date_format.clone());
 
-        // TODO: Wrap this up in a common method for reuse by `posts log`.
-        let subreddits: Vec<&str> = subreddits.iter().map(|s| s.as_str()).collect();
-        let filter = StringSet::from(&subreddits);
-        if filter.is_none() {
-            die(
-                1,
-                &format!("invalid subreddit filter: {}", subreddits.join(" ")),
-            );
-        }
-        // TODO: Might be a better way to do this, but at this point we should know it's Some.
-        let filter = filter.unwrap();
+        let filter = StringSet::from(subreddits).ok_or(format!(
+            "invalid subreddit filter: {}",
+            subreddits.join(" ")
+        ))?;
 
         let comments = RedditFilter::new(self.user().comments())
             .take(limit)
@@ -273,16 +262,17 @@ impl Runner {
 
         Pager::new().pager_envs(conf::pager_env(oneline)).setup();
         println!("{}", output);
+        Ok(())
     }
 
-    fn run_posts(&self, config: &PostCommandConfig) {
+    fn run_posts(&self, config: &PostCommandConfig) -> CliResult {
         match &config.command {
             PostSubcommand::Log { oneline, .. } => self.run_posts_log(&oneline),
             PostSubcommand::Tally(config) => self.run_posts_tally(&config.sort_algorithm()),
         }
     }
 
-    fn run_posts_log(&self, oneline: &bool) {
+    fn run_posts_log(&self, oneline: &bool) -> CliResult {
         let opts = ViewOptions::default().oneline(*oneline);
         let posts = self.user().submissions();
 
@@ -294,9 +284,10 @@ impl Runner {
 
         Pager::new().pager_envs(conf::pager_env(oneline)).setup();
         println!("{}", output);
+        Ok(())
     }
 
-    fn run_posts_tally(&self, sort_algorithm: &SortAlgorithm) {
+    fn run_posts_tally(&self, sort_algorithm: &SortAlgorithm) -> CliResult {
         // TODO: Need to test this conditional logic
 
         if self.user().has_submissions() {
@@ -308,16 +299,18 @@ impl Runner {
                     .collect::<Vec<_>>()
                     .view(&ViewOptions::default(), &SystemClock::default())
             );
+            Ok(())
         } else {
             println!("{} has no posts.", self.user().username());
+            Ok(())
         }
     }
 
-    fn run_summary(&self) {
+    fn run_summary(&self) -> CliResult {
         todo!("summary");
     }
 
-    fn run_tally(&self, sort_algorithm: &SortAlgorithm) {
+    fn run_tally(&self, sort_algorithm: &SortAlgorithm) -> CliResult {
         // TODO: Need to test this conditional logic
 
         if self.user.has_comments() {
@@ -329,12 +322,14 @@ impl Runner {
                     .collect::<Vec<_>>()
                     .view(&ViewOptions::default(), &SystemClock::default())
             );
+            Ok(())
         } else {
             println!("{} has no comments.", self.user().username());
+            Ok(())
         }
     }
 
-    fn run_timeline(&self) {
+    fn run_timeline(&self) -> CliResult {
         // TODO: This is hard to test -- should move the conditional check
         //       into testable method, maybe Timeline::view(), although I'm
         //       not sure the logic is appropriate there, either.
@@ -346,8 +341,10 @@ impl Runner {
                     .timeline()
                     .view(&ViewOptions::default(), &SystemClock::default())
             );
+            Ok(())
         } else {
             println!("{} has no comments.", self.user().username());
+            Ok(())
         }
     }
 }

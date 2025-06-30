@@ -105,7 +105,11 @@ impl StringSet {
     ///
     /// All strings passed in must either be negated or not negated.
     /// If strings are mixed, `None` is returned.
-    pub fn from(strings: &Vec<&str>) -> Option<Self> {
+    pub fn from<S>(strings: S) -> Option<Self>
+    where
+        S: IntoIterator,
+        S::Item: AsRef<str>,
+    {
         let validator = StringSetValidator::from(strings);
 
         if !validator.is_valid() {
@@ -164,11 +168,16 @@ impl StringSetValidator {
     ///
     /// Some or all of the elements of `strings` may be comma-separated;
     /// `new()` will flatten them into a single vector.
-    pub fn from(strings: &Vec<&str>) -> Self {
+    pub fn from<S>(strings: S) -> Self
+    where
+        S: IntoIterator,
+        S::Item: AsRef<str>,
+    {
         let strings = strings
             .into_iter()
             .flat_map(|s| {
-                s.replace(" ", "")
+                s.as_ref()
+                    .replace(" ", "")
                     .split(',')
                     .map(str::to_owned)
                     .collect::<Vec<String>>()
@@ -390,8 +399,8 @@ mod tests {
         fn it_returns_everything_if_subreddit_filter_is_empty() {
             let texts = load_test();
             let n = texts.len();
-            let filter =
-                StringSet::from(&vec![]).expect("should create string set from empty vector");
+            let filter = StringSet::from(Vec::<String>::new())
+                .expect("should create string set from empty vector");
             let filtered = RedditFilter::new(texts.into_iter()).filter(&filter);
             assert_eq!(filtered.collect().len(), n);
         }
@@ -508,7 +517,8 @@ mod tests {
 
         #[test]
         fn it_is_empty_if_it_contains_no_items() {
-            let set = StringSet::from(&vec![]).expect("should build set from empty vector");
+            let set =
+                StringSet::from(Vec::<String>::new()).expect("should build set from empty vector");
             assert!(set.is_empty());
         }
 
