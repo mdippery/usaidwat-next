@@ -1,5 +1,6 @@
 //! General-purpose search utilities.
 
+use crate::thing::HasSubreddit;
 use regex::Regex;
 use std::collections::HashSet;
 
@@ -25,7 +26,7 @@ pub trait Searchable {
 pub struct RedditFilter<I>
 where
     I: Iterator,
-    I::Item: Searchable,
+    I::Item: Searchable + HasSubreddit,
 {
     things: I,
 }
@@ -33,7 +34,7 @@ where
 impl<I> RedditFilter<I>
 where
     I: Iterator,
-    I::Item: Searchable,
+    I::Item: Searchable + HasSubreddit,
 {
     /// Creates a new `RedditFilter` that wraps the given iterator.
     pub fn new(things: I) -> Self {
@@ -41,6 +42,8 @@ where
     }
 
     /// Returns all items with searchable text that matches the given needle.
+    ///
+    /// If `needle` is `None`, all items are returned.
     pub fn grep(self, needle: &Option<String>) -> RedditFilter<impl Iterator<Item = I::Item>> {
         let things = match needle {
             None => self.things.collect::<Vec<_>>(),
@@ -50,6 +53,22 @@ where
                 .collect::<Vec<_>>(),
         };
         let things = things.into_iter();
+        RedditFilter { things }
+    }
+
+    /// Returns all items with subreddits matching the given set of subreddits.
+    ///
+    /// If `subreddits` is empty, all items are returned.
+    pub fn filter(self, subreddits: &StringSet) -> RedditFilter<impl Iterator<Item = I::Item>> {
+        let things: Vec<I::Item> = if subreddits.is_empty() {
+            self.things.collect()
+        } else {
+            self.things
+                .filter(|item| subreddits.contains(item.subreddit()))
+                .collect()
+        };
+        let things = things.into_iter();
+
         RedditFilter { things }
     }
 
@@ -95,9 +114,16 @@ impl StringSet {
     }
 
     pub fn contains(&self, needle: &str) -> bool {
+        // TODO: Case-insensitive match; modify into_set() to return lowercase strings
+        //       and convert needle to lowercase here (test this).
         match &self.kind {
             StringSetKind::Negative(set) => !set.contains(needle),
             StringSetKind::Positive(set) => set.contains(needle),
+        }
+    }
+    pub fn is_empty(&self) -> bool {
+        match &self.kind {
+            StringSetKind::Negative(set) | StringSetKind::Positive(set) => set.is_empty(),
         }
     }
 
@@ -241,12 +267,14 @@ mod tests {
         #[derive(Debug)]
         struct TestSearchable {
             string: String,
+            subreddit: String,
         }
 
         impl TestSearchable {
-            pub fn from(string: &str) -> Self {
+            pub fn new(string: &str, subreddit: &str) -> Self {
                 TestSearchable {
                     string: String::from(string),
+                    subreddit: String::from(subreddit),
                 }
             }
         }
@@ -257,67 +285,108 @@ mod tests {
             }
         }
 
+        impl HasSubreddit for TestSearchable {
+            // Doesn't matter, not tested but required to meet trait constraints
+            fn subreddit(&self) -> &str {
+                self.subreddit.as_str()
+            }
+        }
+
+        fn load_test() -> Vec<TestSearchable> {
+            let strings = vec![
+                (
+                    "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+                    "subreddit",
+                ),
+                ("In sodales urna et libero commodo varius.", "subreddit"),
+                ("Morbi vitae varius orci.", "other"),
+                ("Sed luctus turpis ac fringilla maximus.", "another"),
+                (
+                    "In libero nisl, condimentum in gravida eget, bibendum id lectus.",
+                    "words",
+                ),
+                ("Nunc sit amet odio dolor.", "poetry"),
+                ("Nunc quis urna vel sem iaculis dapibus.", "subreddit"),
+                (
+                    "Donec justo metus, vulputate a purus at, tincidunt porttitor erat.",
+                    "blah",
+                ),
+                (
+                    "Quisque in metus molestie, dictum metus nec, malesuada tortor.",
+                    "foo",
+                ),
+                ("Nam sed turpis eu tortor semper rhoncus.", "bar"),
+                (
+                    "Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas.",
+                    "baz",
+                ),
+            ];
+            strings
+                .iter()
+                .map(|(s, sr)| TestSearchable::new(s, sr))
+                .collect()
+        }
+
         #[test]
         fn it_finds_items_matching_a_string() {
-            let strings = vec![
-                "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-                "In sodales urna et libero commodo varius.",
-                "Morbi vitae varius orci.",
-                "Sed luctus turpis ac fringilla maximus.",
-                "In libero nisl, condimentum in gravida eget, bibendum id lectus.",
-                "Nunc sit amet odio dolor.",
-                "Nunc quis urna vel sem iaculis dapibus.",
-                "Donec justo metus, vulputate a purus at, tincidunt porttitor erat.",
-                "Quisque in metus molestie, dictum metus nec, malesuada tortor.",
-                "Nam sed turpis eu tortor semper rhoncus.",
-                "Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas.",
-            ];
-            let texts = strings.iter().map(|s| TestSearchable::from(s));
+            let texts = load_test();
             let grep = Some(String::from("\\bnunc\\b"));
-            let matches = RedditFilter::new(texts).grep(&grep);
+            let matches = RedditFilter::new(texts.into_iter()).grep(&grep);
             assert_eq!(matches.collect().len(), 2);
         }
 
         #[test]
         fn it_returns_everything_if_there_is_no_needle() {
-            let strings = vec![
-                "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-                "In sodales urna et libero commodo varius.",
-                "Morbi vitae varius orci.",
-                "Sed luctus turpis ac fringilla maximus.",
-                "In libero nisl, condimentum in gravida eget, bibendum id lectus.",
-                "Nunc sit amet odio dolor.",
-                "Nunc quis urna vel sem iaculis dapibus.",
-                "Donec justo metus, vulputate a purus at, tincidunt porttitor erat.",
-                "Quisque in metus molestie, dictum metus nec, malesuada tortor.",
-                "Nam sed turpis eu tortor semper rhoncus.",
-                "Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas.",
-            ];
-            let texts = strings.iter().map(|s| TestSearchable::from(s));
+            let texts = load_test();
+            let n = texts.len();
             let grep = None;
-            let matches = RedditFilter::new(texts).grep(&grep);
-            assert_eq!(matches.collect().len(), strings.len());
+            let matches = RedditFilter::new(texts.into_iter()).grep(&grep);
+            assert_eq!(matches.collect().len(), n);
         }
 
         #[test]
         fn it_returns_nothing_if_there_are_no_matches() {
-            let strings = vec![
-                "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-                "In sodales urna et libero commodo varius.",
-                "Morbi vitae varius orci.",
-                "Sed luctus turpis ac fringilla maximus.",
-                "In libero nisl, condimentum in gravida eget, bibendum id lectus.",
-                "Nunc sit amet odio dolor.",
-                "Nunc quis urna vel sem iaculis dapibus.",
-                "Donec justo metus, vulputate a purus at, tincidunt porttitor erat.",
-                "Quisque in metus molestie, dictum metus nec, malesuada tortor.",
-                "Nam sed turpis eu tortor semper rhoncus.",
-                "Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas.",
-            ];
-            let texts = strings.iter().map(|s| TestSearchable::from(s));
+            let texts = load_test();
             let grep = Some(String::from("some text"));
-            let matches = RedditFilter::new(texts).grep(&grep);
+            let matches = RedditFilter::new(texts.into_iter()).grep(&grep);
             assert_eq!(matches.collect().len(), 0);
+        }
+
+        #[test]
+        fn it_returns_everything_if_subreddit_filter_is_empty() {
+            let texts = load_test();
+            let n = texts.len();
+            let filter =
+                StringSet::from(&vec![]).expect("should create string set from empty vector");
+            let filtered = RedditFilter::new(texts.into_iter()).filter(&filter);
+            assert_eq!(filtered.collect().len(), n);
+        }
+
+        #[test]
+        fn it_returns_a_subset_if_subreddit_filter_is_positive() {
+            let texts = load_test();
+            let n = texts
+                .iter()
+                .filter(|t| t.subreddit() == "subreddit")
+                .count();
+            let filter = StringSet::from(&vec!["subreddit", "doesnotexist"])
+                .expect("should create string set from empty vector");
+            let filtered = RedditFilter::new(texts.into_iter()).filter(&filter);
+            assert_eq!(filtered.collect().len(), n);
+        }
+
+        #[test]
+        fn it_returns_everything_if_subreddit_filter_is_negative() {
+            let texts = load_test();
+            let n = texts.len();
+            let x = texts
+                .iter()
+                .filter(|t| t.subreddit() == "subreddit")
+                .count();
+            let filter = StringSet::from(&vec!["-subreddit", "-doesnotexist"])
+                .expect("should create string set from empty vector");
+            let filtered = RedditFilter::new(texts.into_iter()).filter(&filter);
+            assert_eq!(filtered.collect().len(), n - x);
         }
     }
 
@@ -401,6 +470,20 @@ mod tests {
             let set =
                 StringSet::from(&strings).expect(&format!("should build set from {strings:?}"));
             assert!(!set.is_negated());
+        }
+
+        #[test]
+        fn it_is_empty_if_it_contains_no_items() {
+            let set = StringSet::from(&vec![]).expect("should build set from empty vector");
+            assert!(set.is_empty());
+        }
+
+        #[test]
+        fn it_is_not_empty_if_it_contains_items() {
+            let strings = vec!["alpha", "beta", "charlie", "delta"];
+            let set =
+                StringSet::from(&strings).expect(&format!("should build set from {strings:?}"));
+            assert!(!set.is_empty());
         }
 
         mod when_positive {

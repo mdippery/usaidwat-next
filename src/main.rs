@@ -1,13 +1,7 @@
 use clap::Parser;
 use reqwest::StatusCode;
-use std::process;
-use usaidwat::cli::{Config, Error, Runner};
+use usaidwat::cli::{Config, Error, Runner, die};
 use usaidwat::service;
-
-fn die(error_code: i32, message: &str) {
-    eprintln!("{}", message);
-    process::exit(error_code);
-}
 
 fn dispatch_err(username: &str, err: &Error) {
     let message = match err {

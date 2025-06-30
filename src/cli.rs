@@ -5,12 +5,20 @@ use crate::client::Redditor;
 use crate::clock::SystemClock;
 use crate::conf;
 use crate::count::{SortAlgorithm, SubredditCounter};
-use crate::filter::RedditFilter;
+use crate::filter::{RedditFilter, StringSet};
 use crate::service::RedditService;
 use crate::view::{ViewOptions, Viewable};
 use clap::{Args, Parser, Subcommand, ValueEnum};
 use clap_verbosity_flag::Verbosity;
 use pager::Pager;
+use std::process;
+
+// TODO: We should probably move this back to main and have Runner.run()
+//       return a Result, but we can work on that later.
+pub fn die(error_code: i32, message: &str) {
+    eprintln!("{}", message);
+    process::exit(error_code);
+}
 
 /// Program configuration.
 #[derive(Debug, Parser)]
@@ -48,6 +56,9 @@ enum Command {
     Log {
         /// Reddit username
         username: String,
+
+        /// Only show comments from these subreddits
+        subreddits: Vec<String>,
 
         /// Show dates in "absolute" or "relative" format
         #[arg(long)]
@@ -194,6 +205,7 @@ impl Runner {
         match &self.config.command {
             Command::Info { .. } => self.run_info(),
             Command::Log {
+                subreddits,
                 date,
                 grep,
                 limit,
@@ -202,7 +214,7 @@ impl Runner {
                 ..
             } => {
                 let date_format = date.as_ref().unwrap_or(&DateFormat::Relative);
-                self.run_log(date_format, grep, limit, oneline, raw);
+                self.run_log(subreddits, date_format, grep, limit, oneline, raw);
             }
             Command::Posts(subconfig) => self.run_posts(subconfig),
             Command::Summary { .. } => self.run_summary(),
@@ -221,6 +233,7 @@ impl Runner {
 
     fn run_log(
         &self,
+        subreddits: &Vec<String>,
         date_format: &DateFormat,
         grep: &Option<String>,
         limit: &Option<u32>,
@@ -232,12 +245,29 @@ impl Runner {
             .raw(*raw)
             .grep(grep.clone())
             .date_format(date_format.clone());
+
+        // TODO: Move this take into the filtering code
         let n = limit
             .and_then(|n| Some(n as usize))
             .unwrap_or_else(|| self.user().comments().count());
         let comments = self.user().comments().take(n);
 
-        let comments = RedditFilter::new(comments).grep(grep).collect();
+        // TODO: Wrap this up in a common method for reuse by `posts log`.
+        let subreddits: Vec<&str> = subreddits.iter().map(|s| s.as_str()).collect();
+        let filter = StringSet::from(&subreddits);
+        if filter.is_none() {
+            die(
+                1,
+                &format!("invalid subreddit filter: {}", subreddits.join(" ")),
+            );
+        }
+        // TODO: Might be a better way to do this, but at this point we should know it's Some.
+        let filter = filter.unwrap();
+
+        let comments = RedditFilter::new(comments)
+            .grep(grep)
+            .filter(&filter)
+            .collect();
 
         let joiner = if *oneline { "\n" } else { "\n\n\n" };
         let output = comments
