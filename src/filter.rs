@@ -41,16 +41,25 @@ where
         Self { things }
     }
 
+    /// Returns the first n items.
+    ///
+    /// If `limit` is `None`, then all items are returned.
+    pub fn take(self, limit: &Option<u32>) -> RedditFilter<impl Iterator<Item = I::Item>> {
+        let things: Vec<I::Item> = match limit {
+            None => self.things.collect(),
+            Some(n) => self.things.take(*n as usize).collect(),
+        };
+        let things = things.into_iter();
+        RedditFilter { things }
+    }
+
     /// Returns all items with searchable text that matches the given needle.
     ///
     /// If `needle` is `None`, all items are returned.
     pub fn grep(self, needle: &Option<String>) -> RedditFilter<impl Iterator<Item = I::Item>> {
-        let things = match needle {
-            None => self.things.collect::<Vec<_>>(),
-            Some(needle) => self
-                .things
-                .filter(|thing| thing.matches(needle))
-                .collect::<Vec<_>>(),
+        let things: Vec<I::Item> = match needle {
+            None => self.things.collect(),
+            Some(needle) => self.things.filter(|thing| thing.matches(needle)).collect(),
         };
         let things = things.into_iter();
         RedditFilter { things }
@@ -324,6 +333,32 @@ mod tests {
                 .iter()
                 .map(|(s, sr)| TestSearchable::new(s, sr))
                 .collect()
+        }
+
+        #[test]
+        fn it_returns_the_first_n_items() {
+            let texts = load_test();
+            let limit = Some(3);
+            let results = RedditFilter::new(texts.into_iter()).take(&limit);
+            assert_eq!(results.collect().len(), 3);
+        }
+
+        #[test]
+        fn it_returns_all_items_when_limit_is_none() {
+            let texts = load_test();
+            let n = texts.len();
+            let limit = None;
+            let results = RedditFilter::new(texts.into_iter()).take(&limit);
+            assert_eq!(results.collect().len(), n);
+        }
+
+        #[test]
+        fn it_returns_all_items_when_limit_exceeds_the_total_count() {
+            let texts = load_test();
+            let n = texts.len();
+            let limit = Some(n as u32 + 1);
+            let results = RedditFilter::new(texts.into_iter()).take(&limit);
+            assert_eq!(results.collect().len(), n);
         }
 
         #[test]

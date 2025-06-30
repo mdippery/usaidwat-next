@@ -246,12 +246,6 @@ impl Runner {
             .grep(grep.clone())
             .date_format(date_format.clone());
 
-        // TODO: Move this take into the filtering code
-        let n = limit
-            .and_then(|n| Some(n as usize))
-            .unwrap_or_else(|| self.user().comments().count());
-        let comments = self.user().comments().take(n);
-
         // TODO: Wrap this up in a common method for reuse by `posts log`.
         let subreddits: Vec<&str> = subreddits.iter().map(|s| s.as_str()).collect();
         let filter = StringSet::from(&subreddits);
@@ -264,7 +258,8 @@ impl Runner {
         // TODO: Might be a better way to do this, but at this point we should know it's Some.
         let filter = filter.unwrap();
 
-        let comments = RedditFilter::new(comments)
+        let comments = RedditFilter::new(self.user().comments())
+            .take(limit)
             .grep(grep)
             .filter(&filter)
             .collect();
