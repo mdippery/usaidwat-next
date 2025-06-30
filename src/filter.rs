@@ -114,13 +114,12 @@ impl StringSet {
     }
 
     pub fn contains(&self, needle: &str) -> bool {
-        // TODO: Case-insensitive match; modify into_set() to return lowercase strings
-        //       and convert needle to lowercase here (test this).
         match &self.kind {
-            StringSetKind::Negative(set) => !set.contains(needle),
-            StringSetKind::Positive(set) => set.contains(needle),
+            StringSetKind::Negative(set) => !set.contains(&needle.to_lowercase()),
+            StringSetKind::Positive(set) => set.contains(&needle.to_lowercase()),
         }
     }
+
     pub fn is_empty(&self) -> bool {
         match &self.kind {
             StringSetKind::Negative(set) | StringSetKind::Positive(set) => set.is_empty(),
@@ -193,7 +192,7 @@ impl StringSetValidator {
         HashSet::from_iter(
             self.strings
                 .into_iter()
-                .map(|s| s.trim_start_matches('-').to_owned()),
+                .map(|s| s.trim_start_matches('-').to_lowercase()),
         )
     }
 }
@@ -498,6 +497,17 @@ mod tests {
             }
 
             #[test]
+            fn it_accepts_a_string_in_the_set_case_insensitively() {
+                let strings = vec!["Alpha,Beta", "Charlie", "Delta,Echo,Foxtrot", "golf"];
+                let set =
+                    StringSet::from(&strings).expect(&format!("should build set from {strings:?}"));
+                assert!(
+                    set.contains("echo"),
+                    "'echo' should be in {set:?}, but is not"
+                );
+            }
+
+            #[test]
             fn it_rejects_a_string_not_in_the_set() {
                 let strings = vec!["alpha,beta", "charlie", "delta,echo,foxtrot", "golf"];
                 let set =
@@ -520,6 +530,17 @@ mod tests {
             #[test]
             fn it_rejects_a_string_in_the_set() {
                 let strings = vec!["-alpha,-beta", "-charlie", "-delta,-echo,-foxtrot", "-golf"];
+                let set =
+                    StringSet::from(&strings).expect(&format!("should build set from {strings:?}"));
+                assert!(
+                    !set.contains("echo"),
+                    "'echo' should not be in {set:?}, but is"
+                );
+            }
+
+            #[test]
+            fn it_rejects_a_string_in_the_set_case_insensitively() {
+                let strings = vec!["-Alpha,-Beta", "-Charlie", "-Delta,-Echo,-Foxtrot", "-golf"];
                 let set =
                     StringSet::from(&strings).expect(&format!("should build set from {strings:?}"));
                 assert!(
