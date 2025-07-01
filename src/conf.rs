@@ -29,6 +29,7 @@ use std::ffi::OsString;
 // Also, I should test this with various values of $LESS. For example,
 // my $LESS is simply set to "R", but I should test output when the
 // default option of "FSRX is used.
+
 /// Returns an appropriate vector of environment variables to pass to the pager.
 pub fn pager_env(oneline: &bool) -> impl IntoIterator<Item = impl Into<OsString>> {
     // Get the value of $LESS, defaulting to "FSRX" if $LESS is unset.
