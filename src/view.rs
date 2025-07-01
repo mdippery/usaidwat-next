@@ -2,7 +2,7 @@
 
 use crate::cli::DateFormat;
 use crate::client::{Redditor, Timeline};
-use crate::clock::{Clock, HasAge, SystemClock};
+use crate::clock::{Clock, HasAge};
 use crate::count::SubredditCount;
 use crate::text::RegexReplaceable;
 use crate::thing::{Comment, HasSubreddit, Submission};
@@ -94,13 +94,13 @@ pub trait Viewable {
 }
 
 impl Viewable for Redditor {
-    fn view<C: Clock>(&self, _: &ViewOptions, _: &C) -> String {
+    fn view<C: Clock>(&self, _: &ViewOptions, clock: &C) -> String {
         formatdoc! {"
             Created: {} ({})
             Link Karma: {}
             Comment Karma: {}",
             self.created_utc().with_timezone(&Local).format("%b %d, %Y %H:%M %p"),
-            self.relative_age(&SystemClock::default()),
+            self.relative_age(clock),
             self.link_karma(),
             self.comment_karma(),
         }
