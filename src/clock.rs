@@ -81,8 +81,25 @@ mod tests {
     mod has_age {
         use super::super::*;
         use crate::clock::HasAge;
-        use crate::test_utils::{FrozenClock, load_data};
-        use crate::thing::Comment;
+        use crate::test_utils::FrozenClock;
+
+        #[derive(Debug)]
+        struct ThingWithAge {
+            created_utc: DateTime<Utc>,
+        }
+
+        impl ThingWithAge {
+            pub fn new(timestamp: i64) -> Self {
+                let created_utc = DateTime::from_timestamp(timestamp, 0).unwrap();
+                Self { created_utc }
+            }
+        }
+
+        impl HasAge for ThingWithAge {
+            fn created_utc(&self) -> DateTime<Utc> {
+                self.created_utc
+            }
+        }
 
         #[test]
         #[ignore]
@@ -96,18 +113,14 @@ mod tests {
             todo!("test this!");
         }
 
-        // TODO: Implement HasAge instead of using Comment so I can make
-        //       Comment::parse() and others private again.
-
         #[test]
         fn it_correctly_formats_singular_time_units() {
             let datetime = DateTime::parse_from_rfc3339("2025-05-28T10:51:00-07:00")
                 .expect("could not parse timestamp")
                 .with_timezone(&Utc);
             let clock = FrozenClock::new(datetime);
-            let comments = Comment::parse(&load_data("comments_mipadi")).unwrap();
-            let comment = &comments[3];
-            assert_eq!(comment.relative_age(&clock), "1 month ago");
+            let thing = ThingWithAge::new(1744177355);
+            assert_eq!(thing.relative_age(&clock), "1 month ago");
         }
 
         #[test]
@@ -116,9 +129,8 @@ mod tests {
                 .expect("could not parse timestamp")
                 .with_timezone(&Utc);
             let clock = FrozenClock::new(datetime);
-            let comments = Comment::parse(&load_data("comments_mipadi")).unwrap();
-            let comment = &comments[2];
-            assert_eq!(comment.relative_age(&clock), "a month ago");
+            let thing = ThingWithAge::new(1744481059);
+            assert_eq!(thing.relative_age(&clock), "a month ago");
         }
     }
 }

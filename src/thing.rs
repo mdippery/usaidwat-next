@@ -147,7 +147,7 @@ impl About {
     /// `/users/<user>/about.json`.
     ///
     /// This method is generally invoked by `User`, not directly.
-    pub fn parse(user_data: &str) -> Result<Self> {
+    fn parse(user_data: &str) -> Result<Self> {
         serde_json::from_str(user_data)
             .map(|wrapper: AboutResponse| wrapper.data)
             .map_err(Error::Parse)
@@ -176,7 +176,7 @@ impl Comment {
     /// `/users/<user>/comments.json`.
     ///
     /// This method is generally invoked by `User`, not directly.
-    pub fn parse(comment_data: &str) -> Result<Vec<Self>> {
+    fn parse(comment_data: &str) -> Result<Vec<Self>> {
         serde_json::from_str(comment_data)
             .map(|comment_listing: ListingResponse<CommentResponse>| {
                 comment_listing
@@ -271,7 +271,7 @@ impl Submission {
     /// `/users/<user>/submitted.json`.
     ///
     /// This method is generally invoked by `User`, not directly.
-    pub fn parse(post_data: &str) -> Result<Vec<Self>> {
+    fn parse(post_data: &str) -> Result<Vec<Self>> {
         serde_json::from_str(post_data)
             .map(|comment_listing: ListingResponse<SubmissionResponse>| {
                 comment_listing
