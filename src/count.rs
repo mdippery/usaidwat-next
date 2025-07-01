@@ -43,12 +43,7 @@ impl SubredditCounter {
     /// Returns an iterator over the (subreddit name, count) pairs.
     pub fn sort_by(&self, algo: &SortAlgorithm) -> IntoIter<SubredditCount> {
         match algo {
-            SortAlgorithm::Numerically => self
-                .counts
-                .most_common_tiebreaker(|lhs, rhs| {
-                    Ord::cmp(&lhs.to_lowercase(), &rhs.to_lowercase())
-                })
-                .into_iter(),
+            SortAlgorithm::Numerically => self.sort_numerically(),
             SortAlgorithm::Lexicographically => self.sort_lexicographically(),
         }
     }
@@ -56,6 +51,12 @@ impl SubredditCounter {
     fn count<T: HasSubreddit>(iter: impl Iterator<Item = T>) -> Counter<String> {
         iter.map(|item| String::from(item.subreddit()))
             .collect::<Counter<_>>()
+    }
+
+    fn sort_numerically(&self) -> IntoIter<SubredditCount> {
+        self.counts
+            .most_common_tiebreaker(|lhs, rhs| Ord::cmp(&lhs.to_lowercase(), &rhs.to_lowercase()))
+            .into_iter()
     }
 
     fn sort_lexicographically(&self) -> IntoIter<SubredditCount> {
