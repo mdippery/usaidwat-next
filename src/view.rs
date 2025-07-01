@@ -57,6 +57,31 @@ impl ViewOptions {
     }
 }
 
+/// Something that has a date that can be formatted.
+trait DateFormattable: HasAge {
+    /// Formats the date associated with the data structure.
+    ///
+    /// The date format can be relative or absolute and is specified in the
+    /// `ViewOptions` parameter.
+    fn format_date<C: Clock>(&self, opts: &ViewOptions, clock: &C) -> String {
+        match opts.date_format {
+            DateFormat::Relative => self.relative_age(clock),
+            DateFormat::Absolute => self.format_absolute_date(),
+        }
+    }
+
+    /// Formats an absolute date associated with the data structure.
+    fn format_absolute_date(&self) -> String {
+        let date = self.created_local();
+        let date_part = format!("{}", date.format("%a, %-d %b %Y"));
+        let time_part = format!("{}", date.format("%l:%M %p"));
+        // %l formats a single-digit time as, e.g., " 8",
+        // but I want to trim off the leading space.
+        let time_part = time_part.trim();
+        format!("{date_part}, {time_part}")
+    }
+}
+
 /// Marks an item that can be converted into a string for display on a terminal.
 pub trait Viewable {
     /// Converts the item into a string for display on a terminal.
@@ -91,6 +116,8 @@ impl Viewable for Comment {
         }
     }
 }
+
+impl DateFormattable for Comment {}
 
 impl Comment {
     fn view_full<C: Clock>(&self, opts: &ViewOptions, clock: &C) -> String {
@@ -129,23 +156,6 @@ impl Comment {
     fn view_oneline<C: Clock>(&self, _: &ViewOptions, _: &C) -> String {
         format!("{} {}", self.subreddit().green(), self.link_title())
     }
-
-    fn format_date<C: Clock>(&self, opts: &ViewOptions, clock: &C) -> String {
-        match opts.date_format {
-            DateFormat::Relative => self.relative_age(clock),
-            DateFormat::Absolute => self.format_absolute_date(),
-        }
-    }
-
-    fn format_absolute_date(&self) -> String {
-        let date = self.created_local();
-        let date_part = format!("{}", date.format("%a, %-d %b %Y"));
-        let time_part = format!("{}", date.format("%l:%M %p"));
-        // %l formats a single-digit time as, e.g., " 8",
-        // but I want to trim off the leading space.
-        let time_part = time_part.trim();
-        format!("{date_part}, {time_part}")
-    }
 }
 
 impl Viewable for Submission {
@@ -155,13 +165,16 @@ impl Viewable for Submission {
         if opts.oneline {
             self.view_oneline()
         } else {
-            self.view_full(clock)
+            self.view_full(opts, clock)
         }
     }
 }
 
+impl DateFormattable for Submission {}
+
 impl Submission {
-    fn view_full<C: Clock>(&self, clock: &C) -> String {
+    fn view_full<C: Clock>(&self, opts: &ViewOptions, clock: &C) -> String {
+        let age = self.format_date(opts, clock);
         String::from(
             formatdoc! {"
                 {}
@@ -172,7 +185,7 @@ impl Submission {
                 self.subreddit().green(),
                 self.short_permalink().yellow(),
                 self.title().magenta(),
-                self.relative_age(clock).blue(),
+                age.blue(),
                 self.link_uri(),
             }
             // Remove trailing space since the link will be blank for self posts
@@ -448,10 +461,19 @@ mod tests {
         }
 
         #[test]
-        fn it_formats_a_post() {
+        fn it_formats_a_post_with_relative_dates() {
             let post = get_post(0);
             let expected = load_output("posts");
             let actual = post.view(&ViewOptions::default(), &FrozenClock::default());
+            assert_eq!(actual, expected);
+        }
+
+        #[test]
+        fn it_formats_a_post_with_absolute_dates() {
+            let opts = ViewOptions::default().date_format(DateFormat::Absolute);
+            let post = get_post(0);
+            let expected = load_output("posts_absolute_dates");
+            let actual = post.view(&opts, &FrozenClock::default());
             assert_eq!(actual, expected);
         }
 

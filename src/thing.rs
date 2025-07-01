@@ -1,11 +1,11 @@
 //! A "thing" in the Reddit sense.
 //!
-//! Historically in the Reddit API and its old source code, a "Thing" was
+//! Historically, in the Reddit API and its old source code, a "Thing" was
 //! any element of the Reddit system: users, posts, comments, etc. This
 //! module encapsulates that idea and provides an easy way to more or less
 //! work with JSON data from the Reddit API.
 
-use crate::clock::{DateTime, HasAge, Local, Utc};
+use crate::clock::{DateTime, HasAge, Utc};
 use crate::filter::Searchable;
 use crate::{markdown, text};
 use serde::{Deserialize, Deserializer};
@@ -187,11 +187,6 @@ impl Comment {
                     .collect()
             })
             .map_err(Error::Parse)
-    }
-
-    /// The time the comment was created, in local time.
-    pub fn created_local(&self) -> DateTime<Local> {
-        self.created_utc().with_timezone(&Local)
     }
 
     /// The full URL at which the comment can be retrieved.
@@ -429,6 +424,7 @@ mod tests {
     mod comments {
         use super::super::*;
         use crate::test_utils::{load_data, load_output};
+        use chrono::Local;
         use pretty_assertions::assert_eq;
 
         #[test]

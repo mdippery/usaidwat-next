@@ -29,6 +29,11 @@ pub trait HasAge {
     /// The date the item was created, in UTC.
     fn created_utc(&self) -> DateTime<Utc>;
 
+    /// The date the item was created, in local time.
+    fn created_local(&self) -> DateTime<Local> {
+        self.created_utc().with_timezone(&Local)
+    }
+
     /// The age of the account.
     ///
     /// `clock` is a source of time from which the age can be derived.

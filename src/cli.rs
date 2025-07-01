@@ -150,6 +150,12 @@ enum PostSubcommand {
         /// Output log in a more compact form
         #[arg(long, default_value_t = false)]
         oneline: bool,
+
+        /// Show dates in "absolute" or "relative" format
+        #[arg(long)]
+        // TODO: The default option to DateFormat should avoid having to
+        //       use Option here, but that's not working for some reason.
+        date: Option<DateFormat>,
     },
 
     /// Tally a user's posts by subreddit
@@ -272,15 +278,26 @@ impl Runner {
         match &config.command {
             PostSubcommand::Log {
                 subreddits,
+                date,
                 oneline,
                 ..
-            } => self.run_posts_log(subreddits, &oneline),
+            } => {
+                let date_format = date.as_ref().unwrap_or(&DateFormat::Relative);
+                self.run_posts_log(subreddits, date_format, &oneline)
+            }
             PostSubcommand::Tally(config) => self.run_posts_tally(&config.sort_algorithm()),
         }
     }
 
-    fn run_posts_log(&self, subreddits: &Vec<String>, oneline: &bool) -> CliResult {
-        let opts = ViewOptions::default().oneline(*oneline);
+    fn run_posts_log(
+        &self,
+        subreddits: &Vec<String>,
+        date_format: &DateFormat,
+        oneline: &bool,
+    ) -> CliResult {
+        let opts = ViewOptions::default()
+            .oneline(*oneline)
+            .date_format(date_format.clone());
 
         let filter = StringSet::from(subreddits).ok_or(format!(
             "invalid subreddit filter: {}",
