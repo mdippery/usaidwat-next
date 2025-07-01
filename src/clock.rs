@@ -1,6 +1,7 @@
 //! All things time-related.
 
 pub use chrono::{DateTime, Local, TimeDelta, Utc};
+use regex::Regex;
 use relativetime::NegativeRelativeTime;
 use std::ops::Sub;
 use std::time::Duration;
@@ -49,12 +50,16 @@ pub trait HasAge {
     /// `clock` is a source of time from which the age can be derived.
     /// Generally [`SystemClock::default()`] is used.
     fn relative_age<C: Clock>(&self, clock: &C) -> String {
-        // TODO: For FFS, sometimes this prints "1 months ago".
-        //       I'm using a crate so it's the crate's fault, but I should
-        //       either fix the crate or hack a fix here. So annoying.
         let age = self.age(clock).as_seconds_f64();
         let d = Duration::from_secs(age.trunc() as u64);
-        d.to_relative_in_past()
+        let s = d.to_relative_in_past();
+
+        // The relativetime crate sometimes prints things like "1 months ago".
+        // Unfortunately, the crate is no longer updated and isn't even on
+        // GitHub anymore, so it's not likely to be updated any time soon,
+        // so let's just hack around the bug here until we have a better fix.
+        let re = Regex::new("^1 (?<unit>[a-z]+)s ago$").unwrap();
+        re.replace(&s, "1 $unit ago").to_string()
     }
 }
 
@@ -95,7 +100,6 @@ mod tests {
         //       Comment::parse() and others private again.
 
         #[test]
-        #[ignore] // TODO: Currently fails because the relativetime crate has a bug
         fn it_correctly_formats_singular_time_units() {
             let datetime = DateTime::parse_from_rfc3339("2025-05-28T10:51:00-07:00")
                 .expect("could not parse timestamp")
