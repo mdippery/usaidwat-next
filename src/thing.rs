@@ -525,7 +525,11 @@ mod tests {
         #[test]
         #[ignore]
         fn it_trims_whitespace_from_link_titles() {
-            todo!("figure out how to test this");
+            let expected = "this link title has a lot of whitespace";
+            let comments = Comment::parse(&load_data("comments_whitespace")).unwrap();
+            let comment = &comments[0];
+            let actual = comment.link_title();
+            assert_eq!(actual, expected);
         }
 
         #[test]
@@ -547,9 +551,12 @@ mod tests {
         }
 
         #[test]
-        #[ignore]
         fn it_trims_whitespace_from_its_body() {
-            todo!("figure out how to test this")
+            let expected = "No more whitespace!";
+            let comments = Comment::parse(&load_data("comments_whitespace")).unwrap();
+            let comment = &comments[0];
+            let actual = comment.body();
+            assert_eq!(actual, expected);
         }
 
         #[test]

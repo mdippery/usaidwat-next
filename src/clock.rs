@@ -102,15 +102,17 @@ mod tests {
         }
 
         #[test]
-        #[ignore]
         fn it_returns_its_age() {
-            todo!("test this!");
+            let clock = FrozenClock::default();
+            let thing = ThingWithAge::new(1349074800);
+            assert_eq!(thing.age(&clock).num_seconds(), 398945580);
         }
 
         #[test]
-        #[ignore]
         fn it_returns_its_age_as_a_relative_string() {
-            todo!("test this!");
+            let clock = FrozenClock::default();
+            let thing = ThingWithAge::new(1349074800);
+            assert_eq!(thing.relative_age(&clock), "13 years ago");
         }
 
         #[test]
