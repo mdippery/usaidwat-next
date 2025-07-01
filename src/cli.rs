@@ -11,6 +11,7 @@ use crate::view::{ViewOptions, Viewable};
 use clap::{Args, Parser, Subcommand, ValueEnum};
 use clap_verbosity_flag::Verbosity;
 use pager::Pager;
+use std::fmt::Formatter;
 
 /// Result of running a command.
 pub type CliResult = Result<(), String>;
@@ -56,10 +57,8 @@ enum Command {
         subreddits: Vec<String>,
 
         /// Show dates in "absolute" or "relative" format
-        #[arg(long)]
-        // TODO: The default option to DateFormat should avoid having to
-        //       use Option here, but that's not working for some reason.
-        date: Option<DateFormat>,
+        #[arg(long, value_name = "FORMAT", default_value_t)]
+        date: DateFormat,
 
         /// Show only comments matching STRING
         #[arg(long, value_name = "STRING")]
@@ -152,10 +151,8 @@ enum PostSubcommand {
         oneline: bool,
 
         /// Show dates in "absolute" or "relative" format
-        #[arg(long)]
-        // TODO: The default option to DateFormat should avoid having to
-        //       use Option here, but that's not working for some reason.
-        date: Option<DateFormat>,
+        #[arg(long, value_name = "FORMAT", default_value_t)]
+        date: DateFormat,
     },
 
     /// Tally a user's posts by subreddit
@@ -181,6 +178,15 @@ pub enum DateFormat {
     /// Display dates relative to the current time ("5 months ago").
     #[default]
     Relative,
+}
+
+impl std::fmt::Display for DateFormat {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        match self {
+            DateFormat::Absolute => write!(f, "absolute"),
+            DateFormat::Relative => write!(f, "relative"),
+        }
+    }
 }
 
 /// Runs the command-line program.
@@ -216,10 +222,7 @@ impl Runner {
                 oneline,
                 raw,
                 ..
-            } => {
-                let date_format = date.as_ref().unwrap_or(&DateFormat::Relative);
-                self.run_log(subreddits, date_format, grep, limit, oneline, raw)
-            }
+            } => self.run_log(subreddits, date, grep, limit, oneline, raw),
             Command::Posts(subconfig) => self.run_posts(subconfig),
             Command::Summary { .. } => self.run_summary(),
             Command::Tally(config) => self.run_tally(&config.sort_algorithm()),
@@ -281,10 +284,7 @@ impl Runner {
                 date,
                 oneline,
                 ..
-            } => {
-                let date_format = date.as_ref().unwrap_or(&DateFormat::Relative);
-                self.run_posts_log(subreddits, date_format, &oneline)
-            }
+            } => self.run_posts_log(subreddits, date, &oneline),
             PostSubcommand::Tally(config) => self.run_posts_tally(&config.sort_algorithm()),
         }
     }
