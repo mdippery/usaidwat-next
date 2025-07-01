@@ -159,8 +159,6 @@ impl Comment {
 
 impl Viewable for Submission {
     fn view<C: Clock>(&self, opts: &ViewOptions, clock: &C) -> String {
-        // TODO: Only use color if printing to tty
-
         if opts.oneline {
             self.view_oneline()
         } else {
