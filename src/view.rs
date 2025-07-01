@@ -6,7 +6,6 @@ use crate::clock::{Clock, HasAge};
 use crate::count::SubredditCount;
 use crate::text::RegexReplaceable;
 use crate::thing::{Comment, HasSubreddit, Submission};
-use chrono::Local;
 use colored::Colorize;
 use indoc::formatdoc;
 use itertools::Itertools;
@@ -99,7 +98,7 @@ impl Viewable for Redditor {
             Created: {} ({})
             Link Karma: {}
             Comment Karma: {}",
-            self.created_utc().with_timezone(&Local).format("%b %d, %Y %H:%M %p"),
+            self.created_local().format("%b %d, %Y %H:%M %p"),
             self.relative_age(clock),
             self.link_karma(),
             self.comment_karma(),
