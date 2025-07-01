@@ -11,10 +11,10 @@ use crate::view::{ViewOptions, Viewable};
 use clap::{Args, Parser, Subcommand, ValueEnum};
 use clap_verbosity_flag::Verbosity;
 use pager::Pager;
-use std::fmt::Formatter;
+use std::{fmt::Formatter, result};
 
 /// Result of running a command.
-pub type CliResult = Result<(), String>;
+pub type Result = result::Result<(), String>;
 
 /// Program configuration.
 #[derive(Debug, Parser)]
@@ -200,7 +200,7 @@ impl Runner {
     /// Create a new program runner using the given `config`.
     ///
     /// Returns an error with a helpful message if the user does not exist.
-    pub fn new(config: Config) -> Result<Runner, Error> {
+    pub fn new(config: Config) -> result::Result<Runner, Error> {
         let username = config.command.username();
         let user = Redditor::new(username.to_string(), RedditService::new())?;
         Ok(Self { config, user })
@@ -211,7 +211,7 @@ impl Runner {
     }
 
     /// Run the command-line program using its stored configuration options.
-    pub fn run(&self) -> CliResult {
+    pub fn run(&self) -> Result {
         match &self.config.command {
             Command::Info { .. } => self.run_info(),
             Command::Log {
@@ -230,7 +230,7 @@ impl Runner {
         }
     }
 
-    fn run_info(&self) -> CliResult {
+    fn run_info(&self) -> Result {
         println!(
             "{}",
             self.user()
@@ -247,7 +247,7 @@ impl Runner {
         limit: &Option<u32>,
         oneline: &bool,
         raw: &bool,
-    ) -> CliResult {
+    ) -> Result {
         let opts = ViewOptions::default()
             .oneline(*oneline)
             .raw(*raw)
@@ -277,7 +277,7 @@ impl Runner {
         Ok(())
     }
 
-    fn run_posts(&self, config: &PostCommandConfig) -> CliResult {
+    fn run_posts(&self, config: &PostCommandConfig) -> Result {
         match &config.command {
             PostSubcommand::Log {
                 subreddits,
@@ -294,7 +294,7 @@ impl Runner {
         subreddits: &Vec<String>,
         date_format: &DateFormat,
         oneline: &bool,
-    ) -> CliResult {
+    ) -> Result {
         let opts = ViewOptions::default()
             .oneline(*oneline)
             .date_format(date_format.clone());
@@ -320,7 +320,7 @@ impl Runner {
         Ok(())
     }
 
-    fn run_posts_tally(&self, sort_algorithm: &SortAlgorithm) -> CliResult {
+    fn run_posts_tally(&self, sort_algorithm: &SortAlgorithm) -> Result {
         // TODO: Need to test this conditional logic
 
         if self.user().has_submissions() {
@@ -339,11 +339,11 @@ impl Runner {
         }
     }
 
-    fn run_summary(&self) -> CliResult {
+    fn run_summary(&self) -> Result {
         todo!("summary");
     }
 
-    fn run_tally(&self, sort_algorithm: &SortAlgorithm) -> CliResult {
+    fn run_tally(&self, sort_algorithm: &SortAlgorithm) -> Result {
         // TODO: Need to test this conditional logic
 
         if self.user.has_comments() {
@@ -362,7 +362,7 @@ impl Runner {
         }
     }
 
-    fn run_timeline(&self) -> CliResult {
+    fn run_timeline(&self) -> Result {
         // TODO: This is hard to test -- should move the conditional check
         //       into testable method, maybe Timeline::view(), although I'm
         //       not sure the logic is appropriate there, either.

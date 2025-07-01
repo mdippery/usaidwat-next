@@ -28,7 +28,7 @@ fn main() {
     match Runner::new(config) {
         Ok(runner) => match runner.run() {
             Err(message) => die(1, &message),
-            Ok(result) => result,
+            Ok(()) => (),
         },
         Err(err) => dispatch_err(&username, &err),
     }
