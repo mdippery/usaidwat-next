@@ -344,7 +344,7 @@ impl Runner {
 
     fn run_summary(&self) -> Result {
         let summarizer = Summarizer::for_user(self.user());
-        debug!("Summarization output:\n{}", summarizer.dump());
+        debug!("Summarization output:\n{}", summarizer.context());
         todo!("actually do summarization");
         Ok(())
     }

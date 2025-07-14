@@ -16,8 +16,8 @@ impl<'a> Summarizer<'a> {
         Self { user }
     }
 
-    /// Dumps the raw content that will be sent to an LLM for summarization.
-    pub fn dump(&self) -> String {
+    /// Raw content that will be sent to an LLM for summarization.
+    pub fn context(&self) -> String {
         self.user
             .comments()
             .map(|c| markdown::summarize(c.markdown_body()))
@@ -33,11 +33,10 @@ mod tests {
     use pretty_assertions::assert_eq;
 
     #[test]
-    fn it_dumps_redditor_comments() {
+    fn it_provides_context_for_an_llm() {
         let redditor = Redditor::test();
         let expected = load_output("summary_raw");
-        let actual = Summarizer::for_user(&redditor).dump();
-
+        let actual = Summarizer::for_user(&redditor).context();
         assert_eq!(actual, expected);
     }
 }
