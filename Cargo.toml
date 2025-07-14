@@ -1,6 +1,6 @@
 [package]
 name = "usaidwat"
-version = "2.0.0-alpha.10"
+version = "2.0.0-alpha.11"
 authors = ["Michael Dippery <michael@monkey-robot.com>"]
 description = "Answers the age-old question, \"Where does a Redditor comment the most?\""
 #repository

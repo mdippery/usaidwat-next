@@ -7,9 +7,11 @@ use crate::conf;
 use crate::count::{SortAlgorithm, SubredditCounter};
 use crate::filter::{RedditFilter, StringSet};
 use crate::service::RedditService;
+use crate::summary::Summarizer;
 use crate::view::{ViewOptions, Viewable};
 use clap::{Args, Parser, Subcommand, ValueEnum};
 use clap_verbosity_flag::Verbosity;
+use log::debug;
 use pager::Pager;
 use std::{fmt::Formatter, result};
 
@@ -81,6 +83,7 @@ enum Command {
     Posts(PostCommandConfig),
 
     /// Summarize a user's posting history
+    #[clap(alias = "summarize")]
     Summary {
         /// Reddit username
         username: String,
@@ -340,7 +343,10 @@ impl Runner {
     }
 
     fn run_summary(&self) -> Result {
-        todo!("summary");
+        let summarizer = Summarizer::for_user(self.user());
+        debug!("Summarization output:\n{}", summarizer.dump());
+        todo!("actually do summarization");
+        Ok(())
     }
 
     fn run_tally(&self, sort_algorithm: &SortAlgorithm) -> Result {
