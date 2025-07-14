@@ -225,6 +225,17 @@ impl Comment {
         markdown::parse(&self.body, textwrap::termwidth())
     }
 
+    /// A summarized form of the comment body, suitable for passing to
+    /// an LLM.
+    ///
+    /// This is essentially the comment's body stripped of all markup so
+    /// it is only the basic text. Text contained in extra markup, like link
+    /// text and quotes, are completely removed.
+    // TODO: Test this!
+    pub fn summarized_body(&self) -> String {
+        markdown::summarize(&self.body)
+    }
+
     /// The comment body, as raw Markdown text, with HTML entities converted
     /// to their respective characters.
     ///
@@ -235,11 +246,27 @@ impl Comment {
     /// characters, but it will not do any additional parsing of Markdown
     /// text. In other words, the text returned by this method is suitable
     /// for passing into a Markdown parser.
+    ///
+    /// The returned text is wrapped to the current terminal width, so it
+    /// is also suitable for output to a terminal. For raw, unwrapped text,
+    /// without converted entities, use [`Comment::markdown_body`].
+    // TODO: Test this!
     pub fn raw_body(&self) -> String {
         textwrap::fill(
             &text::convert_html_entities(&self.body),
             textwrap::termwidth(),
         )
+    }
+
+    /// The raw Markdown markup for the comment, as returned from the Reddit
+    /// API.
+    ///
+    /// Like [`Comment::raw_body`], this text is suitable for passing to a
+    /// Markdown parser. Unlike [`Comment::raw_body`], the text is not wrapped,
+    /// and HTML entities have not yet been converted.
+    // TODO: Test this!
+    pub fn markdown_body(&self) -> &str {
+        &self.body
     }
 }
 

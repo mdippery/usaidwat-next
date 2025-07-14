@@ -61,6 +61,7 @@ pub mod count;
 pub mod filter;
 pub mod markdown;
 pub mod service;
+pub mod summary;
 pub mod text;
 pub mod thing;
 pub mod view;

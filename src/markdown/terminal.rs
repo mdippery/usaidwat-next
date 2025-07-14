@@ -16,9 +16,10 @@
 //! - [ANSI Escape Sequences](https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797>), for
 //!   the full rundown of ANSI terminal escape codes.
 
+use crate::markdown::{TextAppendable, Visitable, Visitor};
 use crate::text;
 use itertools::Itertools;
-use log::{debug, warn};
+use log::debug;
 use markdown::{
     Constructs, ParseOptions,
     mdast::{Code, Html, Image, InlineCode, Link, List, Node, Text},
@@ -42,6 +43,7 @@ struct MarkdownParser {
 }
 
 impl MarkdownParser {
+    /// Creates a new Markdown parser that will format text to the given width.
     pub fn new(textwidth: usize) -> Self {
         MarkdownParser { textwidth }
     }
@@ -63,44 +65,6 @@ impl MarkdownParser {
             ..ParseOptions::default()
         }
     }
-}
-
-/// "Visit" a node and emit code.
-///
-/// For example, a `Visitor` can embody an algorithm used to visit each node
-/// in an abstract syntax and emit code for the tree.
-pub trait Visitor {
-    /// The generated text.
-    fn text(&self) -> String;
-
-    /// "Visit" a particular node in a graph.
-    fn visit(&mut self, node: &Node);
-
-    /// "Swallows" a node.
-    ///
-    /// Nothing is done by the visitor for the node, but it continues visiting
-    /// the node's children. This is generally used to accept a known node
-    /// when there is no further processing necessary for that particular node.
-    fn swallow(&mut self, node: &Node)
-    where
-        Self: Sized,
-    {
-        debug!("swallowing node: {node:#?}");
-        node.accept_children(self);
-    }
-
-    /// Indicates that the visitor was asked to visit an unexpected node
-    /// that it does not know how to process.
-    ///
-    /// By default, the visitor will print an error and continue.
-    fn unknown(&self, node: &Node) {
-        warn!("unhandled node: {node:#?}");
-    }
-}
-
-/// A data type that can append text.
-trait TextAppendable {
-    fn push_text(&mut self, text: &str);
 }
 
 /// Provides default implementations of common Markdown parsing operations.
@@ -179,13 +143,13 @@ struct MarkdownVisitor {
 impl MarkdownVisitor {
     pub fn new(textwidth: usize) -> Self {
         Self {
-            text: String::from(""),
+            text: String::new(),
             textwidth,
         }
     }
 
     fn visit_paragraph(&mut self, node: &Node) {
-        self.text += "\n\n";
+        self.push_text("\n\n");
         node.accept_children(self);
     }
 
@@ -608,50 +572,15 @@ impl Visitor for MarkdownBlockquoteVisitor {
     }
 }
 
-/// A data structure that can be visited.
-pub trait Visitable {
-    /// Accept a visitor for processing the visitable item.
-    fn accept<V: Visitor>(&self, visitor: &mut V);
-
-    /// Accept a visitor for processing all child nodes.
-    fn accept_children<V: Visitor>(&self, visitor: &mut V);
-}
-
-impl Visitable for Node {
-    fn accept<V: Visitor>(&self, visitor: &mut V) {
-        visitor.visit(self);
-    }
-
-    fn accept_children<V: Visitor>(&self, visitor: &mut V) {
-        if let Some(children) = self.children() {
-            for child in children {
-                child.accept(visitor);
-            }
-        }
-    }
-}
-
 #[cfg(test)]
 mod tests {
+    use crate::markdown::test_utils::{load_markdown, load_output};
     use crate::test_utils::do_logging;
     //use pretty_assertions::assert_eq;
-    use std::fs;
 
     const TEXTWIDTH: usize = 80;
 
-    fn load_markdown(file: &str) -> String {
-        fs::read_to_string(format!("tests/markdown/{file}.md")).expect("could not find markdown")
-    }
-
-    fn load_output(file: &str) -> String {
-        String::from(
-            fs::read_to_string(format!("tests/markdown/{file}.txt"))
-                .expect("could not find markdown")
-                .trim_end(),
-        )
-    }
-
-    fn load_test(file: &str) -> (String, String) {
+    pub fn load_test(file: &str) -> (String, String) {
         (load_markdown(file), load_output(file))
     }
 
