@@ -16,16 +16,12 @@
 //! - [ANSI Escape Sequences](https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797>), for
 //!   the full rundown of ANSI terminal escape codes.
 
-use crate::{
-    markdown::{TextAppendable, Visitable, Visitor},
-    text,
-};
+use crate::markdown::{TextAppendable, Visitable, Visitor};
+use crate::text;
 use itertools::Itertools;
 use log::debug;
-use markdown::{
-    mdast::{Code, Html, Image, InlineCode, Link, List, Node, Text},
-    {Constructs, ParseOptions},
-};
+use markdown::mdast::{Code, Html, Image, InlineCode, Link, List, Node, Text};
+use markdown::{Constructs, ParseOptions};
 use textwrap::Options;
 
 /// Converts Markdown markup into a formatted string suitable for output on

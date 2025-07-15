@@ -1,16 +1,14 @@
 //! Drives the command-line program.
 
 pub use crate::client::Error;
-use crate::{
-    client::Redditor,
-    clock::SystemClock,
-    conf,
-    count::{SortAlgorithm, SubredditCounter},
-    filter::{RedditFilter, StringSet},
-    service::RedditService,
-    summary::Summarizer,
-    view::{ViewOptions, Viewable},
-};
+use crate::client::Redditor;
+use crate::clock::SystemClock;
+use crate::conf;
+use crate::count::{SortAlgorithm, SubredditCounter};
+use crate::filter::{RedditFilter, StringSet};
+use crate::service::RedditService;
+use crate::summary::Summarizer;
+use crate::view::{ViewOptions, Viewable};
 use clap::{Args, Parser, Subcommand, ValueEnum};
 use clap_verbosity_flag::Verbosity;
 use log::debug;

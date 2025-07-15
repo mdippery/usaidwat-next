@@ -1,6 +1,7 @@
 //! AI summarization.
 
-use crate::{client::Redditor, markdown};
+use crate::client::Redditor;
+use crate::markdown;
 use itertools::Itertools;
 
 /// Summarizes a Redditor's comments and provides a sentiment analysis using AI.

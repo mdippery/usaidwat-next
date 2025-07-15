@@ -1,10 +1,8 @@
 use clap::Parser;
 use reqwest::StatusCode;
 use std::process;
-use usaidwat::{
-    cli::{Config, Error, Runner},
-    service,
-};
+use usaidwat::cli::{Config, Error, Runner};
+use usaidwat::service;
 
 fn die(error_code: i32, message: &str) {
     eprintln!("{}", message);

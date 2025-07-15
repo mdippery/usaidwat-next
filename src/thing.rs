@@ -5,11 +5,9 @@
 //! module encapsulates that idea and provides an easy way to more or less
 //! work with JSON data from the Reddit API.
 
-use crate::{
-    clock::{DateTime, HasAge, Utc},
-    filter::Searchable,
-    markdown, text,
-};
+use crate::clock::{DateTime, HasAge, Utc};
+use crate::filter::Searchable;
+use crate::{markdown, text};
 use serde::{Deserialize, Deserializer};
 use std::fmt::Formatter;
 
