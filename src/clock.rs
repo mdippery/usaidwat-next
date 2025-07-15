@@ -3,13 +3,12 @@
 pub use chrono::{DateTime, Local, TimeDelta, Utc};
 use regex::Regex;
 use relativetime::NegativeRelativeTime;
-use std::ops::Sub;
 use std::time::Duration;
 
 /// Tells time and returns the time.
 ///
 /// Generally you will want to retrieve time using [`SystemClock`],
-/// but it tests you may want to implement a `Clock` with a fixed time.
+/// but in tests you may want to implement a `Clock` with a fixed time.
 pub trait Clock {
     /// The current time.
     fn now(&self) -> DateTime<Utc>;
@@ -41,7 +40,7 @@ pub trait HasAge {
     /// Generally [`SystemClock::default()`] is used.
     fn age<C: Clock>(&self, clock: &C) -> TimeDelta {
         let birthday = self.created_utc();
-        clock.now().sub(birthday)
+        clock.now() - birthday
     }
 
     /// The age of the account, relative to the current time, as a
