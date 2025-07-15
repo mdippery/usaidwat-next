@@ -70,7 +70,8 @@ impl Redditor {
     /// information about the Redditor.
     ///
     /// Returns an [`Error`] if data cannot be parsed for the given username.
-    pub fn new<T: Service>(username: String, service: T) -> Result<Self, Error> {
+    pub fn new<T: Service>(username: impl Into<String>, service: T) -> Result<Self, Error> {
+        let username = username.into();
         let user_data = service.get_resource(&username, "about")?;
         let comment_data = service.get_resource(&username, "comments")?;
         let post_data = service.get_resource(&username, "submitted")?;

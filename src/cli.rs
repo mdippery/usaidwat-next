@@ -205,7 +205,7 @@ impl Runner {
     /// Returns an error with a helpful message if the user does not exist.
     pub fn new(config: Config) -> result::Result<Runner, Error> {
         let username = config.command.username();
-        let user = Redditor::new(username.to_string(), RedditService::new())?;
+        let user = Redditor::new(username, RedditService::new())?;
         Ok(Self { config, user })
     }
 
