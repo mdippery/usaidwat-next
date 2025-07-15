@@ -73,6 +73,7 @@ impl error::Error for AuthError {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::ffi::OsString;
     use temp_env::{with_var, with_var_unset};
 
     #[test]
@@ -97,6 +98,21 @@ mod tests {
                 auth.unwrap_err(),
                 AuthError::EnvError(env::VarError::NotPresent)
             ));
+        })
+    }
+
+    #[test]
+    fn it_returns_an_error_if_a_key_is_not_unicode() {
+        let key_name = "AUTH_API_KEY";
+        let bytes = vec![0xf8, 0xf9, 0xfa, 0xfb, 0xfc, 0xfd, 0xfe, 0xff];
+        let key_value = unsafe { OsString::from_encoded_bytes_unchecked(bytes) };
+        with_var(key_name, Some(key_value), || {
+            let auth = Auth::from_env(key_name);
+            assert!(auth.is_err());
+            assert!(matches!(
+                auth.unwrap_err(),
+                AuthError::EnvError(env::VarError::NotUnicode(_))
+            ))
         })
     }
 }
