@@ -126,6 +126,11 @@ impl StringSet {
         }
     }
 
+    /// True if the set contains the `needle`.
+    ///
+    /// If there are only non-negated strings in the set, this means that
+    /// `needle` is a member of the set. If there are only _negated_ strings
+    /// in the set, this means that `needle` is _not_ contained in the set.
     pub fn contains(&self, needle: &str) -> bool {
         match &self.kind {
             StringSetKind::Negative(set) => !set.contains(&needle.to_lowercase()),
@@ -133,12 +138,19 @@ impl StringSet {
         }
     }
 
+    /// True if the set contains no items.
     pub fn is_empty(&self) -> bool {
         match &self.kind {
             StringSetKind::Negative(set) | StringSetKind::Positive(set) => set.is_empty(),
         }
     }
 
+    /// True if the set contains _negated_ strings.
+    ///
+    /// As a set must contain only negated or only non-negated strings,
+    /// this means that every single string in the set is negated if
+    /// this method returns true; conversely, it means that no string
+    /// in the set is negated if this method returns false.
     pub fn is_negated(&self) -> bool {
         self.kind.is_negated()
     }
