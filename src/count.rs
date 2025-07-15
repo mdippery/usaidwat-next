@@ -3,7 +3,6 @@
 use crate::thing::HasSubreddit;
 use counter::Counter;
 use itertools::Itertools;
-use std::vec::IntoIter;
 
 /// Differentiates between the different sorting algorithms used to
 /// return subreddit counts.
@@ -40,8 +39,8 @@ impl SubredditCounter {
     /// Sorts the subreddit counts by subreddit name or the count of items in
     /// the subreddit.
     ///
-    /// Returns an iterator over the (subreddit name, count) pairs.
-    pub fn sort_by(&self, algo: &SortAlgorithm) -> IntoIter<SubredditCount> {
+    /// Returns a vector of (subreddit name, count) pairs.
+    pub fn sort_by(&self, algo: &SortAlgorithm) -> Vec<SubredditCount> {
         match algo {
             SortAlgorithm::Numerically => self.sort_numerically(),
             SortAlgorithm::Lexicographically => self.sort_lexicographically(),
@@ -53,13 +52,12 @@ impl SubredditCounter {
             .collect::<Counter<_>>()
     }
 
-    fn sort_numerically(&self) -> IntoIter<SubredditCount> {
+    fn sort_numerically(&self) -> Vec<SubredditCount> {
         self.counts
             .most_common_tiebreaker(|lhs, rhs| Ord::cmp(&lhs.to_lowercase(), &rhs.to_lowercase()))
-            .into_iter()
     }
 
-    fn sort_lexicographically(&self) -> IntoIter<SubredditCount> {
+    fn sort_lexicographically(&self) -> Vec<SubredditCount> {
         self.counts
             .keys()
             .sorted_by(|lhs, rhs| Ord::cmp(&lhs.to_lowercase(), &rhs.to_lowercase()))
@@ -73,7 +71,6 @@ impl SubredditCounter {
                 )
             })
             .collect::<Vec<_>>()
-            .into_iter()
     }
 }
 
@@ -134,8 +131,7 @@ mod tests {
         .map(|(subreddit, count)| ((*subreddit).to_string(), *count as usize))
         .collect();
         let actual: Vec<SubredditCount> = SubredditCounter::from_iter(redditor.comments())
-            .sort_by(&SortAlgorithm::Lexicographically)
-            .collect();
+            .sort_by(&SortAlgorithm::Lexicographically);
         assert_eq!(actual, expected);
     }
 
@@ -159,9 +155,8 @@ mod tests {
         .iter()
         .map(|(subreddit, count)| ((*subreddit).to_string(), *count as usize))
         .collect();
-        let actual: Vec<SubredditCount> = SubredditCounter::from_iter(redditor.comments())
-            .sort_by(&SortAlgorithm::Numerically)
-            .collect();
+        let actual: Vec<SubredditCount> =
+            SubredditCounter::from_iter(redditor.comments()).sort_by(&SortAlgorithm::Numerically);
         assert_eq!(actual, expected);
     }
 }

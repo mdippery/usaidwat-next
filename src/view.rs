@@ -506,9 +506,7 @@ mod tests {
             let counts = SubredditCounter::from_iter(redditor.comments())
                 .sort_by(&SortAlgorithm::Lexicographically);
             let expected = load_output("tally_comments_abc");
-            let actual = counts
-                .collect::<Vec<_>>()
-                .view(&ViewOptions::default(), &FrozenClock::default());
+            let actual = counts.view(&ViewOptions::default(), &FrozenClock::default());
             assert_eq!(actual, expected);
         }
 
@@ -518,9 +516,7 @@ mod tests {
             let counts = SubredditCounter::from_iter(redditor.comments())
                 .sort_by(&SortAlgorithm::Numerically);
             let expected = load_output("tally_comments_count");
-            let actual = counts
-                .collect::<Vec<_>>()
-                .view(&ViewOptions::default(), &FrozenClock::default());
+            let actual = counts.view(&ViewOptions::default(), &FrozenClock::default());
             assert_eq!(actual, expected);
         }
 
@@ -529,9 +525,7 @@ mod tests {
             let redditor = Redditor::test_empty();
             let counts =
                 SubredditCounter::from_iter(redditor.comments()).sort_by(&SortAlgorithm::default());
-            let actual = counts
-                .collect::<Vec<_>>()
-                .view(&ViewOptions::default(), &FrozenClock::default());
+            let actual = counts.view(&ViewOptions::default(), &FrozenClock::default());
             assert_eq!(actual, "");
         }
 
@@ -541,9 +535,7 @@ mod tests {
             let counts = SubredditCounter::from_iter(redditor.submissions())
                 .sort_by(&SortAlgorithm::Lexicographically);
             let expected = load_output("tally_posts_abc");
-            let actual = counts
-                .collect::<Vec<_>>()
-                .view(&ViewOptions::default(), &FrozenClock::default());
+            let actual = counts.view(&ViewOptions::default(), &FrozenClock::default());
             assert_eq!(actual, expected);
         }
 
@@ -553,9 +545,7 @@ mod tests {
             let counts = SubredditCounter::from_iter(redditor.submissions())
                 .sort_by(&SortAlgorithm::Numerically);
             let expected = load_output("tally_posts_count");
-            let actual = counts
-                .collect::<Vec<_>>()
-                .view(&ViewOptions::default(), &FrozenClock::default());
+            let actual = counts.view(&ViewOptions::default(), &FrozenClock::default());
             assert_eq!(actual, expected);
         }
 
@@ -564,9 +554,7 @@ mod tests {
             let redditor = Redditor::test_empty();
             let counts = SubredditCounter::from_iter(redditor.submissions())
                 .sort_by(&SortAlgorithm::default());
-            let actual = counts
-                .collect::<Vec<_>>()
-                .view(&ViewOptions::default(), &FrozenClock::default());
+            let actual = counts.view(&ViewOptions::default(), &FrozenClock::default());
             assert_eq!(actual, "");
         }
     }

@@ -332,9 +332,7 @@ impl Runner {
             let tallies = SubredditCounter::from_iter(posts).sort_by(sort_algorithm);
             println!(
                 "{}",
-                tallies
-                    .collect::<Vec<_>>()
-                    .view(&ViewOptions::default(), &SystemClock::default())
+                tallies.view(&ViewOptions::default(), &SystemClock::default())
             );
             Ok(())
         } else {
@@ -359,9 +357,7 @@ impl Runner {
             let tallies = SubredditCounter::from_iter(comments).sort_by(sort_algorithm);
             println!(
                 "{}",
-                tallies
-                    .collect::<Vec<_>>()
-                    .view(&ViewOptions::default(), &SystemClock::default())
+                tallies.view(&ViewOptions::default(), &SystemClock::default())
             );
             Ok(())
         } else {
