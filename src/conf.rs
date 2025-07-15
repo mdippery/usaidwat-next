@@ -40,6 +40,78 @@ use std::ffi::OsString;
 ///
 /// This ensures that output is pleasant for the user, regardless of the
 /// definition of `$LESS`.
+///
+/// # Examples
+///
+/// `pager_env` will return a default value if `$LESS` is not set:
+///
+/// ```
+/// use usaidwat::conf::pager_env;
+/// # use temp_env::with_var_unset;
+/// # with_var_unset("LESS", || {
+/// let less = pager_env(&false).into_iter().nth(0).unwrap().into();
+/// assert_eq!(less, "LESS=FSRX");
+/// # });
+/// ```
+///
+/// It will include `S` if `oneline` is `true`:
+///
+/// ```
+/// use usaidwat::conf::pager_env;
+/// # use temp_env::with_var_unset;
+/// # with_var_unset("LESS", || {
+/// let less = pager_env(&true).into_iter().nth(0).unwrap().into();
+/// assert_eq!(less, "LESS=FSRX");
+/// # });
+/// ```
+///
+/// In this example, `$LESS` was set to `SX`, but `R` will be appended anyway:
+///
+/// ```
+/// use usaidwat::conf::pager_env;
+/// # use temp_env::with_var;
+/// # with_var("LESS", Some("SX"), || {
+/// let less = pager_env(&false).into_iter().nth(0).unwrap().into();
+/// assert_eq!(less, "LESS=SXR");
+/// # });
+/// ```
+///
+/// In this example, `$LESS` was set to `RSX`. Note that `R` is still included,
+/// but `$LESS` was not altered since `R` was already in it:
+///
+/// ```
+/// use usaidwat::conf::pager_env;
+/// # use temp_env::with_var;
+/// # with_var("LESS", Some("RSX"), || {
+/// let less = pager_env(&false).into_iter().nth(0).unwrap().into();
+/// assert_eq!(less, "LESS=RSX");
+/// # });
+/// ```
+///
+/// In this example, `$LESS` was set to `R`. Because the `oneline` option is
+/// `true`, `S` is also appended:
+///
+/// ```
+/// use usaidwat::conf::pager_env;
+/// # use temp_env::with_var;
+/// # with_var("LESS", Some("R"), || {
+/// let less = pager_env(&true).into_iter().nth(0).unwrap().into();
+/// assert_eq!(less, "LESS=RS");
+/// # });
+/// ```
+///
+/// In this example, `$LESS` was set to `SR`. Because the `oneline` option is
+/// `true`, `S` is still included, but because it is already present, the
+/// value of `$LESS` does not change:
+///
+/// ```
+/// use usaidwat::conf::pager_env;
+/// # use temp_env::with_var;
+/// # with_var("LESS", Some("SR"), || {
+/// let less = pager_env(&true).into_iter().nth(0).unwrap().into();
+/// assert_eq!(less, "LESS=SR");
+/// # });
+/// ```
 pub fn pager_env(oneline: &bool) -> impl IntoIterator<Item = impl Into<OsString>> {
     // Get the value of $LESS, defaulting to "FSRX" if $LESS is unset.
     let less = env::var_os("LESS").unwrap_or(
@@ -65,67 +137,4 @@ pub fn pager_env(oneline: &bool) -> impl IntoIterator<Item = impl Into<OsString>
     };
 
     vec![format!("LESS={less}")]
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use temp_env::{with_var, with_var_unset};
-
-    fn get_less(oneline: &bool) -> String {
-        let less: OsString = pager_env(oneline)
-            .into_iter()
-            .nth(0)
-            .expect("expected at least one environment variable")
-            .into();
-        less.to_string_lossy().to_string()
-    }
-
-    #[test]
-    fn it_returns_a_default_value_if_envvar_is_not_set() {
-        with_var_unset("LESS", || {
-            let less = get_less(&false);
-            assert_eq!(less, "LESS=FSRX");
-        });
-    }
-
-    #[test]
-    fn it_returns_a_default_value_including_s_option_if_oneline_is_selected() {
-        with_var_unset("LESS", || {
-            let less = get_less(&true);
-            assert_eq!(less, "LESS=FSRX");
-        });
-    }
-
-    #[test]
-    fn it_adds_r_option_to_env() {
-        with_var("LESS", Some("SX"), || {
-            let less = get_less(&false);
-            assert_eq!(less, "LESS=SXR");
-        });
-    }
-
-    #[test]
-    fn it_includes_r_option_even_if_r_is_already_set() {
-        with_var("LESS", Some("RSX"), || {
-            let less = get_less(&false);
-            assert_eq!(less, "LESS=RSX");
-        });
-    }
-
-    #[test]
-    fn it_adds_s_option_if_oneline_is_set() {
-        with_var("LESS", Some("R"), || {
-            let less = get_less(&true);
-            assert_eq!(less, "LESS=RS");
-        });
-    }
-
-    #[test]
-    fn it_includes_s_option_if_oneline_is_set_even_if_s_is_already_set() {
-        with_var("LESS", Some("SR"), || {
-            let less = get_less(&true);
-            assert_eq!(less, "LESS=SR");
-        });
-    }
 }
