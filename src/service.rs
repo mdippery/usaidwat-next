@@ -4,9 +4,11 @@
 //! with the Reddit API over HTTPS, essentially a specialized HTTPS client
 //! specifically for Reddit.
 
-use reqwest::IntoUrl;
-use reqwest::blocking::Client; // TODO: Async, maybe
-use reqwest::header::{self, HeaderMap, HeaderValue};
+use reqwest::{
+    IntoUrl,
+    blocking::Client, // TODO: Async, maybe
+    header::{self, HeaderMap, HeaderValue},
+};
 use std::fmt::Formatter;
 use std::result;
 

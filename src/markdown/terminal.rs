@@ -16,13 +16,15 @@
 //! - [ANSI Escape Sequences](https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797>), for
 //!   the full rundown of ANSI terminal escape codes.
 
-use crate::markdown::{TextAppendable, Visitable, Visitor};
-use crate::text;
+use crate::{
+    markdown::{TextAppendable, Visitable, Visitor},
+    text,
+};
 use itertools::Itertools;
 use log::debug;
 use markdown::{
-    Constructs, ParseOptions,
     mdast::{Code, Html, Image, InlineCode, Link, List, Node, Text},
+    {Constructs, ParseOptions},
 };
 use textwrap::Options;
 

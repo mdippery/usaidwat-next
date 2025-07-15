@@ -1,11 +1,13 @@
 //! Formats viewable objects for display in a terminal.
 
-use crate::cli::DateFormat;
-use crate::client::{Redditor, Timeline};
-use crate::clock::{Clock, HasAge};
-use crate::count::SubredditCount;
-use crate::text::RegexReplaceable;
-use crate::thing::{Comment, HasSubreddit, Submission};
+use crate::{
+    cli::DateFormat,
+    client::{Redditor, Timeline},
+    clock::{Clock, HasAge},
+    count::SubredditCount,
+    text::RegexReplaceable,
+    thing::{Comment, HasSubreddit, Submission},
+};
 use colored::Colorize;
 use indoc::formatdoc;
 use itertools::Itertools;

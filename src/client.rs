@@ -1,8 +1,10 @@
 //! Clients for reading data from the Reddit API.
 
-use crate::clock::{DateTime, HasAge, Utc};
-use crate::service::{self, Service};
-use crate::thing::{self, Comment, Submission, User};
+use crate::{
+    clock::{DateTime, HasAge, Utc},
+    service::{self, Service},
+    thing::{self, Comment, Submission, User},
+};
 pub use chrono::Weekday;
 use chrono::{Datelike, Timelike};
 

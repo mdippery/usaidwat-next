@@ -9,13 +9,14 @@
 //! some text is completely removed, but it should be "good enough" for an
 //! LLM.
 
-use crate::markdown::{TextAppendable, Visitable, Visitor};
-use crate::text;
+use crate::{
+    markdown::{TextAppendable, Visitable, Visitor},
+    text,
+};
 use log::debug;
-use markdown::mdast::Code;
 use markdown::{
-    Constructs, ParseOptions,
-    mdast::{InlineCode, Node, Text},
+    mdast::{Code, InlineCode, Node, Text},
+    {Constructs, ParseOptions},
 };
 
 /// Converts Markdown markup into a string that has been stripped of nearly
