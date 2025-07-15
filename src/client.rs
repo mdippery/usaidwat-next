@@ -6,46 +6,6 @@ use crate::thing::{self, Comment, Submission, User};
 pub use chrono::Weekday;
 use chrono::{Datelike, Timelike};
 
-/// A client error.
-#[derive(Debug)]
-pub enum Error {
-    /// An error from the underlying HTTP service.
-    Service(service::Error),
-
-    /// An error parsing data.
-    Parse(thing::Error),
-}
-
-impl From<service::Error> for Error {
-    fn from(error: service::Error) -> Self {
-        Error::Service(error)
-    }
-}
-
-impl From<thing::Error> for Error {
-    fn from(error: thing::Error) -> Self {
-        Error::Parse(error)
-    }
-}
-
-impl std::fmt::Display for Error {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Error::Service(err) => write!(f, "Service error: {err}"),
-            Error::Parse(err) => write!(f, "Parse error: {err}"),
-        }
-    }
-}
-
-impl std::error::Error for Error {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        match self {
-            Error::Service(err) => Some(err),
-            Error::Parse(err) => Some(err),
-        }
-    }
-}
-
 /// Represents a Reddit user.
 pub struct Redditor {
     username: String,
@@ -172,6 +132,46 @@ impl Timeline {
             buckets[wday as usize][hour as usize] += 1;
         }
         buckets
+    }
+}
+
+/// A client error.
+#[derive(Debug)]
+pub enum Error {
+    /// An error from the underlying HTTP service.
+    Service(service::Error),
+
+    /// An error parsing data.
+    Parse(thing::Error),
+}
+
+impl From<service::Error> for Error {
+    fn from(error: service::Error) -> Self {
+        Error::Service(error)
+    }
+}
+
+impl From<thing::Error> for Error {
+    fn from(error: thing::Error) -> Self {
+        Error::Parse(error)
+    }
+}
+
+impl std::fmt::Display for Error {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Error::Service(err) => write!(f, "Service error: {err}"),
+            Error::Parse(err) => write!(f, "Parse error: {err}"),
+        }
+    }
+}
+
+impl std::error::Error for Error {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        match self {
+            Error::Service(err) => Some(err),
+            Error::Parse(err) => Some(err),
+        }
     }
 }
 
