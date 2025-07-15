@@ -84,17 +84,17 @@ impl Redditor {
         self.username.to_string()
     }
 
-    /// Redditor's link karma
+    /// Redditor's link karma.
     pub fn link_karma(&self) -> i64 {
         self.user.about().link_karma()
     }
 
-    /// Redditor's comment karma
+    /// Redditor's comment karma.
     pub fn comment_karma(&self) -> i64 {
         self.user.about().comment_karma()
     }
 
-    /// Redditor's comments
+    /// Redditor's comments.
     pub fn comments(&self) -> impl Iterator<Item = Comment> {
         self.user.comments()
     }
