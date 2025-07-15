@@ -31,6 +31,15 @@ use std::ffi::OsString;
 // default option of "FSRX is used.
 
 /// Returns an appropriate vector of environment variables to pass to the pager.
+///
+/// By default, this is `FSRX`, unless the user has defined `$LESS` in the
+/// environment. However, because text is printed in color, `R` is always
+/// included regardless of the value of `$LESS` (it is appended to `$LESS` if
+/// not already present), and when output is printed to oneline (via the
+/// `--oneline` option), `S` is appended to `$LESS` if not already present.
+///
+/// This ensures that output is pleasant for the user, regardless of the
+/// definition of `$LESS`.
 pub fn pager_env(oneline: &bool) -> impl IntoIterator<Item = impl Into<OsString>> {
     // Get the value of $LESS, defaulting to "FSRX" if $LESS is unset.
     let less = env::var_os("LESS").unwrap_or(
@@ -48,7 +57,7 @@ pub fn pager_env(oneline: &bool) -> impl IntoIterator<Item = impl Into<OsString>
     };
 
     // When printing to one line, really print to one line, and force scrolling
-    // to right if lines are too long.
+    // to the right if lines are too long.
     let less = if *oneline && !less.contains("S") {
         less + "S"
     } else {
