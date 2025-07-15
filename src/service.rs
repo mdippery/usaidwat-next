@@ -92,11 +92,10 @@ impl RedditService {
     }
 
     fn headers(&self) -> HeaderMap {
+        let ua = self.user_agent();
+        let ua = HeaderValue::from_str(&ua).expect(&format!("could not get user agent from {ua}"));
         let mut headers = HeaderMap::new();
-        headers.insert(
-            header::USER_AGENT,
-            HeaderValue::from_str(&self.user_agent()).unwrap(),
-        );
+        headers.insert(header::USER_AGENT, ua);
         headers
     }
 
