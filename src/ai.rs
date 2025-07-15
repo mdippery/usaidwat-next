@@ -10,18 +10,17 @@ pub struct Auth {
 
 impl Auth {
     /// Creates a new `Auth` structure using the given API key.
-    pub fn new(api_key: &str) -> Self {
-        Self {
-            api_key: String::from(api_key),
-        }
+    pub fn new(api_key: impl Into<String>) -> Self {
+        let api_key = api_key.into();
+        Self { api_key }
     }
 
     /// Retrieves an API key from the environment.
     ///
     /// Returns an error if the API key cannot be retrieved from the
     /// environment.
-    pub fn from_env(envvar: &str) -> AuthResult {
-        let api_key = env::var(envvar).map_err(AuthError::EnvError)?;
+    pub fn from_env(envvar: impl Into<String>) -> AuthResult {
+        let api_key = env::var(envvar.into()).map_err(AuthError::EnvError)?;
         Ok(Self { api_key })
     }
 
