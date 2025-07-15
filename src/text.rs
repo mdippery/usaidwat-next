@@ -49,8 +49,8 @@ use regex::Regex;
 /// let converted = convert_html_entities(raw);
 /// assert_eq!(converted, raw);
 /// ```
-pub fn convert_html_entities(text: &str) -> String {
-    let text = text.trim();
+pub fn convert_html_entities(text: impl AsRef<str>) -> String {
+    let text = text.as_ref().trim();
     entity::decode(text.as_bytes())
         .to_string()
         .unwrap_or(text.to_string())
@@ -61,7 +61,7 @@ pub fn convert_html_entities(text: &str) -> String {
 pub trait RegexReplaceable {
     /// Search the target for `needle` and replace matches with `repl`,
     /// returning a new version of the target.
-    fn replace_all(&self, needle: &str, repl: &str) -> Self;
+    fn replace_all<S: AsRef<str>>(&self, needle: S, repl: S) -> Self;
 }
 
 impl RegexReplaceable for String {
@@ -97,10 +97,10 @@ impl RegexReplaceable for String {
     /// let after = before.replace_all("HAAAAAAAATE", "LOVE");
     /// assert_eq!(after, "I LOVE REGEXES!");
     /// ```
-    fn replace_all(&self, needle: &str, repl: &str) -> Self {
-        match Regex::new(needle) {
-            Ok(re) => re.replace_all(self, repl).to_string(),
-            Err(_) => self.replace(needle, repl),
+    fn replace_all<S: AsRef<str>>(&self, needle: S, repl: S) -> Self {
+        match Regex::new(needle.as_ref()) {
+            Ok(re) => re.replace_all(self, repl.as_ref()).to_string(),
+            Err(_) => self.replace(needle.as_ref(), repl.as_ref()),
         }
     }
 }
