@@ -1,6 +1,7 @@
 use crate::client::Redditor;
 use crate::clock::{Clock, DateTime, Utc};
-use crate::service::{Result, Service, Uri};
+use crate::service::{Result, Service};
+use reqwest::IntoUrl;
 use std::fs;
 
 pub fn do_logging() {
@@ -31,8 +32,8 @@ impl<'a> TestService<'a> {
 }
 
 impl<'a> Service for TestService<'a> {
-    fn get(&self, uri: Uri) -> Result {
-        Ok(fs::read_to_string(uri).expect("could not find test data"))
+    fn get(&self, uri: impl IntoUrl) -> Result {
+        Ok(fs::read_to_string(uri.as_str()).expect("could not find test data"))
     }
 
     fn get_resource(&self, _username: &str, resource: &str) -> Result {

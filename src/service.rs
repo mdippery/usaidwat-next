@@ -4,13 +4,11 @@
 //! with the Reddit API over HTTPS, essentially a specialized HTTPS client
 //! specifically for Reddit.
 
+use reqwest::IntoUrl;
 use reqwest::blocking::Client; // TODO: Async, maybe
 use reqwest::header::{self, HeaderMap, HeaderValue};
 use std::fmt::Formatter;
 use std::result;
-
-/// A URI.
-pub type Uri<'a> = &'a str;
 
 /// A service error.
 #[derive(Debug)]
@@ -72,7 +70,7 @@ pub type Result = result::Result<String, Error>;
 /// and a mocked connector for testing purposes.
 pub trait Service {
     /// Performs a GET request to the given URI and returns the raw body.
-    fn get(&self, uri: Uri) -> Result;
+    fn get(&self, uri: impl IntoUrl) -> Result;
 
     /// Performs a GET request to the `resource` associated with the given
     /// `username` and returns it as a parsed JSON response.
@@ -117,7 +115,7 @@ impl RedditService {
 }
 
 impl Service for RedditService {
-    fn get(&self, uri: Uri) -> Result {
+    fn get(&self, uri: impl IntoUrl) -> Result {
         let client = Client::new();
         let resp = client
             .get(uri)
