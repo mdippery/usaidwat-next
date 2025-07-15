@@ -53,6 +53,7 @@
 //! usaidwat --help
 //! ```
 
+pub mod ai;
 pub mod cli;
 pub mod client;
 pub mod clock;

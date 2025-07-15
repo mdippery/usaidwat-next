@@ -345,6 +345,7 @@ impl Runner {
     fn run_summary(&self) -> Result {
         let summarizer = Summarizer::for_user(self.user());
         debug!("Summarization output:\n{}", summarizer.context());
+        todo!("construct Auth and show warning to set up OPENAI_API_KEY envvar");
         todo!("actually do summarization");
         Ok(())
     }
