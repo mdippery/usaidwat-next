@@ -9,56 +9,6 @@ use reqwest::{Client, IntoUrl};
 use std::fmt::Formatter;
 use std::result;
 
-/// A service error.
-#[derive(Debug)]
-pub enum Error {
-    /// An error retrieving the body of a response.
-    Body(reqwest::Error),
-
-    /// An error that occurred while making an HTTP request.
-    Request(reqwest::Error),
-
-    /// An unsuccessful HTTP status code in an HTTP response.
-    Http(reqwest::StatusCode),
-
-    /// A missing Content-Type header in a response.
-    MissingContentType,
-
-    /// An invalid Content-Type header.
-    InvalidContentType(header::ToStrError),
-
-    /// A Content-Type that is not understood by the service.
-    UnexpectedContentType(String),
-}
-
-impl std::fmt::Display for Error {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Error::Body(err) => write!(f, "Error retrieving body of HTTP response: {err}"),
-            Error::Request(err) => write!(f, "Error while making HTTP request: {err}"),
-            Error::Http(status) => write!(f, "Request returned HTTP {status}"),
-            Error::MissingContentType => write!(f, "Missing Content-Type header"),
-            Error::InvalidContentType(err) => write!(f, "Invalid Content-Type header value: {err}"),
-            Error::UnexpectedContentType(content_type) => {
-                write!(f, "Unexpected content type: {content_type}")
-            }
-        }
-    }
-}
-
-impl std::error::Error for Error {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        match self {
-            Error::Body(err) => Some(err),
-            Error::Request(err) => Some(err),
-            Error::Http(_) => None,
-            Error::MissingContentType => None,
-            Error::InvalidContentType(err) => Some(err),
-            Error::UnexpectedContentType(_) => None,
-        }
-    }
-}
-
 /// The result of an HTTP request.
 pub type Result = result::Result<String, Error>;
 
@@ -147,6 +97,56 @@ impl Service for RedditService {
     async fn get_resource(&self, username: &str, resource: &str) -> Result {
         let uri = self.uri(username, resource);
         self.get(&uri).await
+    }
+}
+
+/// A service error.
+#[derive(Debug)]
+pub enum Error {
+    /// An error retrieving the body of a response.
+    Body(reqwest::Error),
+
+    /// An error that occurred while making an HTTP request.
+    Request(reqwest::Error),
+
+    /// An unsuccessful HTTP status code in an HTTP response.
+    Http(reqwest::StatusCode),
+
+    /// A missing Content-Type header in a response.
+    MissingContentType,
+
+    /// An invalid Content-Type header.
+    InvalidContentType(header::ToStrError),
+
+    /// A Content-Type that is not understood by the service.
+    UnexpectedContentType(String),
+}
+
+impl std::fmt::Display for Error {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Error::Body(err) => write!(f, "Error retrieving body of HTTP response: {err}"),
+            Error::Request(err) => write!(f, "Error while making HTTP request: {err}"),
+            Error::Http(status) => write!(f, "Request returned HTTP {status}"),
+            Error::MissingContentType => write!(f, "Missing Content-Type header"),
+            Error::InvalidContentType(err) => write!(f, "Invalid Content-Type header value: {err}"),
+            Error::UnexpectedContentType(content_type) => {
+                write!(f, "Unexpected content type: {content_type}")
+            }
+        }
+    }
+}
+
+impl std::error::Error for Error {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        match self {
+            Error::Body(err) => Some(err),
+            Error::Request(err) => Some(err),
+            Error::Http(_) => None,
+            Error::MissingContentType => None,
+            Error::InvalidContentType(err) => Some(err),
+            Error::UnexpectedContentType(_) => None,
+        }
     }
 }
 
