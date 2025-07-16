@@ -34,12 +34,15 @@ pub trait Service {
 }
 
 /// A service that contacts the Reddit API directly to retrieve information.
-pub struct RedditService;
+pub struct RedditService {
+    client: Client,
+}
 
 impl RedditService {
     /// Creates a new Reddit service.
     pub fn new() -> Self {
-        Self {}
+        let client = Client::new();
+        Self { client }
     }
 
     fn headers(&self) -> HeaderMap {
@@ -69,8 +72,8 @@ impl Service for RedditService {
     where
         U: IntoUrl + Send,
     {
-        let client = Client::new();
-        let resp = client
+        let resp = self
+            .client
             .get(uri)
             .headers(self.headers())
             .send()
