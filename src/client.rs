@@ -5,6 +5,7 @@ use crate::service::{self, Service};
 use crate::thing::{self, Comment, Submission, User};
 pub use chrono::Weekday;
 use chrono::{Datelike, Timelike};
+use tokio::try_join;
 
 /// Represents a Reddit user.
 pub struct Redditor {
@@ -32,10 +33,13 @@ impl Redditor {
     /// Returns an [`Error`] if data cannot be parsed for the given username.
     pub async fn new<T: Service>(username: impl Into<String>, service: T) -> Result<Self, Error> {
         let username = username.into();
-        // TODO: Collect and await once?
-        let user_data = service.get_resource(&username, "about").await?;
-        let comment_data = service.get_resource(&username, "comments").await?;
-        let post_data = service.get_resource(&username, "submitted").await?;
+
+        let (user_data, comment_data, post_data) = try_join!(
+            service.get_resource(&username, "about"),
+            service.get_resource(&username, "comments"),
+            service.get_resource(&username, "submitted"),
+        )?;
+
         let user = User::parse(&user_data, &comment_data, &post_data)?;
         Ok(Self { username, user })
     }
