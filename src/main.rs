@@ -27,7 +27,7 @@ async fn main() {
         .filter_level(config.verbosity().into())
         .init();
     match Runner::new(config).await {
-        Ok(runner) => match runner.run() {
+        Ok(runner) => match runner.run().await {
             Err(message) => die(1, &message),
             Ok(()) => (),
         },

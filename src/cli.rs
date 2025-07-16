@@ -3,16 +3,15 @@
 pub use crate::client::Error;
 use crate::client::Redditor;
 use crate::clock::SystemClock;
-use crate::conf;
 use crate::count::{SortAlgorithm, SubredditCounter};
 use crate::filter::{RedditFilter, StringSet};
+use crate::pager::{Pager, PagerEnv};
 use crate::service::RedditService;
 use crate::summary::Summarizer;
 use crate::view::{ViewOptions, Viewable};
 use clap::{Args, Parser, Subcommand, ValueEnum};
 use clap_verbosity_flag::Verbosity;
 use log::debug;
-use pager::Pager;
 use std::fmt::Formatter;
 use std::result;
 
@@ -215,7 +214,7 @@ impl Runner {
     }
 
     /// Run the command-line program using its stored configuration options.
-    pub fn run(&self) -> Result {
+    pub async fn run(&self) -> Result {
         match &self.config.command {
             Command::Info { .. } => self.run_info(),
             Command::Log {
@@ -226,8 +225,11 @@ impl Runner {
                 oneline,
                 raw,
                 ..
-            } => self.run_log(subreddits, date, grep, limit, oneline, raw),
-            Command::Posts(subconfig) => self.run_posts(subconfig),
+            } => {
+                self.run_log(subreddits, date, grep, limit, oneline, raw)
+                    .await
+            }
+            Command::Posts(subconfig) => self.run_posts(subconfig).await,
             Command::Summary { .. } => self.run_summary(),
             Command::Tally(config) => self.run_tally(&config.sort_algorithm()),
             Command::Timeline { .. } => self.run_timeline(),
@@ -243,7 +245,7 @@ impl Runner {
         Ok(())
     }
 
-    fn run_log(
+    async fn run_log(
         &self,
         subreddits: &Vec<String>,
         date_format: &DateFormat,
@@ -276,24 +278,24 @@ impl Runner {
             .collect::<Vec<_>>()
             .join(joiner);
 
-        Pager::new().pager_envs(conf::pager_env(oneline)).setup();
-        println!("{}", output);
-        Ok(())
+        Pager::new(PagerEnv::default().oneline(*oneline))
+            .page(&output)
+            .await
     }
 
-    fn run_posts(&self, config: &PostCommandConfig) -> Result {
+    async fn run_posts(&self, config: &PostCommandConfig) -> Result {
         match &config.command {
             PostSubcommand::Log {
                 subreddits,
                 date,
                 oneline,
                 ..
-            } => self.run_posts_log(subreddits, date, &oneline),
+            } => Ok(self.run_posts_log(subreddits, date, &oneline).await?),
             PostSubcommand::Tally(config) => self.run_posts_tally(&config.sort_algorithm()),
         }
     }
 
-    fn run_posts_log(
+    async fn run_posts_log(
         &self,
         subreddits: &Vec<String>,
         date_format: &DateFormat,
@@ -319,9 +321,9 @@ impl Runner {
             .collect::<Vec<_>>()
             .join(joiner);
 
-        Pager::new().pager_envs(conf::pager_env(oneline)).setup();
-        println!("{}", output);
-        Ok(())
+        Pager::new(PagerEnv::default().oneline(*oneline))
+            .page(&output)
+            .await
     }
 
     fn run_posts_tally(&self, sort_algorithm: &SortAlgorithm) -> Result {
