@@ -32,13 +32,13 @@ impl<'a> TestService<'a> {
 }
 
 impl<'a> Service for TestService<'a> {
-    fn get(&self, uri: impl IntoUrl) -> Result {
+    async fn get(&self, uri: impl IntoUrl) -> Result {
         Ok(fs::read_to_string(uri.as_str()).expect("could not find test data"))
     }
 
-    fn get_resource(&self, _username: &str, resource: &str) -> Result {
+    async fn get_resource(&self, _username: &str, resource: &str) -> Result {
         let filename = format!("tests/data/{resource}_{}.json", self.suffix);
-        self.get(&filename)
+        self.get(&filename).await
     }
 
     fn user_agent(&self) -> String {
@@ -74,22 +74,27 @@ impl Clock for FrozenClock {
 impl Redditor {
     /// Returns a valid Redditor with 100 submissions and 100 comments
     /// that can be used for testing purposes.
-    pub fn test() -> Redditor {
-        Redditor::new(String::from("mipadi"), TestService::new("mipadi")).unwrap()
+    pub async fn test() -> Redditor {
+        Redditor::new(String::from("mipadi"), TestService::new("mipadi"))
+            .await
+            .unwrap()
     }
 
     /// Returns a valid Redditor with no submissions nor comments that can
     /// be used for testing purposes.
-    pub fn test_empty() -> Redditor {
+    pub async fn test_empty() -> Redditor {
         Redditor::new(
             String::from("testuserpleaseignore"),
             TestService::new("empty"),
         )
+        .await
         .unwrap()
     }
 
     /// Returns a non-existent Redditor.
-    pub fn test_none() -> Option<Redditor> {
-        Redditor::new(String::from("doesnotexist"), TestService::new("404")).ok()
+    pub async fn test_none() -> Option<Redditor> {
+        Redditor::new(String::from("doesnotexist"), TestService::new("404"))
+            .await
+            .ok()
     }
 }

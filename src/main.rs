@@ -19,13 +19,14 @@ fn dispatch_err(username: &str, err: &Error) {
     die(67, &message)
 }
 
-fn main() {
+#[tokio::main]
+async fn main() {
     let config = Config::parse();
     let username = config.username();
     env_logger::builder()
         .filter_level(config.verbosity().into())
         .init();
-    match Runner::new(config) {
+    match Runner::new(config).await {
         Ok(runner) => match runner.run() {
             Err(message) => die(1, &message),
             Ok(()) => (),

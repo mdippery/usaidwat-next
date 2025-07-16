@@ -4,9 +4,8 @@
 //! with the Reddit API over HTTPS, essentially a specialized HTTPS client
 //! specifically for Reddit.
 
-use reqwest::IntoUrl;
-use reqwest::blocking::Client; // TODO: Async, maybe
 use reqwest::header::{self, HeaderMap, HeaderValue};
+use reqwest::{Client, IntoUrl};
 use std::fmt::Formatter;
 use std::result;
 
@@ -70,11 +69,11 @@ pub type Result = result::Result<String, Error>;
 /// and a mocked connector for testing purposes.
 pub trait Service {
     /// Performs a GET request to the given URI and returns the raw body.
-    fn get(&self, uri: impl IntoUrl) -> Result;
+    async fn get(&self, uri: impl IntoUrl) -> Result;
 
     /// Performs a GET request to the `resource` associated with the given
     /// `username` and returns it as a parsed JSON response.
-    fn get_resource(&self, username: &str, resource: &str) -> Result;
+    async fn get_resource(&self, username: &str, resource: &str) -> Result;
 
     /// An appropriate user agent to use for HTTP requests.
     fn user_agent(&self) -> String {
@@ -114,12 +113,13 @@ impl RedditService {
 }
 
 impl Service for RedditService {
-    fn get(&self, uri: impl IntoUrl) -> Result {
+    async fn get(&self, uri: impl IntoUrl) -> Result {
         let client = Client::new();
         let resp = client
             .get(uri)
             .headers(self.headers())
             .send()
+            .await
             .map_err(Error::Request)?;
 
         if !resp.status().is_success() {
@@ -134,14 +134,14 @@ impl Service for RedditService {
             if !content_type.starts_with("application/json") {
                 Err(Error::UnexpectedContentType(content_type.to_string()))
             } else {
-                resp.text().map_err(Error::Body)
+                resp.text().await.map_err(Error::Body)
             }
         }
     }
 
-    fn get_resource(&self, username: &str, resource: &str) -> Result {
+    async fn get_resource(&self, username: &str, resource: &str) -> Result {
         let uri = self.uri(username, resource);
-        self.get(&uri)
+        self.get(&uri).await
     }
 }
 

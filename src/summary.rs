@@ -32,9 +32,9 @@ mod tests {
     use crate::test_utils::load_output;
     use pretty_assertions::assert_eq;
 
-    #[test]
-    fn it_provides_context_for_an_llm() {
-        let redditor = Redditor::test();
+    #[tokio::test]
+    async fn it_provides_context_for_an_llm() {
+        let redditor = Redditor::test().await;
         let expected = load_output("summary_raw");
         let actual = Summarizer::for_user(&redditor).context();
         assert_eq!(actual, expected);

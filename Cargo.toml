@@ -1,6 +1,6 @@
 [package]
 name = "usaidwat"
-version = "2.0.0-alpha.11"
+version = "2.0.0-alpha.12"
 authors = ["Michael Dippery <michael@monkey-robot.com>"]
 description = "Answers the age-old question, \"Where does a Redditor comment the most?\""
 #repository
@@ -25,10 +25,11 @@ markdown = "1.0.0"
 pager = "0.16.1"
 regex = "1.11.1"
 relativetime = "0.1.4"
-reqwest = { version = "0.12.15", features = ["blocking"] }
+reqwest = "0.12.15"
 serde = { version = "1.0.219", features = ["derive"] }
 serde_json = "1.0.140"
 textwrap = { version = "0.16.2", features = ["terminal_size"] }
+tokio = { version = "1.46.1", features = ["rt-multi-thread", "macros"] }
 
 [dev-dependencies]
 pretty_assertions = "1.4.1"

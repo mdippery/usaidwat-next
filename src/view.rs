@@ -306,9 +306,9 @@ mod tests {
         use crate::client::Redditor;
         use crate::test_utils::{FrozenClock, load_output};
 
-        #[test]
-        fn it_formats_a_user() {
-            let user = Redditor::test();
+        #[tokio::test]
+        async fn it_formats_a_user() {
+            let user = Redditor::test().await;
             let actual = user.view(&ViewOptions::default(), &FrozenClock::default());
             let expected = load_output("about_mipadi");
             assert_eq!(actual, expected);
@@ -324,101 +324,103 @@ mod tests {
 
         // TODO: Test with and without color when possible
 
-        fn get_comment(n: usize) -> Comment {
+        async fn get_comment(n: usize) -> Comment {
             Redditor::test()
+                .await
                 .comments()
                 .nth(n)
                 .expect("no comment found")
         }
 
-        #[test]
-        fn it_formats_an_absolute_date() {
-            let actual = get_comment(0).format_absolute_date();
+        #[tokio::test]
+        async fn it_formats_an_absolute_date() {
+            let actual = get_comment(0).await.format_absolute_date();
             let expected = "Thu, 17 Apr 2025, 8:44 PM";
             assert_eq!(actual, expected);
         }
 
-        #[test]
-        fn it_formats_a_comment_with_a_raw_body() {
+        #[tokio::test]
+        async fn it_formats_a_comment_with_a_raw_body() {
             let opts = ViewOptions::default().raw(true);
-            let comment = get_comment(1);
+            let comment = get_comment(1).await;
             let actual = comment.view(&opts, &FrozenClock::default());
             let expected = load_output("comments_raw_body");
             assert_eq!(actual, expected, "\nleft:\n{actual}\n\nright:\n{expected}");
         }
 
-        #[test]
-        fn it_formats_a_comment_with_markdown_markup() {
+        #[tokio::test]
+        async fn it_formats_a_comment_with_markdown_markup() {
             let opts = ViewOptions::default();
-            let comment = get_comment(3);
+            let comment = get_comment(3).await;
             let actual = comment.view(&opts, &FrozenClock::default());
             let expected = load_output("comments_markdown_body");
             assert_eq!(actual, expected, "\nleft:\n{actual}\n\nright:\n{expected}");
         }
 
-        #[test]
-        fn it_formats_a_comment_with_no_markdown_markup() {
+        #[tokio::test]
+        async fn it_formats_a_comment_with_no_markdown_markup() {
             do_logging();
             let opts = ViewOptions::default();
-            let comment = get_comment(0);
+            let comment = get_comment(0).await;
             let actual = comment.view(&opts, &FrozenClock::default());
             let expected = load_output("comments_no_markdown");
             assert_eq!(actual, expected, "\nleft:\n{actual}\n\nright:\n{expected}");
         }
 
-        #[test]
-        fn it_formats_a_comment_with_relative_dates() {
+        #[tokio::test]
+        async fn it_formats_a_comment_with_relative_dates() {
             do_logging();
             let opts = ViewOptions::default().date_format(DateFormat::Relative);
-            let actual = get_comment(0).view(&opts, &FrozenClock::default());
+            let actual = get_comment(0).await.view(&opts, &FrozenClock::default());
             let expected = load_output("comments_relative_dates");
             assert_eq!(actual, expected, "\nleft:\n{actual}\n\nright:\n{expected}");
         }
 
-        #[test]
-        fn it_formats_a_comment_with_absolute_dates() {
+        #[tokio::test]
+        async fn it_formats_a_comment_with_absolute_dates() {
             do_logging();
             let opts = ViewOptions::default().date_format(DateFormat::Absolute);
-            let actual = get_comment(0).view(&opts, &FrozenClock::default());
+            let actual = get_comment(0).await.view(&opts, &FrozenClock::default());
             let expected = load_output("comments_absolute_dates");
             assert_eq!(actual, expected, "\nleft:\n{actual}\n\nright:\n{expected}");
         }
 
-        #[test]
-        fn it_formats_a_comment_on_oneline() {
+        #[tokio::test]
+        async fn it_formats_a_comment_on_oneline() {
             let opts = ViewOptions::default().oneline(true);
-            let actual = get_comment(0).view(&opts, &FrozenClock::default());
+            let actual = get_comment(0).await.view(&opts, &FrozenClock::default());
             let expected = "\u{1b}[32mcyphersystem\u{1b}[0m Cypher System & ChatGPT";
             assert_eq!(actual, expected);
         }
 
-        #[test]
-        fn it_formats_a_comment_with_grep() {
+        #[tokio::test]
+        async fn it_formats_a_comment_with_grep() {
             let opts = ViewOptions::default().grep(Some(String::from("Pathfinder")));
-            let actual = get_comment(3).view(&opts, &FrozenClock::default());
+            let actual = get_comment(3).await.view(&opts, &FrozenClock::default());
             let expected = load_output("comments_markdown_body_grep");
             assert_eq!(actual, expected);
         }
 
-        #[test]
-        fn it_formats_a_comment_with_grep_case_insensitively() {
+        #[tokio::test]
+        async fn it_formats_a_comment_with_grep_case_insensitively() {
             let opts = ViewOptions::default().grep(Some(String::from("pathfinder")));
-            let actual = get_comment(3).view(&opts, &FrozenClock::default());
+            let actual = get_comment(3).await.view(&opts, &FrozenClock::default());
             let expected = load_output("comments_markdown_body_grep");
             assert_eq!(actual, expected);
         }
 
-        #[test]
+        #[tokio::test]
         // TODO: Fix test
         // Running this causes the previous test to fail. I suspect tests are run
         // in parallel and colored::control::set_override() is not threadsafe.
         // Don't worry about this for now, but we should test uncolored output
         // eventually.
         #[ignore]
-        fn it_formats_a_comment_on_oneline_without_color() {
+        async fn it_formats_a_comment_on_oneline_without_color() {
             let opts = ViewOptions::default().oneline(true);
             let expected = "cyphersystem Cypher System & ChatGPT";
-            let actual = with_no_color(|| get_comment(0).view(&opts, &FrozenClock::default()));
+            let comment = get_comment(0).await;
+            let actual = with_no_color(|| comment.view(&opts, &FrozenClock::default()));
             assert_eq!(actual, expected);
         }
     }
@@ -430,62 +432,63 @@ mod tests {
         use crate::thing::Submission;
         use pretty_assertions::assert_eq;
 
-        fn get_post(n: usize) -> Submission {
+        async fn get_post(n: usize) -> Submission {
             Redditor::test()
+                .await
                 .submissions()
                 .nth(n)
                 .expect("no comment found")
         }
 
-        #[test]
-        fn it_returns_the_permalink_without_the_full_title() {
-            let post = get_post(0);
+        #[tokio::test]
+        async fn it_returns_the_permalink_without_the_full_title() {
+            let post = get_post(0).await;
             let expected = "https://www.reddit.com/r/rpg/comments/1hv9k9l";
             assert_eq!(post.short_permalink(), expected);
         }
 
-        #[test]
-        fn it_returns_the_link_uri() {
-            let post = get_post(0);
+        #[tokio::test]
+        async fn it_returns_the_link_uri() {
+            let post = get_post(0).await;
             let expected = "https://acoup.blog/2025/01/03/collections-coinage-and-the-tyranny-of-fantasy-gold/";
             assert_eq!(post.link_uri(), expected);
         }
 
-        #[test]
-        fn it_returns_an_empty_link_uri_for_self_posts() {
-            let post = get_post(3);
+        #[tokio::test]
+        async fn it_returns_an_empty_link_uri_for_self_posts() {
+            let post = get_post(3).await;
             assert_eq!(post.link_uri(), "")
         }
 
-        #[test]
-        fn it_formats_a_post_with_relative_dates() {
-            let post = get_post(0);
+        #[tokio::test]
+        async fn it_formats_a_post_with_relative_dates() {
+            let post = get_post(0).await;
             let expected = load_output("posts");
             let actual = post.view(&ViewOptions::default(), &FrozenClock::default());
             assert_eq!(actual, expected);
         }
 
-        #[test]
-        fn it_formats_a_post_with_absolute_dates() {
+        #[tokio::test]
+        async fn it_formats_a_post_with_absolute_dates() {
             let opts = ViewOptions::default().date_format(DateFormat::Absolute);
-            let post = get_post(0);
+            let post = get_post(0).await;
             let expected = load_output("posts_absolute_dates");
             let actual = post.view(&opts, &FrozenClock::default());
             assert_eq!(actual, expected);
         }
 
-        #[test]
-        fn it_formats_a_self_post() {
-            let post = get_post(3);
+        #[tokio::test]
+        async fn it_formats_a_self_post() {
+            let post = get_post(3).await;
             let expected = load_output("posts_self");
             let actual = post.view(&ViewOptions::default(), &FrozenClock::default());
             assert_eq!(actual, expected);
         }
 
-        #[test]
-        fn it_formats_a_post_on_oneline() {
+        #[tokio::test]
+        async fn it_formats_a_post_on_oneline() {
             let opts = ViewOptions::default().oneline(true);
-            let post = get_post(0);
+            let post = get_post(0).await;
             let expected =
                 "\u{1b}[32mrpg\u{1b}[0m Collections: Coinage and the Tyranny of Fantasy \"Gold\"";
             let actual = post.view(&opts, &FrozenClock::default());
@@ -500,9 +503,9 @@ mod tests {
         use crate::test_utils::{FrozenClock, load_output};
         use pretty_assertions::assert_eq;
 
-        #[test]
-        fn it_formats_comment_tallies_by_subreddit_name() {
-            let redditor = Redditor::test();
+        #[tokio::test]
+        async fn it_formats_comment_tallies_by_subreddit_name() {
+            let redditor = Redditor::test().await;
             let counts = SubredditCounter::from_iter(redditor.comments())
                 .sort_by(&SortAlgorithm::Lexicographically);
             let expected = load_output("tally_comments_abc");
@@ -510,9 +513,9 @@ mod tests {
             assert_eq!(actual, expected);
         }
 
-        #[test]
-        fn it_formats_comment_tallies_by_count() {
-            let redditor = Redditor::test();
+        #[tokio::test]
+        async fn it_formats_comment_tallies_by_count() {
+            let redditor = Redditor::test().await;
             let counts = SubredditCounter::from_iter(redditor.comments())
                 .sort_by(&SortAlgorithm::Numerically);
             let expected = load_output("tally_comments_count");
@@ -520,18 +523,18 @@ mod tests {
             assert_eq!(actual, expected);
         }
 
-        #[test]
-        fn it_returns_an_empty_string_if_no_comments() {
-            let redditor = Redditor::test_empty();
+        #[tokio::test]
+        async fn it_returns_an_empty_string_if_no_comments() {
+            let redditor = Redditor::test_empty().await;
             let counts =
                 SubredditCounter::from_iter(redditor.comments()).sort_by(&SortAlgorithm::default());
             let actual = counts.view(&ViewOptions::default(), &FrozenClock::default());
             assert_eq!(actual, "");
         }
 
-        #[test]
-        fn it_formats_submission_tallies_by_subreddit_name() {
-            let redditor = Redditor::test();
+        #[tokio::test]
+        async fn it_formats_submission_tallies_by_subreddit_name() {
+            let redditor = Redditor::test().await;
             let counts = SubredditCounter::from_iter(redditor.submissions())
                 .sort_by(&SortAlgorithm::Lexicographically);
             let expected = load_output("tally_posts_abc");
@@ -539,9 +542,9 @@ mod tests {
             assert_eq!(actual, expected);
         }
 
-        #[test]
-        fn it_formats_submission_tallies_by_count() {
-            let redditor = Redditor::test();
+        #[tokio::test]
+        async fn it_formats_submission_tallies_by_count() {
+            let redditor = Redditor::test().await;
             let counts = SubredditCounter::from_iter(redditor.submissions())
                 .sort_by(&SortAlgorithm::Numerically);
             let expected = load_output("tally_posts_count");
@@ -549,9 +552,9 @@ mod tests {
             assert_eq!(actual, expected);
         }
 
-        #[test]
-        fn it_returns_an_empty_string_if_no_submissions() {
-            let redditor = Redditor::test_empty();
+        #[tokio::test]
+        async fn it_returns_an_empty_string_if_no_submissions() {
+            let redditor = Redditor::test_empty().await;
             let counts = SubredditCounter::from_iter(redditor.submissions())
                 .sort_by(&SortAlgorithm::default());
             let actual = counts.view(&ViewOptions::default(), &FrozenClock::default());
@@ -564,9 +567,9 @@ mod tests {
         use crate::client::Redditor;
         use crate::test_utils::{FrozenClock, load_output};
 
-        #[test]
-        fn it_formats_a_timeline() {
-            let user = Redditor::test();
+        #[tokio::test]
+        async fn it_formats_a_timeline() {
+            let user = Redditor::test().await;
             let actual = user
                 .timeline()
                 .view(&ViewOptions::default(), &FrozenClock::default());

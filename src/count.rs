@@ -79,9 +79,9 @@ mod tests {
     use super::*;
     use crate::client::Redditor;
 
-    #[test]
-    fn it_counts_comments_by_subreddit() {
-        let redditor = Redditor::test();
+    #[tokio::test]
+    async fn it_counts_comments_by_subreddit() {
+        let redditor = Redditor::test().await;
         let comments = redditor.comments();
         let counter = SubredditCounter::count(comments);
 
@@ -110,9 +110,9 @@ mod tests {
         }
     }
 
-    #[test]
-    fn it_sorts_by_subreddit_name() {
-        let redditor = Redditor::test();
+    #[tokio::test]
+    async fn it_sorts_by_subreddit_name() {
+        let redditor = Redditor::test().await;
         let expected: Vec<SubredditCount> = vec![
             ("cyphersystem", 1),
             ("DiscoElysium", 31),
@@ -135,9 +135,9 @@ mod tests {
         assert_eq!(actual, expected);
     }
 
-    #[test]
-    fn it_sorts_by_subreddit_count() {
-        let redditor = Redditor::test();
+    #[tokio::test]
+    async fn it_sorts_by_subreddit_count() {
+        let redditor = Redditor::test().await;
         let expected: Vec<SubredditCount> = vec![
             ("rpg", 51),
             ("DiscoElysium", 31),

@@ -204,9 +204,9 @@ impl Runner {
     /// Create a new program runner using the given `config`.
     ///
     /// Returns an error with a helpful message if the user does not exist.
-    pub fn new(config: Config) -> result::Result<Runner, Error> {
+    pub async fn new(config: Config) -> result::Result<Runner, Error> {
         let username = config.command.username();
-        let user = Redditor::new(username, RedditService::new())?;
+        let user = Redditor::new(username, RedditService::new()).await?;
         Ok(Self { config, user })
     }
 
