@@ -32,7 +32,10 @@ impl<'a> TestService<'a> {
 }
 
 impl<'a> Service for TestService<'a> {
-    async fn get(&self, uri: impl IntoUrl) -> Result {
+    async fn get<U>(&self, uri: U) -> Result
+    where
+        U: IntoUrl + Send,
+    {
         Ok(fs::read_to_string(uri.as_str()).expect("could not find test data"))
     }
 

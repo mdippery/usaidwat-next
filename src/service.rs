@@ -69,11 +69,13 @@ pub type Result = result::Result<String, Error>;
 /// and a mocked connector for testing purposes.
 pub trait Service {
     /// Performs a GET request to the given URI and returns the raw body.
-    async fn get(&self, uri: impl IntoUrl) -> Result;
+    fn get<U>(&self, uri: U) -> impl Future<Output = Result> + Send
+    where
+        U: IntoUrl + Send;
 
     /// Performs a GET request to the `resource` associated with the given
     /// `username` and returns it as a parsed JSON response.
-    async fn get_resource(&self, username: &str, resource: &str) -> Result;
+    fn get_resource(&self, username: &str, resource: &str) -> impl Future<Output = Result> + Send;
 
     /// An appropriate user agent to use for HTTP requests.
     fn user_agent(&self) -> String {
@@ -113,7 +115,10 @@ impl RedditService {
 }
 
 impl Service for RedditService {
-    async fn get(&self, uri: impl IntoUrl) -> Result {
+    async fn get<U>(&self, uri: U) -> Result
+    where
+        U: IntoUrl + Send,
+    {
         let client = Client::new();
         let resp = client
             .get(uri)
