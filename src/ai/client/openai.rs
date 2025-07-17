@@ -72,11 +72,25 @@ struct OpenAIRequestBody {
 
 impl OpenAIRequestBody {
     /// Sets the model used by the OpenAI API request.
+    ///
+    /// If not specified, the [default](Model::default) model, gpt-4o,
+    /// will be used. [According to OpenAI][1], gpt-4.1 also "offers a
+    /// solid combination of intelligence, speed, and cost effectiveness".
+    /// If you are on a budget, you can also try using the
+    /// [least expensive](Model::cheapest), too.
+    ///
+    /// [1]: https://platform.openai.com/docs/guides/text?api-mode=responses#choosing-a-model
     pub fn model(self, model: Model) -> Self {
         Self { model, ..self }
     }
 
     /// Sets optional instructions for the request.
+    ///
+    /// Instructions provide high-level instructions on how a GPT model should
+    /// behave while generating a response, including tone, goals, and examples
+    /// of correct responses. Instructions take precedence over the prompt
+    /// provided by the [`input`] parameter. Instructions are not necessary if
+    /// you do not wish to customize the response or provide guidance.
     pub fn instructions(self, instructions: impl Into<String>) -> Self {
         let instructions = Some(instructions.into());
         Self {
@@ -86,6 +100,12 @@ impl OpenAIRequestBody {
     }
 
     /// Sets the request's input.
+    ///
+    /// This is sometimes referred to as a "prompt" and represents a request
+    /// made to GPT for which one or more responses are expected.
+    ///
+    /// If [instructions] are provided, the instructions take precedence
+    /// over this input.
     pub fn input(self, input: impl Into<String>) -> Self {
         let input = input.into();
         Self { input, ..self }
@@ -97,6 +117,13 @@ impl OpenAIRequestBody {
 /// For more information on the differences between each model, see the
 /// [OpenAI model documentation](https://platform.openai.com/docs/models).
 ///
+/// The [default](Model::default) is [gpt-4o](Model::Gpt4o), which OpenAI
+/// describes as "the best model to use for most tasks". [According to its
+/// docs][1], [gpt-4.1](Model::Gpt4_1) "offers a solid combination of
+/// intelligence, speed, and cost effectiveness". If you are on a budget,
+/// consider using [gpt-4.1-nano](Model::Gpt4_1nano), the
+/// [least expensive](Model::cheapest) model.
+///
 /// # Cost
 ///
 /// OpenAI API usage has a cost, and the cost of each model differs;
@@ -104,6 +131,8 @@ impl OpenAIRequestBody {
 ///
 /// See the [cost breakdown](self#Cost) in the `openai` module documentation for more details,
 /// or visit OpenAI's [pricing](https://platform.openai.com/docs/pricing) docs for the last prices.
+///
+/// [1]: https://platform.openai.com/docs/guides/text?api-mode=responses#choosing-a-model
 #[derive(Debug, Default, PartialEq, Deserialize, Serialize)]
 pub enum Model {
     /// The model currently used by ChatGPT.
