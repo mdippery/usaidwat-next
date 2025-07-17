@@ -1,6 +1,61 @@
 //! OpenAI API client.
+//!
+//! When you create a client, you will have to select a [model](Model) to use. By default, the
+//! [cheapest](Model::cheapest) model will be selected. Read the
+//! [OpenAI model documentation](https://platform.openai.com/docs/models) for more information
+//! on the various models offered by the OpenAI API.
+//!
+//! # Access
+//!
+//! You will need to set up an [OpenAI API account](https://platform.openai.com/docs/overview)
+//! and generate your own authentication key to use OpenAI's API. Your key should be stored
+//! under the `$OPENAI_API_KEY` environment variable for use with [`Auth`](crate::ai::auth::Auth).
+//!
+//! **Note that you are solely responsible for paying the costs of OpenAI API access.** The
+//! usaidwat developers are not responsible for costs you incur while making use of the usaidwat
+//! summarization service or other AI services. Read on for details about OpenAI's API pricing.
+//!
+//! # Cost
+//!
+//! There's no such thing as a free lunch, and there's no such thing as free OpenAI access,
+//! even if OpenAI is a "non-profit" that is building its technology for the betterment of
+//! humanity (and not Sam Altman's bank account). When you create an OpenAI API client,
+//! you will need to select a [`Model`]. Models are billed on a per-token basis, where a token
+//! is the smallest unit of text that the model reads and processes. There are three types of
+//! tokens: input tokens, cached input tokens, and output tokens.
+//!
+//! - **Input tokens** are the token used in any _requests_ made to the OpenAPI AI. This is
+//!   the "prompt" that usaidwat sends to OpenAI for summarization.
+//! - **Cached input tokens** are input tokens that have been reused by GPT. Input tokens are
+//!   reused by prompts that have a common prefix, as described
+//!   [here](https://openai.com/index/api-prompt-caching/).
+//! - **Output tokens** are tokens generated in the output that is sent back to a client in
+//!   response to a request.
+//!
+//! Prices are expressed in US dollars per $1 million tokens. As of 17 July 2025, the prices for
+//! each model are as follows.
+//!
+//! For the latest pricing, see OpenAI's [pricing](https://platform.openai.com/docs/pricing) docs.
+//!
+//! | Model      | Descriptor        | Input    | Cached Input | Output  |
+//! |------------|-------------------|----------|--------------|---------|
+//! | Gpt4_1nano | gpt-4.1-nano      | $0.10   | $0.025        | $0.40   |
+//! | Gpt4omini  | gpt-4o-mini       | $0.15   | $0.075        | $0.60   |
+//! | Gpt4_1mini | gpt-4.1-mini      | $0.40   | $0.10         | $1.60   |
+//! | O4mini     | o4-mini           | $1.10   | $0.275        | $4.40   |
+//! | O3mini     | o3-mini           | $1.10   | $0.55         | $4.40   |
+//! | Gpt4_1     | gpt-4.1           | $2.00   | $0.50         | $8.00   |
+//! | O3         | o3                | $2.00   | $0.50         | $8.00   |
+//! | Gpt4o      | gpt-4o            | $2.50   | $1.25         | $10.00  |
+//! | ChatGpt4o  | chatgpt-4o-latest | $5.00   | -             | $15.00  |
+//! | O1         | o1                | $15.00  | $7.50         | $60.00  |
+//! | O3pro      | o3-pro            | $20.00  | -             | $80.00  |
+//! | 01pro      | o1-pro            | $150.00 | -             | $600.00 |
+//!
+//! # See Also
+//!
+//! - [OpenAI model documentation](https://platform.openai.com/docs/models)
 
-use crate::ai::client::{HasCost, ModelCost};
 use serde::{Deserialize, Serialize};
 use std::fmt;
 
@@ -38,6 +93,17 @@ impl OpenAIRequestBody {
 }
 
 /// Available OpenAI GPT models.
+///
+/// For more information on the differences between each model, see the
+/// [OpenAI model documentation](https://platform.openai.com/docs/models).
+///
+/// # Cost
+///
+/// OpenAI API usage has a cost, and the cost of each model differs;
+/// naturally more powerful models cost more to use.
+///
+/// See the [cost breakdown](self#Cost) in the `openai` module documentation for more details,
+/// or visit OpenAI's [pricing](https://platform.openai.com/docs/pricing) docs for the last prices.
 #[derive(Debug, Default, PartialEq, Deserialize, Serialize)]
 pub enum Model {
     /// The model currently used by ChatGPT.
@@ -117,26 +183,6 @@ impl fmt::Display for Model {
         let s = serde_json::to_string(&self).expect(&format!("could not serialize {:?}", self));
         let s = s.trim_matches('"');
         f.write_fmt(format_args!("{}", s))
-    }
-}
-
-impl HasCost for Model {
-    fn cost(&self) -> ModelCost {
-        let (i, c, o) = match self {
-            Model::ChatGpt4o => (5.0, None, 15.0),
-            Model::Gpt4o => (2.5, Some(1.5), 10.0),
-            Model::Gpt4omini => (0.15, Some(0.075), 0.60),
-            Model::Gpt4_1 => (2.0, Some(0.5), 8.0),
-            Model::Gpt4_1mini => (0.4, Some(0.1), 1.6),
-            Model::Gpt4_1nano => (0.1, Some(0.025), 0.4),
-            Model::O4mini => (1.1, Some(0.275), 4.4),
-            Model::O3 => (2.0, Some(0.5), 8.0),
-            Model::O3mini => (1.1, Some(0.55), 4.4),
-            Model::O3pro => (20.0, None, 80.0),
-            Model::O1 => (15.0, Some(7.5), 60.0),
-            Model::O1pro => (150.0, None, 600.0),
-        };
-        ModelCost::new(i * 100.0, c.map(|cents| cents * 100.0), o * 100.0)
     }
 }
 
