@@ -69,9 +69,14 @@ pub struct OpenAIClient {
 
 impl APIClient for OpenAIClient {
     type APIRequest = OpenAIRequest;
+    type APIResponse = String; // TODO: Create OpenAIResponse type
 
     fn new(auth: Auth) -> Self {
         Self { auth }
+    }
+
+    fn send(&self, request: &Self::APIRequest) -> Self::APIResponse {
+        todo!("not implemented yet")
     }
 }
 

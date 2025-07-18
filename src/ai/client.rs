@@ -9,8 +9,13 @@ pub trait APIClient {
     /// The client can make API requests of this type.
     type APIRequest: APIRequest;
 
+    type APIResponse; // TODO: Create APIResponse trait
+
     /// Creates a new client with the given authentication data.
     fn new(auth: Auth) -> Self;
+
+    /// Sends the request to the AI service and receives a response.
+    fn send(&self, request: &Self::APIRequest) -> Self::APIResponse; // TODO: Create Result type and return
 }
 
 /// A request to an AI service's API.
