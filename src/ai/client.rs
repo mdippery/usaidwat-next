@@ -2,6 +2,17 @@
 
 pub mod openai;
 
+use crate::ai::Auth;
+
+/// A client for an AI service's API.
+pub trait APIClient {
+    /// The client can make API requests of this type.
+    type APIRequest: APIRequest;
+
+    /// Creates a new client with the given authentication data.
+    fn new(auth: Auth) -> Self;
+}
+
 /// A request to an AI service's API.
 ///
 /// This trait follows a "builder" pattern where elements of the request

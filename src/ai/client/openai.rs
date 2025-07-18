@@ -9,7 +9,7 @@
 //!
 //! You will need to set up an [OpenAI API account](https://platform.openai.com/docs/overview)
 //! and generate your own authentication key to use OpenAI's API. Your key should be stored
-//! under the `$OPENAI_API_KEY` environment variable for use with [`Auth`](crate::ai::auth::Auth).
+//! under the `$OPENAI_API_KEY` environment variable for use with [`Auth`].
 //!
 //! **Note that you are solely responsible for paying the costs of OpenAI API access.** The
 //! usaidwat developers are not responsible for costs you incur while making use of the usaidwat
@@ -56,12 +56,27 @@
 //!
 //! - [OpenAI model documentation](https://platform.openai.com/docs/models)
 
-use crate::ai::client::APIRequest;
+use crate::ai::Auth;
+use crate::ai::client::{APIClient, APIRequest};
 use serde::{Deserialize, Serialize};
 use std::fmt;
 
+/// An OpenAI API client.
+#[derive(Debug)]
+pub struct OpenAIClient {
+    auth: Auth,
+}
+
+impl APIClient for OpenAIClient {
+    type APIRequest = OpenAIRequest;
+
+    fn new(auth: Auth) -> Self {
+        Self { auth }
+    }
+}
+
 /// A body for an OpenAI API request.
-#[derive(Default, Deserialize, Serialize)]
+#[derive(Debug, Default, Deserialize, Serialize)]
 pub struct OpenAIRequest {
     model: Model,
 
