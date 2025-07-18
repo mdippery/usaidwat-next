@@ -56,12 +56,13 @@
 //!
 //! - [OpenAI model documentation](https://platform.openai.com/docs/models)
 
+use crate::ai::client::APIRequest;
 use serde::{Deserialize, Serialize};
 use std::fmt;
 
 /// A body for an OpenAI API request.
 #[derive(Default, Deserialize, Serialize)]
-struct OpenAIRequestBody {
+pub struct OpenAIRequest {
     model: Model,
 
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -70,7 +71,9 @@ struct OpenAIRequestBody {
     input: String,
 }
 
-impl OpenAIRequestBody {
+impl APIRequest for OpenAIRequest {
+    /// This request uses OpenAI GPT-specific [models](Model).
+    type Model = Model;
     /// Sets the model used by the OpenAI API request.
     ///
     /// If not specified, the [default](Model::default) model, gpt-4o,
@@ -80,7 +83,7 @@ impl OpenAIRequestBody {
     /// [least expensive](Model::cheapest), too.
     ///
     /// [1]: https://platform.openai.com/docs/guides/text?api-mode=responses#choosing-a-model
-    pub fn model(self, model: Model) -> Self {
+    fn model(self, model: Model) -> Self {
         Self { model, ..self }
     }
 
@@ -89,9 +92,10 @@ impl OpenAIRequestBody {
     /// Instructions provide high-level instructions on how a GPT model should
     /// behave while generating a response, including tone, goals, and examples
     /// of correct responses. Instructions take precedence over the prompt
-    /// provided by the [`input`] parameter. Instructions are not necessary if
-    /// you do not wish to customize the response or provide guidance.
-    pub fn instructions(self, instructions: impl Into<String>) -> Self {
+    /// provided by the [`input`](OpenAIRequest::input) parameter.
+    /// Instructions are not necessary if you do not wish to customize the
+    /// response or provide guidance.
+    fn instructions(self, instructions: impl Into<String>) -> Self {
         let instructions = Some(instructions.into());
         Self {
             instructions,
@@ -104,9 +108,9 @@ impl OpenAIRequestBody {
     /// This is sometimes referred to as a "prompt" and represents a request
     /// made to GPT for which one or more responses are expected.
     ///
-    /// If [instructions] are provided, the instructions take precedence
-    /// over this input.
-    pub fn input(self, input: impl Into<String>) -> Self {
+    /// If [instructions](OpenAIRequest::instructions) are provided,
+    /// the instructions take precedence over this input.
+    fn input(self, input: impl Into<String>) -> Self {
         let input = input.into();
         Self { input, ..self }
     }
@@ -217,13 +221,13 @@ impl fmt::Display for Model {
 
 #[cfg(test)]
 mod test {
-    mod request_body {
+    mod request {
         use super::super::*;
         use indoc::indoc;
 
         #[test]
         fn it_serializes() {
-            let body = OpenAIRequestBody::default()
+            let body = OpenAIRequest::default()
                 .model(Model::Gpt4omini)
                 .instructions("Please treat this as a test.")
                 .input("Serialize me, GPT!");
@@ -241,7 +245,7 @@ mod test {
 
         #[test]
         fn it_serializes_without_instructions() {
-            let body = OpenAIRequestBody::default().input("Serialize me, GPT!");
+            let body = OpenAIRequest::default().input("Serialize me, GPT!");
             let expected = indoc! {"{
               \"model\": \"gpt-4o\",
               \"input\": \"Serialize me, GPT!\"
@@ -260,7 +264,7 @@ mod test {
                 "instructions": "Please treat this as a test.",
                 "input": "Deserialize me, GPT!"
             }"#;
-            let body: OpenAIRequestBody = serde_json::from_str(data).unwrap();
+            let body: OpenAIRequest = serde_json::from_str(data).unwrap();
             assert_eq!(body.model, Model::Gpt4omini);
             assert!(body.instructions.is_some());
             assert_eq!(body.instructions.unwrap(), "Please treat this as a test.");
@@ -273,7 +277,7 @@ mod test {
                 "model": "gpt-4o",
                 "input": "Deserialize me, GPT!"
             }"#;
-            let body: OpenAIRequestBody = serde_json::from_str(data).unwrap();
+            let body: OpenAIRequest = serde_json::from_str(data).unwrap();
             assert_eq!(body.model, Model::Gpt4o);
             assert!(body.instructions.is_none());
             assert_eq!(body.input, "Deserialize me, GPT!");
