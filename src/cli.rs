@@ -6,7 +6,6 @@ use crate::clock::SystemClock;
 use crate::count::{SortAlgorithm, SubredditCounter};
 use crate::filter::{RedditFilter, StringSet};
 use crate::pager::{Pager, PagerEnv};
-use crate::service::RedditService;
 use crate::summary::Summarizer;
 use crate::view::{ViewOptions, Viewable};
 use clap::{Args, Parser, Subcommand, ValueEnum};
@@ -205,7 +204,7 @@ impl Runner {
     /// Returns an error with a helpful message if the user does not exist.
     pub async fn new(config: Config) -> result::Result<Runner, Error> {
         let username = config.command.username();
-        let user = Redditor::new(username, RedditService::new()).await?;
+        let user = Redditor::new(username).await?;
         Ok(Self { config, user })
     }
 

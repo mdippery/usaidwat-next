@@ -78,7 +78,7 @@ impl Redditor {
     /// Returns a valid Redditor with 100 submissions and 100 comments
     /// that can be used for testing purposes.
     pub async fn test() -> Redditor {
-        Redditor::new(String::from("mipadi"), TestService::new("mipadi"))
+        Redditor::new_with_service(String::from("mipadi"), TestService::new("mipadi"))
             .await
             .unwrap()
     }
@@ -86,7 +86,7 @@ impl Redditor {
     /// Returns a valid Redditor with no submissions nor comments that can
     /// be used for testing purposes.
     pub async fn test_empty() -> Redditor {
-        Redditor::new(
+        Redditor::new_with_service(
             String::from("testuserpleaseignore"),
             TestService::new("empty"),
         )
@@ -96,7 +96,7 @@ impl Redditor {
 
     /// Returns a non-existent Redditor.
     pub async fn test_none() -> Option<Redditor> {
-        Redditor::new(String::from("doesnotexist"), TestService::new("404"))
+        Redditor::new_with_service(String::from("doesnotexist"), TestService::new("404"))
             .await
             .ok()
     }

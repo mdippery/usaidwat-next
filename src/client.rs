@@ -1,7 +1,7 @@
 //! Clients for reading data from the Reddit API.
 
 use crate::clock::{DateTime, HasAge, Utc};
-use crate::service::{self, Service};
+use crate::service::{self, RedditService, Service};
 use crate::thing::{self, Comment, Submission, User};
 pub use chrono::Weekday;
 use chrono::{Datelike, Timelike};
@@ -26,12 +26,25 @@ impl std::fmt::Debug for Redditor {
 impl Redditor {
     /// Creates a new client for retrieving information for Reddit users.
     ///
+    /// `username` should be the Redditor's username.
+    ///
+    /// Returns an [`Error`] if data cannot be parsed for the given username.
+    pub async fn new(username: impl Into<String>) -> Result<Self, Error> {
+        let service = RedditService::new();
+        Self::new_with_service(username, service).await
+    }
+
+    /// Creates a new client for retrieving information for Reddit users.
+    ///
     /// `username` should be the Redditor's username. `service` is the
     /// actual service implementation that will be used to retrieve
     /// information about the Redditor.
     ///
     /// Returns an [`Error`] if data cannot be parsed for the given username.
-    pub async fn new<T: Service>(username: impl Into<String>, service: T) -> Result<Self, Error> {
+    pub(crate) async fn new_with_service<T: Service>(
+        username: impl Into<String>,
+        service: T,
+    ) -> Result<Self, Error> {
         let username = username.into();
 
         let (user_data, comment_data, post_data) = try_join!(
