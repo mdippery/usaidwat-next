@@ -57,7 +57,7 @@
 //! - [OpenAI model documentation](https://platform.openai.com/docs/models)
 
 use crate::ai::Auth;
-use crate::ai::client::{APIClient, APIRequest};
+use crate::ai::client::{APIClient, APIRequest, APIResponse};
 use serde::{Deserialize, Serialize};
 use std::fmt;
 
@@ -69,7 +69,7 @@ pub struct OpenAIClient {
 
 impl APIClient for OpenAIClient {
     type APIRequest = OpenAIRequest;
-    type APIResponse = String; // TODO: Create OpenAIResponse type
+    type APIResponse = OpenAIResponse;
 
     fn new(auth: Auth) -> Self {
         Self { auth }
@@ -238,6 +238,12 @@ impl fmt::Display for Model {
         f.write_fmt(format_args!("{}", s))
     }
 }
+
+/// A response from the OpenAI API.
+#[derive(Debug)]
+pub struct OpenAIResponse;
+
+impl APIResponse for OpenAIResponse {}
 
 #[cfg(test)]
 mod test {
