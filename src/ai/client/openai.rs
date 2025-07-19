@@ -57,7 +57,7 @@
 //! - [OpenAI model documentation](https://platform.openai.com/docs/models)
 
 use crate::ai::Auth;
-use crate::ai::client::{APIClient, APIRequest, APIResponse};
+use crate::ai::client::{APIClient, APIRequest, APIResponse, APIResult};
 use serde::{Deserialize, Serialize};
 use std::fmt;
 
@@ -75,7 +75,7 @@ impl APIClient for OpenAIClient {
         Self { auth }
     }
 
-    fn send(&self, request: &Self::APIRequest) -> Self::APIResponse {
+    fn send(&self, request: &Self::APIRequest) -> APIResult<Self::APIResponse> {
         todo!("not implemented yet")
     }
 }

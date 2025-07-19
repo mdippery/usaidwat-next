@@ -16,7 +16,7 @@ pub trait APIClient {
     fn new(auth: Auth) -> Self;
 
     /// Sends the request to the AI service and receives a response.
-    fn send(&self, request: &Self::APIRequest) -> Self::APIResponse; // TODO: Create Result type and return
+    fn send(&self, request: &Self::APIRequest) -> APIResult<Self::APIResponse>;
 }
 
 /// A request to an AI service's API.
@@ -89,3 +89,10 @@ pub trait APIRequest {
 
 /// A response from an AI service's API.
 pub trait APIResponse {}
+
+/// An API result that includes the response if successful or an error
+/// if unsuccessful.
+pub type APIResult<T> = Result<T, APIError>;
+
+/// An API error.
+pub enum APIError {}
