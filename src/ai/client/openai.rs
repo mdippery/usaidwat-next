@@ -65,6 +65,7 @@ use std::fmt;
 #[derive(Debug)]
 pub struct OpenAIClient {
     auth: Auth,
+    service: reqwest::Client, // TODO: Need a more general type for mocking tests
 }
 
 impl APIClient for OpenAIClient {
@@ -72,11 +73,17 @@ impl APIClient for OpenAIClient {
     type APIResponse = OpenAIResponse;
 
     fn new(auth: Auth) -> Self {
-        Self { auth }
+        Self::new_with_service(auth, reqwest::Client::new())
     }
 
     fn send(&self, request: &Self::APIRequest) -> APIResult<Self::APIResponse> {
         todo!("not implemented yet")
+    }
+}
+
+impl OpenAIClient {
+    fn new_with_service(auth: Auth, service: reqwest::Client) -> Self {
+        Self { auth, service }
     }
 }
 
