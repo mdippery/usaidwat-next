@@ -4,8 +4,8 @@
 //! with the Reddit API over HTTPS, essentially a specialized HTTPS client
 //! specifically for Reddit.
 
-use reqwest::header::{self, HeaderMap, HeaderValue};
-use reqwest::{Client, IntoUrl};
+use reqwest::header;
+use reqwest::{Client, ClientBuilder, IntoUrl};
 use std::fmt::Formatter;
 use std::result;
 
@@ -28,7 +28,7 @@ pub trait Service {
     fn get_resource(&self, username: &str, resource: &str) -> impl Future<Output = Result> + Send;
 
     /// An appropriate user agent to use for HTTP requests.
-    fn user_agent(&self) -> String {
+    fn user_agent() -> String {
         format!("{} v{}", env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION"))
     }
 }
@@ -41,16 +41,15 @@ pub struct RedditService {
 impl RedditService {
     /// Creates a new Reddit service.
     pub fn new() -> Self {
-        let client = Client::new();
+        let client = ClientBuilder::new()
+            .user_agent(Self::user_agent())
+            .build()
+            // Better error handling? According to the docs, build() only
+            // fails if a TLS backend cannot be initialized, or if DNS
+            // resolution cannot be initialized, and both of these seem
+            // like unrecoverable errors for us.
+            .expect("could not create a new HTTP client");
         Self { client }
-    }
-
-    fn headers(&self) -> HeaderMap {
-        let ua = self.user_agent();
-        let ua = HeaderValue::from_str(&ua).expect(&format!("could not get user agent from {ua}"));
-        let mut headers = HeaderMap::new();
-        headers.insert(header::USER_AGENT, ua);
-        headers
     }
 
     fn query_string(&self, resource: &str) -> &str {
@@ -72,13 +71,7 @@ impl Service for RedditService {
     where
         U: IntoUrl + Send,
     {
-        let resp = self
-            .client
-            .get(uri)
-            .headers(self.headers())
-            .send()
-            .await
-            .map_err(Error::Request)?;
+        let resp = self.client.get(uri).send().await.map_err(Error::Request)?;
 
         if !resp.status().is_success() {
             Err(Error::Http(resp.status()))
@@ -160,8 +153,7 @@ mod tests {
 
     #[test]
     fn it_returns_user_agent_with_version_number() {
-        let service = RedditService::new();
-        let user_agent = service.user_agent();
+        let user_agent = RedditService::user_agent();
         let version_re = Regex::new(r"^[a-z]+ v\d+\.\d+\.\d+(-(alpha|beta)\.\d+)?$").unwrap();
         assert!(
             version_re.is_match(&user_agent),

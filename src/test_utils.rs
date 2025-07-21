@@ -44,7 +44,7 @@ impl<'a> Service for TestService<'a> {
         self.get(&filename).await
     }
 
-    fn user_agent(&self) -> String {
+    fn user_agent() -> String {
         format!("test-service-please-ignore v{}", env!("CARGO_PKG_VERSION"))
     }
 }
