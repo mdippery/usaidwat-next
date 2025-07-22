@@ -58,22 +58,24 @@
 
 use crate::ai::Auth;
 use crate::ai::client::{APIClient, APIRequest, APIResponse, APIResult};
+use crate::ai::service::{APIService, HTTPService};
 use serde::{Deserialize, Serialize};
 use std::fmt;
 
 /// An OpenAI API client.
 #[derive(Debug)]
-pub struct OpenAIClient {
+pub struct OpenAIClient<T: APIService> {
     auth: Auth,
-    service: reqwest::Client, // TODO: Need a more general type for mocking tests
+    service: T,
 }
 
-impl APIClient for OpenAIClient {
+impl APIClient for OpenAIClient<HTTPService> {
     type APIRequest = OpenAIRequest;
     type APIResponse = OpenAIResponse;
 
     fn new(auth: Auth) -> Self {
-        Self::new_with_service(auth, reqwest::Client::new())
+        let service = HTTPService::new();
+        Self::new_with_service(auth, service)
     }
 
     fn send(&self, request: &Self::APIRequest) -> APIResult<Self::APIResponse> {
@@ -81,8 +83,8 @@ impl APIClient for OpenAIClient {
     }
 }
 
-impl OpenAIClient {
-    fn new_with_service(auth: Auth, service: reqwest::Client) -> Self {
+impl<T: APIService> OpenAIClient<T> {
+    fn new_with_service(auth: Auth, service: T) -> Self {
         Self { auth, service }
     }
 }

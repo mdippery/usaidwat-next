@@ -6,7 +6,7 @@
 
 use crate::http::{HTTPError, HTTPResult, HTTPService};
 use reqwest::header;
-use reqwest::{Client, ClientBuilder, IntoUrl};
+use reqwest::{Client, IntoUrl};
 
 /// A service for retrieving information for Reddit users.
 ///
@@ -36,14 +36,7 @@ pub struct RedditService {
 impl RedditService {
     /// Creates a new Reddit service.
     pub fn new() -> Self {
-        let client = ClientBuilder::new()
-            .user_agent(Self::user_agent())
-            .build()
-            // Better error handling? According to the docs, build() only
-            // fails if a TLS backend cannot be initialized, or if DNS
-            // resolution cannot be initialized, and both of these seem
-            // like unrecoverable errors for us.
-            .expect("could not create a new HTTP client");
+        let client = Self::client();
         Self { client }
     }
 

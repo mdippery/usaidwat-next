@@ -1,6 +1,6 @@
 //! Services for communicating with APIs using HTTP.
 
-use reqwest::header;
+use reqwest::{Client, ClientBuilder, header};
 use std::{error, fmt};
 
 /// A general service for making HTTP calls.
@@ -12,6 +12,18 @@ use std::{error, fmt};
 /// be remote, such as when the implementation is a deterministic service
 /// used for testing.
 pub trait HTTPService {
+    /// Default HTTP client that can be used to make HTTP requests.
+    fn client() -> Client {
+        ClientBuilder::new()
+            .user_agent(Self::user_agent())
+            .build()
+            // Better error handling? According to the docs, build() only
+            // fails if a TLS backend cannot be initialized, or if DNS
+            // resolution cannot be initialized, and both of these seem
+            // like unrecoverable errors for us.
+            .expect("could not create a new HTTP client")
+    }
+
     /// An appropriate user agent to use when making HTTP requests.
     fn user_agent() -> String {
         format!("{} v{}", env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION"))
