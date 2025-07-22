@@ -9,19 +9,10 @@ use chrono::{Datelike, Timelike};
 use tokio::try_join;
 
 /// Represents a Reddit user.
+#[derive(Debug)]
 pub struct Redditor {
     username: String,
     user: User,
-}
-
-impl std::fmt::Debug for Redditor {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(
-            f,
-            "Redditor {{ username = {}, user = {:?} }}",
-            self.username, self.user
-        )
-    }
 }
 
 impl Redditor {
