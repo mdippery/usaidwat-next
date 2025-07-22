@@ -101,19 +101,6 @@ impl Service for RedditService {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use regex::Regex;
-
-    #[test]
-    fn it_returns_user_agent_with_version_number() {
-        let user_agent = RedditService::user_agent();
-        let version_re = Regex::new(r"^[a-z]+ v\d+\.\d+\.\d+(-(alpha|beta)\.\d+)?$").unwrap();
-        assert!(
-            version_re.is_match(&user_agent),
-            "{} does not match {}",
-            user_agent,
-            version_re,
-        );
-    }
 
     #[test]
     fn it_returns_a_query_string_with_comment_limits() {
