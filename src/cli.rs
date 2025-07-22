@@ -1,11 +1,11 @@
 //! Drives the command-line program.
 
-pub use crate::client::Error;
-use crate::client::Redditor;
 use crate::clock::SystemClock;
 use crate::count::{SortAlgorithm, SubredditCounter};
 use crate::filter::{RedditFilter, StringSet};
 use crate::pager::{Pager, PagerEnv};
+pub use crate::reddit::client::Error;
+use crate::reddit::client::Redditor;
 use crate::summary::Summarizer;
 use crate::view::{ViewOptions, Viewable};
 use clap::{Args, Parser, Subcommand, ValueEnum};

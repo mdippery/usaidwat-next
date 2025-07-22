@@ -4,33 +4,23 @@
 //! with the Reddit API over HTTPS, essentially a specialized HTTPS client
 //! specifically for Reddit.
 
+use crate::http::{HTTPError, HTTPResult, HTTPService};
 use reqwest::header;
 use reqwest::{Client, ClientBuilder, IntoUrl};
-use std::fmt::Formatter;
-use std::result;
-
-/// The result of an HTTP request.
-pub type Result = result::Result<String, Error>;
 
 /// A service for retrieving information for Reddit users.
 ///
 /// Using this trait, clients can implement different ways of connecting
 /// to the Reddit API, such as an actual connector for production code,
 /// and a mocked connector for testing purposes.
-pub trait Service {
-    /// Performs a GET request to the given URI and returns the raw body.
-    fn get<U>(&self, uri: U) -> impl Future<Output = Result> + Send
-    where
-        U: IntoUrl + Send;
-
+pub trait Service: HTTPService {
     /// Performs a GET request to the `resource` associated with the given
     /// `username` and returns it as a parsed JSON response.
-    fn get_resource(&self, username: &str, resource: &str) -> impl Future<Output = Result> + Send;
-
-    /// An appropriate user agent to use for HTTP requests.
-    fn user_agent() -> String {
-        format!("{} v{}", env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION"))
-    }
+    fn get_resource(
+        &self,
+        username: &str,
+        resource: &str,
+    ) -> impl Future<Output = HTTPResult<String>> + Send;
 }
 
 /// A service that contacts the Reddit API directly to retrieve information.
@@ -66,83 +56,40 @@ impl RedditService {
     }
 }
 
-impl Service for RedditService {
-    async fn get<U>(&self, uri: U) -> Result
+impl HTTPService for RedditService {
+    async fn get<U>(&self, uri: U) -> HTTPResult<String>
     where
         U: IntoUrl + Send,
     {
-        let resp = self.client.get(uri).send().await.map_err(Error::Request)?;
+        let resp = self
+            .client
+            .get(uri)
+            .send()
+            .await
+            .map_err(HTTPError::Request)?;
 
         if !resp.status().is_success() {
-            Err(Error::Http(resp.status()))
+            Err(HTTPError::Http(resp.status()))
         } else {
             let content_type = resp
                 .headers()
                 .get(header::CONTENT_TYPE)
-                .ok_or(Error::MissingContentType)?
+                .ok_or(HTTPError::MissingContentType)?
                 .to_str()
-                .map_err(Error::InvalidContentType)?;
+                .map_err(HTTPError::InvalidContentType)?;
             if !content_type.starts_with("application/json") {
-                Err(Error::UnexpectedContentType(content_type.to_string()))
+                Err(HTTPError::UnexpectedContentType(content_type.to_string()))
             } else {
-                resp.text().await.map_err(Error::Body)
+                resp.text().await.map_err(HTTPError::Body)
             }
         }
     }
+}
 
-    async fn get_resource(&self, username: &str, resource: &str) -> Result {
+impl Service for RedditService {
+    async fn get_resource(&self, username: &str, resource: &str) -> HTTPResult<String> {
         let uri = self.uri(username, resource);
         self.get(&uri).await
-    }
-}
-
-/// A service error.
-#[derive(Debug)]
-pub enum Error {
-    /// An error retrieving the body of a response.
-    Body(reqwest::Error),
-
-    /// An error that occurred while making an HTTP request.
-    Request(reqwest::Error),
-
-    /// An unsuccessful HTTP status code in an HTTP response.
-    Http(reqwest::StatusCode),
-
-    /// A missing Content-Type header in a response.
-    MissingContentType,
-
-    /// An invalid Content-Type header.
-    InvalidContentType(header::ToStrError),
-
-    /// A Content-Type that is not understood by the service.
-    UnexpectedContentType(String),
-}
-
-impl std::fmt::Display for Error {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Error::Body(err) => write!(f, "Error retrieving body of HTTP response: {err}"),
-            Error::Request(err) => write!(f, "Error while making HTTP request: {err}"),
-            Error::Http(status) => write!(f, "Request returned HTTP {status}"),
-            Error::MissingContentType => write!(f, "Missing Content-Type header"),
-            Error::InvalidContentType(err) => write!(f, "Invalid Content-Type header value: {err}"),
-            Error::UnexpectedContentType(content_type) => {
-                write!(f, "Unexpected content type: {content_type}")
-            }
-        }
-    }
-}
-
-impl std::error::Error for Error {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        match self {
-            Error::Body(err) => Some(err),
-            Error::Request(err) => Some(err),
-            Error::Http(_) => None,
-            Error::MissingContentType => None,
-            Error::InvalidContentType(err) => Some(err),
-            Error::UnexpectedContentType(_) => None,
-        }
     }
 }
 

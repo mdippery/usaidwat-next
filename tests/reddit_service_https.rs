@@ -1,4 +1,4 @@
-use usaidwat::service::{RedditService, Service};
+use usaidwat::reddit::service::{RedditService, Service};
 use uuid::Uuid;
 
 // Not really the most interesting tests, but these are testing live HTTPS

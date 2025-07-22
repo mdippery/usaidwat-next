@@ -1,9 +1,9 @@
 //! Formats viewable objects for display in a terminal.
 
 use crate::cli::DateFormat;
-use crate::client::{Redditor, Timeline};
 use crate::clock::{Clock, HasAge};
 use crate::count::SubredditCount;
+use crate::reddit::client::{Redditor, Timeline};
 use crate::text::RegexReplaceable;
 use crate::thing::{Comment, HasSubreddit, Submission};
 use colored::Colorize;
@@ -303,7 +303,7 @@ mod tests {
 
     mod format_info {
         use super::super::*;
-        use crate::client::Redditor;
+        use crate::reddit::client::Redditor;
         use crate::test_utils::{FrozenClock, load_output};
 
         #[tokio::test]
@@ -318,7 +318,7 @@ mod tests {
     mod format_comment {
         use super::super::*;
         use super::with_no_color;
-        use crate::client::Redditor;
+        use crate::reddit::client::Redditor;
         use crate::test_utils::{FrozenClock, do_logging, load_output};
         use pretty_assertions::assert_eq;
 
@@ -427,7 +427,7 @@ mod tests {
 
     mod format_submission {
         use super::super::*;
-        use crate::client::Redditor;
+        use crate::reddit::client::Redditor;
         use crate::test_utils::{FrozenClock, load_output};
         use crate::thing::Submission;
         use pretty_assertions::assert_eq;
@@ -498,8 +498,8 @@ mod tests {
 
     mod format_tallies {
         use super::super::*;
-        use crate::client::Redditor;
         use crate::count::{SortAlgorithm, SubredditCounter};
+        use crate::reddit::client::Redditor;
         use crate::test_utils::{FrozenClock, load_output};
         use pretty_assertions::assert_eq;
 
@@ -564,7 +564,7 @@ mod tests {
 
     mod format_timeline {
         use super::super::*;
-        use crate::client::Redditor;
+        use crate::reddit::client::Redditor;
         use crate::test_utils::{FrozenClock, load_output};
 
         #[tokio::test]

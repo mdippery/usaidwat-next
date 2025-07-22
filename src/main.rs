@@ -2,7 +2,7 @@ use clap::Parser;
 use reqwest::StatusCode;
 use std::process;
 use usaidwat::cli::{Config, Error, Runner};
-use usaidwat::service;
+use usaidwat::http::HTTPError;
 
 fn die(error_code: i32, message: &str) {
     eprintln!("{}", message);
@@ -11,7 +11,7 @@ fn die(error_code: i32, message: &str) {
 
 fn dispatch_err(username: &str, err: &Error) {
     let message = match err {
-        Error::Service(service::Error::Http(StatusCode::NOT_FOUND)) => {
+        Error::Service(HTTPError::Http(StatusCode::NOT_FOUND)) => {
             format!("no such user: {username}")
         }
         _ => err.to_string(),

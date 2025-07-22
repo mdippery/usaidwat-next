@@ -55,13 +55,13 @@
 
 pub mod ai;
 pub mod cli;
-pub mod client;
 pub mod clock;
 pub mod count;
 pub mod filter;
+pub mod http;
 pub mod markdown;
 pub mod pager;
-pub mod service;
+pub mod reddit;
 pub mod summary;
 pub mod text;
 pub mod thing;

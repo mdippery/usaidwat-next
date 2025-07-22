@@ -77,7 +77,7 @@ impl SubredditCounter {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::client::Redditor;
+    use crate::reddit::client::Redditor;
 
     #[tokio::test]
     async fn it_counts_comments_by_subreddit() {

@@ -1,7 +1,8 @@
 //! Clients for reading data from the Reddit API.
 
 use crate::clock::{DateTime, HasAge, Utc};
-use crate::service::{self, RedditService, Service};
+use crate::http;
+use crate::reddit::service::{RedditService, Service};
 use crate::thing::{self, Comment, Submission, User};
 pub use chrono::Weekday;
 use chrono::{Datelike, Timelike};
@@ -157,14 +158,14 @@ impl Timeline {
 #[derive(Debug)]
 pub enum Error {
     /// An error from the underlying HTTP service.
-    Service(service::Error),
+    Service(http::HTTPError),
 
     /// An error parsing data.
     Parse(thing::Error),
 }
 
-impl From<service::Error> for Error {
-    fn from(error: service::Error) -> Self {
+impl From<http::HTTPError> for Error {
+    fn from(error: http::HTTPError) -> Self {
         Error::Service(error)
     }
 }
@@ -223,8 +224,8 @@ impl<'a> Iterator for TimelineIterator<'a> {
 #[cfg(test)]
 mod tests {
     mod user_with_data {
-        use crate::client::Redditor;
         use crate::clock::HasAge;
+        use crate::reddit::client::Redditor;
         use crate::test_utils::FrozenClock;
         use chrono::DateTime;
 
@@ -296,8 +297,8 @@ mod tests {
     }
 
     mod user_with_no_data {
-        use crate::client::Redditor;
         use crate::clock::HasAge;
+        use crate::reddit::client::Redditor;
         use crate::test_utils::FrozenClock;
         use chrono::DateTime;
 
@@ -369,7 +370,7 @@ mod tests {
     }
 
     mod invalid_user {
-        use crate::client::Redditor;
+        use crate::reddit::client::Redditor;
 
         #[tokio::test]
         async fn it_is_none() {
@@ -379,7 +380,7 @@ mod tests {
     }
 
     mod timeline {
-        use crate::client::Redditor;
+        use crate::reddit::client::Redditor;
         use chrono::Weekday;
         use std::iter::zip;
 
