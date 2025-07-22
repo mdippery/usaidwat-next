@@ -1,15 +1,10 @@
 //! Services for communicating with APIs using HTTP.
 
-use reqwest::{IntoUrl, header};
+use reqwest::header;
 use std::{error, fmt};
 
 /// A general service for making HTTP calls.
 pub trait HTTPService {
-    /// Performs a GET request to the given URI and returns the raw body.
-    fn get<U>(&self, uri: U) -> impl Future<Output = HTTPResult<String>> + Send
-    where
-        U: IntoUrl + Send;
-
     /// An appropriate user agent to use for HTTP requests.
     fn user_agent() -> String {
         format!("{} v{}", env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION"))

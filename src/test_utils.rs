@@ -33,6 +33,12 @@ impl<'a> TestService<'a> {
 }
 
 impl<'a> HTTPService for TestService<'a> {
+    fn user_agent() -> String {
+        format!("test-service-please-ignore v{}", env!("CARGO_PKG_VERSION"))
+    }
+}
+
+impl<'a> Service for TestService<'a> {
     async fn get<U>(&self, uri: U) -> HTTPResult<String>
     where
         U: IntoUrl + Send,
@@ -40,12 +46,6 @@ impl<'a> HTTPService for TestService<'a> {
         Ok(fs::read_to_string(uri.as_str()).expect("could not find test data"))
     }
 
-    fn user_agent() -> String {
-        format!("test-service-please-ignore v{}", env!("CARGO_PKG_VERSION"))
-    }
-}
-
-impl<'a> Service for TestService<'a> {
     async fn get_resource(&self, _username: &str, resource: &str) -> HTTPResult<String> {
         let filename = format!("tests/data/{resource}_{}.json", self.suffix);
         self.get(&filename).await

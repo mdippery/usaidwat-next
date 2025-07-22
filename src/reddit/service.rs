@@ -14,6 +14,11 @@ use reqwest::{Client, ClientBuilder, IntoUrl};
 /// to the Reddit API, such as an actual connector for production code,
 /// and a mocked connector for testing purposes.
 pub trait Service: HTTPService {
+    /// Performs a GET request to the given URI and returns the raw body.
+    fn get<U>(&self, uri: U) -> impl Future<Output = HTTPResult<String>> + Send
+    where
+        U: IntoUrl + Send;
+
     /// Performs a GET request to the `resource` associated with the given
     /// `username` and returns it as a parsed JSON response.
     fn get_resource(
@@ -56,7 +61,9 @@ impl RedditService {
     }
 }
 
-impl HTTPService for RedditService {
+impl HTTPService for RedditService {}
+
+impl Service for RedditService {
     async fn get<U>(&self, uri: U) -> HTTPResult<String>
     where
         U: IntoUrl + Send,
@@ -84,9 +91,7 @@ impl HTTPService for RedditService {
             }
         }
     }
-}
 
-impl Service for RedditService {
     async fn get_resource(&self, username: &str, resource: &str) -> HTTPResult<String> {
         let uri = self.uri(username, resource);
         self.get(&uri).await
