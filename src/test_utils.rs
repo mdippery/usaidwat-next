@@ -1,6 +1,6 @@
 use crate::clock::{Clock, DateTime, Utc};
 use crate::http::{HTTPResult, HTTPService};
-use crate::reddit::client::Redditor;
+use crate::reddit::Redditor;
 use crate::reddit::service::Service;
 use reqwest::IntoUrl;
 use std::fs;

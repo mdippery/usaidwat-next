@@ -1,7 +1,7 @@
 //! AI summarization.
 
 use crate::markdown;
-use crate::reddit::client::Redditor;
+use crate::reddit::Redditor;
 use itertools::Itertools;
 
 /// Summarizes a Redditor's comments and provides a sentiment analysis using AI.
@@ -27,7 +27,7 @@ impl<'a> Summarizer<'a> {
 
 #[cfg(test)]
 mod tests {
-    use crate::reddit::client::Redditor;
+    use crate::reddit::Redditor;
     use crate::summary::Summarizer;
     use crate::test_utils::load_output;
     use pretty_assertions::assert_eq;

@@ -217,7 +217,7 @@ impl<'a> Iterator for TimelineIterator<'a> {
 mod tests {
     mod user_with_data {
         use crate::clock::HasAge;
-        use crate::reddit::client::Redditor;
+        use crate::reddit::Redditor;
         use crate::test_utils::FrozenClock;
         use chrono::DateTime;
 
@@ -290,7 +290,7 @@ mod tests {
 
     mod user_with_no_data {
         use crate::clock::HasAge;
-        use crate::reddit::client::Redditor;
+        use crate::reddit::Redditor;
         use crate::test_utils::FrozenClock;
         use chrono::DateTime;
 
@@ -362,7 +362,7 @@ mod tests {
     }
 
     mod invalid_user {
-        use crate::reddit::client::Redditor;
+        use crate::reddit::Redditor;
 
         #[tokio::test]
         async fn it_is_none() {
@@ -372,7 +372,7 @@ mod tests {
     }
 
     mod timeline {
-        use crate::reddit::client::Redditor;
+        use crate::reddit::Redditor;
         use chrono::Weekday;
         use std::iter::zip;
 
