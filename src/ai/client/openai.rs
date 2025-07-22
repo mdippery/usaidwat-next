@@ -102,6 +102,8 @@ pub struct OpenAIRequest {
     instructions: Option<String>,
 
     input: String,
+
+    store: bool,
 }
 
 impl APIRequest for OpenAIRequest {
@@ -274,7 +276,8 @@ mod test {
             let expected = indoc! {"{
               \"model\": \"gpt-4o-mini\",
               \"instructions\": \"Please treat this as a test.\",
-              \"input\": \"Serialize me, GPT!\"
+              \"input\": \"Serialize me, GPT!\",
+              \"store\": false
             }"};
             let actual = serde_json::to_string_pretty(&body).unwrap();
             assert_eq!(
@@ -288,7 +291,8 @@ mod test {
             let body = OpenAIRequest::default().input("Serialize me, GPT!");
             let expected = indoc! {"{
               \"model\": \"gpt-4o\",
-              \"input\": \"Serialize me, GPT!\"
+              \"input\": \"Serialize me, GPT!\",
+              \"store\": false
             }"};
             let actual = serde_json::to_string_pretty(&body).unwrap();
             assert_eq!(
@@ -302,7 +306,8 @@ mod test {
             let data = r#"{
                 "model": "gpt-4o-mini",
                 "instructions": "Please treat this as a test.",
-                "input": "Deserialize me, GPT!"
+                "input": "Deserialize me, GPT!",
+                "store": false
             }"#;
             let body: OpenAIRequest = serde_json::from_str(data).unwrap();
             assert_eq!(body.model, Model::Gpt4omini);
@@ -315,7 +320,8 @@ mod test {
         fn it_deserializes_without_instructions() {
             let data = r#"{
                 "model": "gpt-4o",
-                "input": "Deserialize me, GPT!"
+                "input": "Deserialize me, GPT!",
+                "store": false
             }"#;
             let body: OpenAIRequest = serde_json::from_str(data).unwrap();
             assert_eq!(body.model, Model::Gpt4o);
