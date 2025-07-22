@@ -4,8 +4,15 @@ use reqwest::header;
 use std::{error, fmt};
 
 /// A general service for making HTTP calls.
+///
+/// It might be a bit odd to refer to this trait as a "service", since
+/// it appears to be more of a _client_ implementation, but think of
+/// this as a proxy for a remote _service_ (even though a _client_ is used
+/// to communicate with that remote service). A service might not always
+/// be remote, such as when the implementation is a deterministic service
+/// used for testing.
 pub trait HTTPService {
-    /// An appropriate user agent to use for HTTP requests.
+    /// An appropriate user agent to use when making HTTP requests.
     fn user_agent() -> String {
         format!("{} v{}", env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION"))
     }
