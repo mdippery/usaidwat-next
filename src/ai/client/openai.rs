@@ -61,6 +61,7 @@ use crate::ai::client::{APIClient, APIRequest, APIResponse, APIResult};
 use crate::ai::service::{APIService, HTTPService};
 use serde::{Deserialize, Serialize};
 use std::fmt;
+use std::slice::Iter;
 
 /// An OpenAI API client.
 #[derive(Debug)]
@@ -69,6 +70,8 @@ pub struct OpenAIClient<T: APIService> {
     service: T,
 }
 
+// TODO: I need to implement this trait for any API service, but that won't
+//      work with new(), so I need to figure out how best to pull this off.
 impl APIClient for OpenAIClient<HTTPService> {
     type APIRequest = OpenAIRequest;
     type APIResponse = OpenAIResponse;
@@ -78,7 +81,7 @@ impl APIClient for OpenAIClient<HTTPService> {
         Self::new_with_service(auth, service)
     }
 
-    // TODO: Need integration test! (once I have an API key set up)
+    // TODO: Test with a dummy service
     async fn send(&self, request: &Self::APIRequest) -> APIResult<Self::APIResponse> {
         self.service.post(Self::BASE_URI, &self.auth, request).await
     }
@@ -257,9 +260,50 @@ impl fmt::Display for Model {
 
 /// A response from the OpenAI API.
 #[derive(Debug, Deserialize, Serialize)]
-pub struct OpenAIResponse;
+pub struct OpenAIResponse {
+    output: Vec<OpenAIOutput>,
+}
 
 impl APIResponse for OpenAIResponse {}
+
+impl OpenAIResponse {
+    /// GPT response output.
+    ///
+    /// There should be at least item in the output, but there could be
+    /// multiple output objects.
+    pub fn output(&self) -> Iter<OpenAIOutput> {
+        self.output.iter()
+    }
+}
+
+/// Generated GPT output.
+#[derive(Debug, Deserialize, Serialize)]
+pub struct OpenAIOutput {
+    content: Vec<OpenAIContent>,
+}
+
+impl OpenAIOutput {
+    /// Contents of the GPT API response.
+    ///
+    /// There should be at least one piece of content in the output,
+    /// but there could be multiple content objects.
+    pub fn content(&self) -> Iter<OpenAIContent> {
+        self.content.iter()
+    }
+}
+
+/// Content of GPT output.
+#[derive(Debug, Deserialize, Serialize)]
+pub struct OpenAIContent {
+    text: String,
+}
+
+impl OpenAIContent {
+    /// Generated GPT text.
+    pub fn text(&self) -> &str {
+        &self.text
+    }
+}
 
 #[cfg(test)]
 mod test {

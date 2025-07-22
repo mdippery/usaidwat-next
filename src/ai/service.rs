@@ -51,7 +51,9 @@ impl HTTPService {
 impl BaseHTTPService for HTTPService {}
 
 impl APIService for HTTPService {
-    // TODO: Need integration test! (once I have an API key set up)
+    // This is covered by the openai_service_https integration test.
+    // It would be amazing to test this via unit tests, but that's going
+    // to be really hard.
     async fn post<U, D, R>(&self, uri: U, auth: &Auth, data: &D) -> HTTPResult<R>
     where
         U: IntoUrl + Send,
