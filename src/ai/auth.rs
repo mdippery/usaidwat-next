@@ -1,6 +1,6 @@
 //! Authentication for AI services.
 
-use std::{env, error, fmt};
+use std::env;
 
 /// Manages authentication keys for AI service APIs.
 #[derive(Debug)]
@@ -19,9 +19,8 @@ impl Auth {
     ///
     /// Returns an error if the API key cannot be retrieved from the
     /// environment.
-    pub fn from_env(envvar: impl Into<String>) -> AuthResult {
-        let api_key = env::var(envvar.into()).map_err(AuthError::EnvError)?;
-        Ok(Self { api_key })
+    pub fn from_env(envvar: impl Into<String>) -> Result<Auth, env::VarError> {
+        env::var(envvar.into()).map(|api_key| Self { api_key })
     }
 
     /// The actual API key.
@@ -35,38 +34,6 @@ impl Auth {
     /// ```
     pub fn api_key(&self) -> &str {
         &self.api_key
-    }
-}
-
-/// Standard result type for [`Auth`] creation.
-pub type AuthResult = Result<Auth, AuthError>;
-
-/// Indicates an error when creating an authentication key.
-#[derive(Debug)]
-pub enum AuthError {
-    /// An error occurred while retrieving a key from the environment.
-    EnvError(env::VarError),
-}
-
-impl From<env::VarError> for AuthError {
-    fn from(error: env::VarError) -> Self {
-        AuthError::EnvError(error)
-    }
-}
-
-impl fmt::Display for AuthError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            AuthError::EnvError(err) => write!(f, "Environment error: {err}"),
-        }
-    }
-}
-
-impl error::Error for AuthError {
-    fn source(&self) -> Option<&(dyn error::Error + 'static)> {
-        match self {
-            AuthError::EnvError(err) => Some(err),
-        }
     }
 }
 
@@ -94,11 +61,8 @@ mod tests {
         with_var_unset(key_name, || {
             let auth = Auth::from_env(key_name);
             assert!(auth.is_err());
-            assert!(matches!(
-                auth.unwrap_err(),
-                AuthError::EnvError(env::VarError::NotPresent)
-            ));
-        })
+            assert!(matches!(auth.unwrap_err(), env::VarError::NotPresent))
+        });
     }
 
     #[test]
@@ -109,10 +73,7 @@ mod tests {
         with_var(key_name, Some(key_value), || {
             let auth = Auth::from_env(key_name);
             assert!(auth.is_err());
-            assert!(matches!(
-                auth.unwrap_err(),
-                AuthError::EnvError(env::VarError::NotUnicode(_))
-            ))
+            assert!(matches!(auth.unwrap_err(), env::VarError::NotUnicode(_)))
         })
     }
 }
