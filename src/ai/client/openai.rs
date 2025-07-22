@@ -78,12 +78,16 @@ impl APIClient for OpenAIClient<HTTPService> {
         Self::new_with_service(auth, service)
     }
 
-    fn send(&self, request: &Self::APIRequest) -> APIResult<Self::APIResponse> {
-        todo!("not implemented yet")
+    // TODO: Need integration test! (once I have an API key set up)
+    async fn send(&self, request: &Self::APIRequest) -> APIResult<Self::APIResponse> {
+        self.service.post(Self::BASE_URI, &self.auth, request).await
     }
 }
 
 impl<T: APIService> OpenAIClient<T> {
+    /// The base URI for OpenAI API requests.
+    const BASE_URI: &'static str = "https://api.openai.com/v1/responses";
+
     fn new_with_service(auth: Auth, service: T) -> Self {
         Self { auth, service }
     }
@@ -103,6 +107,7 @@ pub struct OpenAIRequest {
 impl APIRequest for OpenAIRequest {
     /// This request uses OpenAI GPT-specific [models](Model).
     type Model = Model;
+
     /// Sets the model used by the OpenAI API request.
     ///
     /// If not specified, the [default](Model::default) model, gpt-4o,
@@ -249,7 +254,7 @@ impl fmt::Display for Model {
 }
 
 /// A response from the OpenAI API.
-#[derive(Debug)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct OpenAIResponse;
 
 impl APIResponse for OpenAIResponse {}

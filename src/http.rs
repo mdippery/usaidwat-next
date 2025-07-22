@@ -42,6 +42,9 @@ pub enum HTTPError {
     /// An error that occurred while making an HTTP request.
     Request(reqwest::Error),
 
+    /// An error that occurred while trying to serialize a POST body.
+    Serialization(serde_json::Error),
+
     /// An unsuccessful HTTP status code in an HTTP response.
     Http(reqwest::StatusCode),
 
@@ -60,6 +63,7 @@ impl fmt::Display for HTTPError {
         match self {
             HTTPError::Body(err) => write!(f, "Error retrieving body of HTTP response: {err}"),
             HTTPError::Request(err) => write!(f, "Error while making HTTP request: {err}"),
+            HTTPError::Serialization(err) => write!(f, "Error serializing POST body: {err}"),
             HTTPError::Http(status) => write!(f, "Request returned HTTP {status}"),
             HTTPError::MissingContentType => write!(f, "Missing Content-Type header"),
             HTTPError::InvalidContentType(err) => {
@@ -77,6 +81,7 @@ impl error::Error for HTTPError {
         match self {
             HTTPError::Body(err) => Some(err),
             HTTPError::Request(err) => Some(err),
+            HTTPError::Serialization(err) => Some(err),
             HTTPError::Http(_) => None,
             HTTPError::MissingContentType => None,
             HTTPError::InvalidContentType(err) => Some(err),

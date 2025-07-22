@@ -3,6 +3,7 @@
 pub mod openai;
 
 use crate::ai::Auth;
+use crate::http::HTTPError;
 
 /// A client for an AI service's API.
 pub trait APIClient {
@@ -16,7 +17,10 @@ pub trait APIClient {
     fn new(auth: Auth) -> Self;
 
     /// Sends the request to the AI service and receives a response.
-    fn send(&self, request: &Self::APIRequest) -> APIResult<Self::APIResponse>;
+    fn send(
+        &self,
+        request: &Self::APIRequest,
+    ) -> impl Future<Output = APIResult<Self::APIResponse>> + Send;
 }
 
 /// A request to an AI service's API.
@@ -95,4 +99,4 @@ pub trait APIResponse {}
 pub type APIResult<T> = Result<T, APIError>;
 
 /// An API error.
-pub enum APIError {}
+pub type APIError = HTTPError;
