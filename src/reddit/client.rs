@@ -6,6 +6,7 @@ use crate::reddit::service::{RedditService, Service};
 use crate::thing::{self, Comment, Submission, User};
 pub use chrono::Weekday;
 use chrono::{Datelike, Timelike};
+use std::{error, fmt};
 use tokio::try_join;
 
 /// Represents a Reddit user.
@@ -167,8 +168,8 @@ impl From<thing::Error> for Error {
     }
 }
 
-impl std::fmt::Display for Error {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl fmt::Display for Error {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Error::Service(err) => write!(f, "Service error: {err}"),
             Error::Parse(err) => write!(f, "Parse error: {err}"),
@@ -176,8 +177,8 @@ impl std::fmt::Display for Error {
     }
 }
 
-impl std::error::Error for Error {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+impl error::Error for Error {
+    fn source(&self) -> Option<&(dyn error::Error + 'static)> {
         match self {
             Error::Service(err) => Some(err),
             Error::Parse(err) => Some(err),
