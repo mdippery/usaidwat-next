@@ -10,7 +10,7 @@ pub fn do_logging() {
 }
 
 pub fn load_data(file: &str) -> String {
-    fs::read_to_string(format!("tests/data/{file}.json")).expect("could not find test data")
+    fs::read_to_string(format!("tests/data/reddit/{file}.json")).expect("could not find test data")
 }
 
 pub fn load_output(filename: &str) -> String {
@@ -47,7 +47,7 @@ impl<'a> Service for TestService<'a> {
     }
 
     async fn get_resource(&self, _username: &str, resource: &str) -> HTTPResult<String> {
-        let filename = format!("tests/data/{resource}_{}.json", self.suffix);
+        let filename = format!("tests/data/reddit/{resource}_{}.json", self.suffix);
         self.get(&filename).await
     }
 }
