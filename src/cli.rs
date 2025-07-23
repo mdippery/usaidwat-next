@@ -229,7 +229,7 @@ impl Runner {
                     .await
             }
             Command::Posts(subconfig) => self.run_posts(subconfig).await,
-            Command::Summary { .. } => self.run_summary(),
+            Command::Summary { .. } => self.run_summary().await,
             Command::Tally(config) => self.run_tally(&config.sort_algorithm()),
             Command::Timeline { .. } => self.run_timeline(),
         }
@@ -342,12 +342,24 @@ impl Runner {
         }
     }
 
-    fn run_summary(&self) -> Result {
+    async fn run_summary(&self) -> Result {
         let summarizer = Summarizer::for_user(self.user());
         debug!("Summarization output:\n{}", summarizer.context());
-        todo!("construct Auth and show warning to set up OPENAI_API_KEY envvar");
-        todo!("actually do summarization");
-        Ok(())
+        let response = summarizer.summarize().await;
+
+        // TODO: summarize() should ultimately grab data from the API
+        //       response and return a string itself.
+        // TODO: Should we return raw JSON here in debug mode?
+        let output = response
+            .output()
+            .next()
+            .unwrap()
+            .content()
+            .next()
+            .unwrap()
+            .text();
+        let output = textwrap::fill(output, textwrap::termwidth());
+        Pager::new(PagerEnv::default()).page(&output).await
     }
 
     fn run_tally(&self, sort_algorithm: &SortAlgorithm) -> Result {
