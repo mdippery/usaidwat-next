@@ -49,7 +49,7 @@ enum Command {
     },
 
     /// Display a user's comments
-    #[clap(alias = "l")]
+    #[clap(visible_alias = "l")]
     Log {
         /// Reddit username
         username: String,
@@ -82,14 +82,15 @@ enum Command {
     Posts(PostCommandConfig),
 
     /// Summarize a user's posting history
-    #[clap(alias = "summarize")]
+    #[clap(visible_alias = "summarize")]
+    #[clap(visible_alias = "s")]
     Summary {
         /// Reddit username
         username: String,
     },
 
     /// Tally a user's comments by subreddit
-    #[clap(alias = "t")]
+    #[clap(visible_alias = "t")]
     Tally(TallyConfig),
 
     /// Display user's activity by day of week and hour
