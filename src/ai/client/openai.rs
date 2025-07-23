@@ -308,6 +308,63 @@ impl OpenAIContent {
 
 #[cfg(test)]
 mod test {
+    mod client {
+        use super::super::{APIClient, APIRequest, APIService};
+        use super::super::{OpenAIClient, OpenAIRequest};
+        use crate::ai::Auth;
+        use crate::http::{HTTPError, HTTPResult, HTTPService};
+        use reqwest::IntoUrl;
+        use serde::Serialize;
+        use serde::de::DeserializeOwned;
+        use std::fs;
+
+        struct TestAPIService {}
+
+        impl HTTPService for TestAPIService {}
+
+        impl APIService for TestAPIService {
+            async fn post<U, D, R>(&self, _uri: U, _auth: &Auth, _data: &D) -> HTTPResult<R>
+            where
+                U: IntoUrl + Send,
+                D: Serialize + Sync,
+                R: DeserializeOwned,
+            {
+                let data = self.load_data();
+                serde_json::from_str(&data).map_err(HTTPError::Serialization)
+            }
+        }
+
+        impl TestAPIService {
+            pub fn new() -> Self {
+                Self {}
+            }
+
+            fn load_data(&self) -> String {
+                fs::read_to_string(format!("tests/data/openai/responses.json"))
+                    .expect("could not find test data")
+            }
+        }
+
+        impl OpenAIClient<TestAPIService> {
+            fn test() -> Self {
+                let auth = Auth::new("some-api-key");
+                OpenAIClient::new_with_service(auth, TestAPIService::new())
+            }
+        }
+
+        #[tokio::test]
+        async fn it_sends_a_request_and_returns_a_response() {
+            let client = OpenAIClient::test();
+            let request = OpenAIRequest::default().input("write a haiku about ai");
+            let response = client.send(&request).await;
+            assert!(response.is_ok());
+
+            let response = response.unwrap();
+            assert_eq!(response.output().count(), 1);
+            assert_eq!(response.output().next().unwrap().content().count(), 1);
+        }
+    }
+
     mod request {
         use super::super::*;
         use indoc::indoc;
