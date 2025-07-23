@@ -2,7 +2,6 @@
 
 pub mod openai;
 
-use crate::ai::Auth;
 use crate::http::HTTPError;
 
 /// A client for an AI service's API.
@@ -12,9 +11,6 @@ pub trait APIClient {
 
     /// The client receives API responses of this type.
     type APIResponse: APIResponse;
-
-    /// Creates a new client with the given authentication data.
-    fn new(auth: Auth) -> Self;
 
     /// Sends the request to the AI service and receives a response.
     fn send(

@@ -65,21 +65,14 @@ use std::slice::Iter;
 
 /// An OpenAI API client.
 #[derive(Debug)]
-pub struct OpenAIClient<T: APIService> {
+pub struct OpenAIClient<T: APIService + Sync> {
     auth: Auth,
     service: T,
 }
 
-// TODO: I need to implement this trait for any API service, but that won't
-//      work with new(), so I need to figure out how best to pull this off.
-impl APIClient for OpenAIClient<HTTPService> {
+impl<T: APIService + Sync> APIClient for OpenAIClient<T> {
     type APIRequest = OpenAIRequest;
     type APIResponse = OpenAIResponse;
-
-    fn new(auth: Auth) -> Self {
-        let service = HTTPService::new();
-        Self::new_with_service(auth, service)
-    }
 
     // TODO: Test with a dummy service
     async fn send(&self, request: &Self::APIRequest) -> APIResult<Self::APIResponse> {
@@ -87,12 +80,20 @@ impl APIClient for OpenAIClient<HTTPService> {
     }
 }
 
-impl<T: APIService> OpenAIClient<T> {
+impl<T: APIService + Sync> OpenAIClient<T> {
     /// The base URI for OpenAI API requests.
     const BASE_URI: &'static str = "https://api.openai.com/v1/responses";
 
     fn new_with_service(auth: Auth, service: T) -> Self {
         Self { auth, service }
+    }
+}
+
+impl OpenAIClient<HTTPService> {
+    /// Create a new OpenAI client using the given authentication data.
+    pub fn new(auth: Auth) -> Self {
+        let service = HTTPService::new();
+        Self::new_with_service(auth, service)
     }
 }
 
