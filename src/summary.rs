@@ -1,7 +1,7 @@
 //! AI summarization.
 
 use crate::ai::Auth;
-use crate::ai::client::openai::{OpenAIClient, OpenAIRequest, OpenAIResponse};
+use crate::ai::client::openai::{Model, OpenAIClient, OpenAIRequest, OpenAIResponse};
 use crate::ai::client::{APIClient, APIRequest};
 use crate::markdown;
 use crate::reddit::Redditor;
@@ -37,8 +37,9 @@ impl<'a> Summarizer<'a> {
         let auth = Auth::from_env("OPENAI_API_KEY").unwrap();
         let client = OpenAIClient::new(auth);
 
-        // TODO: Use a faster model here? Gpt4_1nano?
-        let request = OpenAIRequest::default().input(self.input());
+        let request = OpenAIRequest::default()
+            .model(Model::cheapest())
+            .input(self.input());
 
         // TODO: Error handling!
         client.send(&request).await.unwrap()
