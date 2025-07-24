@@ -114,7 +114,7 @@ pub type APIResult<T> = Result<T, APIError>;
 pub type APIError = HTTPError;
 
 /// An AI model specification.
-pub trait AIModel {
+pub trait AIModel: Default {
     /// The "best" model available for a given LLM.
     ///
     /// "Best" is obviously subjective, but generally this is the model

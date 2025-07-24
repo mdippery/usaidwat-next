@@ -1,5 +1,6 @@
 //! Drives the command-line program.
 
+use crate::ai::client::AIModel;
 use crate::clock::SystemClock;
 use crate::count::{SortAlgorithm, SubredditCounter};
 use crate::filter::{RedditFilter, StringSet};
@@ -11,8 +12,7 @@ use crate::view::{ViewOptions, Viewable};
 use clap::{Args, Parser, Subcommand, ValueEnum};
 use clap_verbosity_flag::Verbosity;
 use log::debug;
-use std::fmt::Formatter;
-use std::result;
+use std::{fmt, result};
 
 /// Result of running a command.
 pub type Result = result::Result<(), String>;
@@ -87,6 +87,10 @@ enum Command {
     Summary {
         /// Reddit username
         username: String,
+
+        /// Use this AI model for summarization
+        #[arg(short = 'm', long, default_value_t)]
+        model: AIModelClass,
     },
 
     /// Tally a user's comments by subreddit
@@ -106,7 +110,7 @@ impl Command {
             Command::Info { username } => username,
             Command::Log { username, .. } => username,
             Command::Posts(subconfig) => subconfig.command.username(),
-            Command::Summary { username } => username,
+            Command::Summary { username, .. } => username,
             Command::Tally(TallyConfig { username, .. }) => username,
             Command::Timeline { username } => username,
         }
@@ -183,11 +187,92 @@ pub enum DateFormat {
     Relative,
 }
 
-impl std::fmt::Display for DateFormat {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+impl fmt::Display for DateFormat {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             DateFormat::Absolute => write!(f, "absolute"),
             DateFormat::Relative => write!(f, "relative"),
+        }
+    }
+}
+
+/// Determines the qualities of the AI model used for summarization.
+#[derive(Clone, Debug, Default, ValueEnum)]
+pub enum AIModelClass {
+    /// Use the "default" as determined by the AI service.
+    ///
+    /// This is often referred to as the service's "flagship" model.
+    // TODO: Change name? Might be confusing since it's _not_ the default option.
+    Default,
+
+    /// Use the AI service's "best" model.
+    ///
+    /// Each AI provider determines what it calls its "best" model, but
+    /// generally it is one that provides the best price/performance
+    /// ratio.
+    Best,
+
+    /// Use the AI service's least expensive model.
+    #[default]
+    Cheapest,
+
+    /// Use the AI service's fastest model.
+    Fastest,
+}
+
+impl fmt::Display for AIModelClass {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            AIModelClass::Default => write!(f, "default"),
+            AIModelClass::Best => write!(f, "best"),
+            AIModelClass::Cheapest => write!(f, "cheapest"),
+            AIModelClass::Fastest => write!(f, "fastest"),
+        }
+    }
+}
+
+impl AIModelClass {
+    /// Returns a specific AI model.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use usaidwat::ai::client::openai::OpenAIModel;
+    /// use usaidwat::cli::AIModelClass;
+    /// let flag = AIModelClass::Default;
+    /// let model: OpenAIModel = flag.model();
+    /// assert_eq!(model, OpenAIModel::default());
+    /// ```
+    ///
+    /// ```
+    /// use usaidwat::ai::client::{AIModel, openai::OpenAIModel};
+    /// use usaidwat::cli::AIModelClass;
+    /// let flag = AIModelClass::Best;
+    /// let model: OpenAIModel = flag.model();
+    /// assert_eq!(model, OpenAIModel::best());
+    /// ```
+    ///
+    /// ```
+    /// use usaidwat::ai::client::{AIModel, openai::OpenAIModel};
+    /// use usaidwat::cli::AIModelClass;
+    /// let flag = AIModelClass::Cheapest;
+    /// let model: OpenAIModel = flag.model();
+    /// assert_eq!(model, OpenAIModel::cheapest());
+    /// ```
+    ///
+    /// ```
+    /// use usaidwat::ai::client::{AIModel, openai::OpenAIModel};
+    /// use usaidwat::cli::AIModelClass;
+    /// let flag = AIModelClass::Fastest;
+    /// let model: OpenAIModel = flag.model();
+    /// assert_eq!(model, OpenAIModel::fastest());
+    /// ```
+    pub fn model<T: AIModel>(&self) -> T {
+        match self {
+            AIModelClass::Default => T::default(),
+            AIModelClass::Best => T::best(),
+            AIModelClass::Cheapest => T::cheapest(),
+            AIModelClass::Fastest => T::fastest(),
         }
     }
 }
@@ -230,7 +315,7 @@ impl Runner {
                     .await
             }
             Command::Posts(subconfig) => self.run_posts(subconfig).await,
-            Command::Summary { .. } => self.run_summary().await,
+            Command::Summary { model, .. } => self.run_summary(model).await,
             Command::Tally(config) => self.run_tally(&config.sort_algorithm()),
             Command::Timeline { .. } => self.run_timeline(),
         }
@@ -343,11 +428,14 @@ impl Runner {
         }
     }
 
-    async fn run_summary(&self) -> Result {
+    async fn run_summary(&self, model: &AIModelClass) -> Result {
         let summarizer = Summarizer::for_user(self.user());
         debug!("Summarization output:\n{}", summarizer.context());
 
-        let response = summarizer.summarize().await;
+        let model = model.model();
+        debug!("Using model: {:?} - {}", model, model);
+
+        let response = summarizer.model(model).summarize().await;
 
         // TODO: summarize() should ultimately grab data from the API
         //       response and return a string itself.
