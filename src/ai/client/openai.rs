@@ -179,7 +179,7 @@ impl APIRequest for OpenAIRequest {
 /// [pricing](https://platform.openai.com/docs/pricing) docs for the last prices.
 ///
 /// [1]: https://platform.openai.com/docs/guides/text?api-mode=responses#choosing-a-model
-#[derive(Debug, Default, PartialEq, Deserialize, Serialize)]
+#[derive(Clone, Copy, Debug, Default, PartialEq, Deserialize, Serialize)]
 pub enum OpenAIModel {
     /// The model currently used by ChatGPT.
     #[serde(rename = "chatgpt-4o-latest")]

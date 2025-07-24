@@ -346,6 +346,7 @@ impl Runner {
     async fn run_summary(&self) -> Result {
         let summarizer = Summarizer::for_user(self.user());
         debug!("Summarization output:\n{}", summarizer.context());
+
         let response = summarizer.summarize().await;
 
         // TODO: summarize() should ultimately grab data from the API

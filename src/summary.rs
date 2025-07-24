@@ -2,7 +2,7 @@
 
 use crate::ai::Auth;
 use crate::ai::client::openai::{OpenAIClient, OpenAIModel, OpenAIRequest, OpenAIResponse};
-use crate::ai::client::{AIModel, APIClient, APIRequest};
+use crate::ai::client::{APIClient, APIRequest};
 use crate::markdown;
 use crate::reddit::Redditor;
 use itertools::Itertools;
@@ -11,6 +11,9 @@ use itertools::Itertools;
 #[derive(Debug)]
 pub struct Summarizer<'a> {
     user: &'a Redditor,
+    // TODO: Needs to be generalized (associated type?) to work with AI model
+    //       specific to client/request type
+    model: OpenAIModel,
 }
 
 impl<'a> Summarizer<'a> {
@@ -18,7 +21,18 @@ impl<'a> Summarizer<'a> {
 
     /// Summarizes content from the given `user`.
     pub fn for_user(user: &'a Redditor) -> Self {
-        Self { user }
+        Self {
+            user,
+            model: OpenAIModel::default(),
+        }
+    }
+
+    /// Sets the AI model used for summarization.
+    ///
+    /// By default, the summarizer uses [`OpenAIModel::default()`], but
+    /// that option can be changed here.
+    pub fn model(self, model: OpenAIModel) -> Self {
+        Self { model, ..self }
     }
 
     /// Summarize the Redditor's comments and return the summary as a string,
@@ -40,8 +54,10 @@ impl<'a> Summarizer<'a> {
         // TODO: Might want to separate instructions from text to summarize,
         //       or at least pass some of the preamble as instructions.
         //       Iterate on this!
+        // TODO: Really should test that request is formed properly, but
+        //       that's going to be hard to do without accessors, etc.
         let request = OpenAIRequest::default()
-            .model(OpenAIModel::cheapest())
+            .model(self.model)
             .input(self.input());
 
         // TODO: Error handling!
@@ -78,10 +94,25 @@ impl<'a> Summarizer<'a> {
 
 #[cfg(test)]
 mod tests {
+    use crate::ai::client::openai::OpenAIModel;
     use crate::reddit::Redditor;
     use crate::summary::Summarizer;
     use crate::test_utils::load_output;
     use pretty_assertions::assert_eq;
+
+    #[tokio::test]
+    async fn it_uses_the_default_model_if_one_is_not_provided() {
+        let redditor = Redditor::test().await;
+        let summarizer = Summarizer::for_user(&redditor);
+        assert_eq!(summarizer.model, OpenAIModel::default());
+    }
+
+    #[tokio::test]
+    async fn it_allows_model_to_be_configured() {
+        let redditor = Redditor::test().await;
+        let summarizer = Summarizer::for_user(&redditor).model(OpenAIModel::O1pro);
+        assert_eq!(summarizer.model, OpenAIModel::O1pro);
+    }
 
     #[tokio::test]
     async fn it_provides_context_for_an_llm() {
