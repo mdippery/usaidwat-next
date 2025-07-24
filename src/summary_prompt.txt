@@ -1,2 +1,4 @@
-Please summarize the following text, including tone and sentiment.
+The following text is a series of posts by a single author on social media.
+Please summarize the text, including tone and sentiment.
 Give a broad overview in the form of prose, not detailed bullet points.
+Do not identify the text as a series of social media posts in your response.

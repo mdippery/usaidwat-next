@@ -37,6 +37,9 @@ impl<'a> Summarizer<'a> {
         let auth = Auth::from_env("OPENAI_API_KEY").unwrap();
         let client = OpenAIClient::new(auth);
 
+        // TODO: Might want to separate instructions from text to summarize,
+        //       or at least pass some of the preamble as instructions.
+        //       Iterate on this!
         let request = OpenAIRequest::default()
             .model(Model::cheapest())
             .input(self.input());
