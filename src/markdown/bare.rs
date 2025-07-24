@@ -11,7 +11,7 @@
 
 use crate::markdown::{TextAppendable, Visitable, Visitor};
 use crate::text;
-use log::debug;
+use log::trace;
 use markdown::mdast::{Code, InlineCode, Node, Text};
 use markdown::{Constructs, ParseOptions};
 
@@ -65,7 +65,7 @@ impl MarkdownVisitor {
     }
 
     fn ignore(&self, node: &Node) {
-        debug!("completely ignoring a node and its children: {node:?}");
+        trace!("completely ignoring a node and its children: {node:?}");
     }
 
     fn visit_paragraph(&mut self, node: &Node) {
@@ -82,12 +82,12 @@ impl MarkdownVisitor {
     }
 
     fn visit_any_emphasis(&mut self, node: &Node) {
-        debug!("emphasis: {node:?}");
+        trace!("emphasis: {node:?}");
         node.accept_children(self);
     }
 
     fn visit_link(&mut self, node: &Node) {
-        debug!("link: {node:#?}");
+        trace!("link: {node:#?}");
         node.accept_children(self);
     }
 
@@ -129,7 +129,7 @@ impl Visitor for MarkdownVisitor {
 
 impl TextAppendable for MarkdownVisitor {
     fn push_text(&mut self, text: &str) {
-        debug!("appending text to {:?}: {text:?}", self.text);
+        trace!("appending text to {:?}: {text:?}", self.text);
         self.text += text;
     }
 }

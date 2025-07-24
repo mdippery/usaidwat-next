@@ -10,7 +10,7 @@ pub mod terminal;
 pub use bare::parse as summarize;
 pub use terminal::parse;
 
-use log::{debug, warn};
+use log::{trace, warn};
 use markdown::mdast::Node;
 
 /// "Visit" a node and emit code.
@@ -33,7 +33,7 @@ pub trait Visitor {
     where
         Self: Sized,
     {
-        debug!("swallowing node: {node:#?}");
+        trace!("swallowing node: {node:#?}");
         node.accept_children(self);
     }
 

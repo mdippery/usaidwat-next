@@ -19,7 +19,7 @@
 use crate::markdown::{TextAppendable, Visitable, Visitor};
 use crate::text;
 use itertools::Itertools;
-use log::debug;
+use log::trace;
 use markdown::mdast::{Code, Html, Image, InlineCode, Link, List, Node, Text};
 use markdown::{Constructs, ParseOptions};
 use textwrap::Options;
@@ -117,7 +117,7 @@ trait DefaultMarkdownVisitor: TextAppendable {
     }
 
     fn visit_list(&mut self, ordered: &bool, start: &Option<u32>, node: &Node) {
-        debug!("processing list node: {node:?}");
+        trace!("processing list node: {node:?}");
 
         let list_type = if *ordered {
             ListType::Ordered(start.unwrap_or(1))
@@ -175,7 +175,7 @@ impl MarkdownVisitor {
         // it will be wrapped by the general mechanism that wraps all
         // the text (in MarkdownVisitor::text()). I would prefer lines
         // of code not be wrapped, but I have no idea how to prevent that.
-        debug!("got code:\n{code}");
+        trace!("got code:\n{code}");
         self.push_text("\n\n");
         self.push_text(
             &code
