@@ -9,7 +9,7 @@ use crate::clock::{DateTime, HasAge, Utc};
 use crate::filter::Searchable;
 use crate::{markdown, text};
 use serde::{Deserialize, Deserializer};
-use std::fmt::Formatter;
+use std::{error, fmt};
 
 /// An error processing or creating a thing.
 #[derive(Debug)]
@@ -18,16 +18,22 @@ pub enum Error {
     Parse(serde_json::Error),
 }
 
-impl std::fmt::Display for Error {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+impl From<serde_json::Error> for Error {
+    fn from(error: serde_json::Error) -> Self {
+        Error::Parse(error)
+    }
+}
+
+impl fmt::Display for Error {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Error::Parse(err) => write!(f, "Parsing error occurred: {err}"),
         }
     }
 }
 
-impl std::error::Error for Error {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+impl error::Error for Error {
+    fn source(&self) -> Option<&(dyn error::Error + 'static)> {
         match self {
             Error::Parse(err) => Some(err),
         }
@@ -148,9 +154,7 @@ impl About {
     ///
     /// This method is generally invoked by `User`, not directly.
     fn parse(user_data: &str) -> Result<Self> {
-        serde_json::from_str(user_data)
-            .map(|wrapper: AboutResponse| wrapper.data)
-            .map_err(Error::Parse)
+        Ok(serde_json::from_str(user_data).map(|wrapper: AboutResponse| wrapper.data)?)
     }
 
     /// The date on which the account was created.
@@ -177,16 +181,17 @@ impl Comment {
     ///
     /// This method is generally invoked by `User`, not directly.
     fn parse(comment_data: &str) -> Result<Vec<Self>> {
-        serde_json::from_str(comment_data)
-            .map(|comment_listing: ListingResponse<CommentResponse>| {
+        let json_object = serde_json::from_str(comment_data).map(
+            |comment_listing: ListingResponse<CommentResponse>| {
                 comment_listing
                     .data
                     .children
                     .into_iter()
                     .map(|comment_wrapper| comment_wrapper.data)
                     .collect()
-            })
-            .map_err(Error::Parse)
+            },
+        )?;
+        Ok(json_object)
     }
 
     /// The full URL at which the comment can be retrieved.
@@ -299,16 +304,17 @@ impl Submission {
     ///
     /// This method is generally invoked by `User`, not directly.
     fn parse(post_data: &str) -> Result<Vec<Self>> {
-        serde_json::from_str(post_data)
-            .map(|comment_listing: ListingResponse<SubmissionResponse>| {
+        let json_object = serde_json::from_str(post_data).map(
+            |comment_listing: ListingResponse<SubmissionResponse>| {
                 comment_listing
                     .data
                     .children
                     .into_iter()
                     .map(|comment_wrapper| comment_wrapper.data)
                     .collect()
-            })
-            .map_err(Error::Parse)
+            },
+        )?;
+        Ok(json_object)
     }
 
     /// True if the submission is a self post.

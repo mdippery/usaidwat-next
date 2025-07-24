@@ -61,12 +61,7 @@ impl Service for RedditService {
     where
         U: IntoUrl + Send,
     {
-        let resp = self
-            .client
-            .get(uri)
-            .send()
-            .await
-            .map_err(HTTPError::Request)?;
+        let resp = self.client.get(uri).send().await?;
 
         if !resp.status().is_success() {
             Err(HTTPError::Http(resp.status()))
@@ -75,12 +70,11 @@ impl Service for RedditService {
                 .headers()
                 .get(header::CONTENT_TYPE)
                 .ok_or(HTTPError::MissingContentType)?
-                .to_str()
-                .map_err(HTTPError::InvalidContentType)?;
+                .to_str()?;
             if !content_type.starts_with("application/json") {
                 Err(HTTPError::UnexpectedContentType(content_type.to_string()))
             } else {
-                resp.text().await.map_err(HTTPError::Body)
+                Ok(resp.text().await?)
             }
         }
     }

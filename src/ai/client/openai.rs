@@ -322,7 +322,7 @@ mod test {
         use super::super::{APIClient, APIRequest, APIService};
         use super::super::{OpenAIClient, OpenAIRequest};
         use crate::ai::Auth;
-        use crate::http::{HTTPError, HTTPResult, HTTPService};
+        use crate::http::{HTTPResult, HTTPService};
         use reqwest::IntoUrl;
         use serde::Serialize;
         use serde::de::DeserializeOwned;
@@ -340,7 +340,7 @@ mod test {
                 R: DeserializeOwned,
             {
                 let data = self.load_data();
-                serde_json::from_str(&data).map_err(HTTPError::Serialization)
+                Ok(serde_json::from_str(&data)?)
             }
         }
 

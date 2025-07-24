@@ -1,7 +1,7 @@
 //! Services for communicating with APIs using HTTP.
 
 use crate::ai::Auth;
-use crate::http::{HTTPError, HTTPResult, HTTPService as BaseHTTPService};
+use crate::http::{HTTPResult, HTTPService as BaseHTTPService};
 use reqwest::header;
 use reqwest::{Client, IntoUrl};
 use serde::Serialize;
@@ -61,16 +61,16 @@ impl APIService for HTTPService {
         R: DeserializeOwned,
     {
         let auth_header = format!("Bearer {}", auth.api_key());
-        self.client
+        let json_object = self
+            .client
             .post(uri)
             .header(header::CONTENT_TYPE, "application/json")
             .header(header::AUTHORIZATION, auth_header)
             .json(data)
             .send()
-            .await
-            .map_err(HTTPError::Request)?
-            .json()
-            .await
-            .map_err(HTTPError::Body)
+            .await?
+            .json::<R>()
+            .await?;
+        Ok(json_object)
     }
 }

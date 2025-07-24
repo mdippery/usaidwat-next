@@ -36,9 +36,6 @@ pub type HTTPResult<T> = Result<T, HTTPError>;
 /// Indicates an error has occurred when making an HTTP call.
 #[derive(Debug)]
 pub enum HTTPError {
-    /// An error retrieving the body of a response.
-    Body(reqwest::Error),
-
     /// An error that occurred while making an HTTP request.
     Request(reqwest::Error),
 
@@ -58,11 +55,30 @@ pub enum HTTPError {
     UnexpectedContentType(String),
 }
 
+impl From<reqwest::Error> for HTTPError {
+    fn from(error: reqwest::Error) -> Self {
+        HTTPError::Request(error)
+    }
+}
+
+impl From<header::ToStrError> for HTTPError {
+    fn from(value: header::ToStrError) -> Self {
+        HTTPError::InvalidContentType(value)
+    }
+}
+
+impl From<serde_json::Error> for HTTPError {
+    fn from(error: serde_json::Error) -> Self {
+        HTTPError::Serialization(error)
+    }
+}
+
 impl fmt::Display for HTTPError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            HTTPError::Body(err) => write!(f, "Error retrieving body of HTTP response: {err}"),
-            HTTPError::Request(err) => write!(f, "Error while making HTTP request: {err}"),
+            HTTPError::Request(err) => {
+                write!(f, "Error while making or processing an HTTP request: {err}")
+            }
             HTTPError::Serialization(err) => write!(f, "Error serializing POST body: {err}"),
             HTTPError::Http(status) => write!(f, "Request returned HTTP {status}"),
             HTTPError::MissingContentType => write!(f, "Missing Content-Type header"),
@@ -79,7 +95,6 @@ impl fmt::Display for HTTPError {
 impl error::Error for HTTPError {
     fn source(&self) -> Option<&(dyn error::Error + 'static)> {
         match self {
-            HTTPError::Body(err) => Some(err),
             HTTPError::Request(err) => Some(err),
             HTTPError::Serialization(err) => Some(err),
             HTTPError::Http(_) => None,
