@@ -1,5 +1,6 @@
 //! Drives the command-line program.
 
+use crate::ai::Auth;
 use crate::ai::client::AIModel;
 use crate::clock::SystemClock;
 use crate::count::{SortAlgorithm, SubredditCounter};
@@ -429,7 +430,11 @@ impl Runner {
     }
 
     async fn run_summary(&self, model: &AIModelClass) -> Result {
-        let summarizer = Summarizer::for_user(self.user());
+        let auth = Auth::from_env("OPENAI_API_KEY")
+            // TODO: Better error message, with instructions.
+            .map_err(|_| format!("Please define $OPENAI_API_KEY in your environment"))?;
+
+        let summarizer = Summarizer::new(auth, self.user());
         debug!("Summarization output:\n{}", summarizer.context());
 
         let model = model.model();

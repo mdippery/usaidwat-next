@@ -3,7 +3,7 @@
 use std::env;
 
 /// Manages authentication keys for AI service APIs.
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct Auth {
     api_key: String,
 }

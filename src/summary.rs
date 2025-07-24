@@ -10,6 +10,7 @@ use itertools::Itertools;
 /// Summarizes a Redditor's comments and provides a sentiment analysis using AI.
 #[derive(Debug)]
 pub struct Summarizer<'a> {
+    auth: Auth,
     user: &'a Redditor,
     // TODO: Needs to be generalized (associated type?) to work with AI model
     //       specific to client/request type
@@ -20,8 +21,11 @@ impl<'a> Summarizer<'a> {
     const PREAMBLE: &'static str = include_str!("summary_prompt.txt");
 
     /// Summarizes content from the given `user`.
-    pub fn for_user(user: &'a Redditor) -> Self {
+    ///
+    /// `auth` will be used when making requests to the AI service.
+    pub fn new(auth: Auth, user: &'a Redditor) -> Self {
         Self {
+            auth,
             user,
             model: OpenAIModel::default(),
         }
@@ -32,6 +36,7 @@ impl<'a> Summarizer<'a> {
     /// By default, the summarizer uses [`OpenAIModel::default()`], but
     /// that option can be changed here.
     pub fn model(self, model: OpenAIModel) -> Self {
+        // TODO: Need to constrain this based on service being used.
         Self { model, ..self }
     }
 
@@ -47,9 +52,9 @@ impl<'a> Summarizer<'a> {
         //       or otherwise one that can be wrapped to terminal width.
         // TODO: Let callers specify a client so we can test this easier!
 
-        // TODO: Probably need to result a Result or specify Auth earlier!
-        let auth = Auth::from_env("OPENAI_API_KEY").unwrap();
-        let client = OpenAIClient::new(auth);
+        // TODO: OpenAIClient should use an auth lifetime instead of cloning?
+        // If so, can remove Clone from Auth.
+        let client = OpenAIClient::new(self.auth.clone());
 
         // TODO: Might want to separate instructions from text to summarize,
         //       or at least pass some of the preamble as instructions.
@@ -94,23 +99,30 @@ impl<'a> Summarizer<'a> {
 
 #[cfg(test)]
 mod tests {
+    use crate::ai::Auth;
     use crate::ai::client::openai::OpenAIModel;
     use crate::reddit::Redditor;
     use crate::summary::Summarizer;
     use crate::test_utils::load_output;
     use pretty_assertions::assert_eq;
 
+    impl<'a> Summarizer<'a> {
+        pub fn test(user: &'a Redditor) -> Self {
+            Self::new(Auth::new("fake-api-key"), user)
+        }
+    }
+
     #[tokio::test]
     async fn it_uses_the_default_model_if_one_is_not_provided() {
         let redditor = Redditor::test().await;
-        let summarizer = Summarizer::for_user(&redditor);
+        let summarizer = Summarizer::test(&redditor);
         assert_eq!(summarizer.model, OpenAIModel::default());
     }
 
     #[tokio::test]
     async fn it_allows_model_to_be_configured() {
         let redditor = Redditor::test().await;
-        let summarizer = Summarizer::for_user(&redditor).model(OpenAIModel::O1pro);
+        let summarizer = Summarizer::test(&redditor).model(OpenAIModel::O1pro);
         assert_eq!(summarizer.model, OpenAIModel::O1pro);
     }
 
@@ -118,7 +130,7 @@ mod tests {
     async fn it_provides_context_for_an_llm() {
         let redditor = Redditor::test().await;
         let expected = load_output("summary_raw");
-        let actual = Summarizer::for_user(&redditor).context();
+        let actual = Summarizer::test(&redditor).context();
         assert_eq!(actual, expected);
     }
 
@@ -127,7 +139,7 @@ mod tests {
         let redditor = Redditor::test().await;
         let expected = include_str!("summary_prompt.txt");
         let expected = expected.replace('\n', " ");
-        let actual = Summarizer::for_user(&redditor).preamble();
+        let actual = Summarizer::test(&redditor).preamble();
         assert_eq!(actual, expected);
     }
 
@@ -138,7 +150,7 @@ mod tests {
         let instructions = instructions.replace('\n', " ");
         let summary = load_output("summary_raw");
         let expected = format!("{}\n\n{}", instructions, summary);
-        let actual = Summarizer::for_user(&redditor).input();
+        let actual = Summarizer::test(&redditor).input();
         assert_eq!(actual, expected);
     }
 }
