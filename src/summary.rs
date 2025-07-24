@@ -1,8 +1,8 @@
 //! AI summarization.
 
 use crate::ai::Auth;
-use crate::ai::client::openai::{Model, OpenAIClient, OpenAIRequest, OpenAIResponse};
-use crate::ai::client::{APIClient, APIRequest};
+use crate::ai::client::openai::{OpenAIClient, OpenAIModel, OpenAIRequest, OpenAIResponse};
+use crate::ai::client::{AIModel, APIClient, APIRequest};
 use crate::markdown;
 use crate::reddit::Redditor;
 use itertools::Itertools;
@@ -41,7 +41,7 @@ impl<'a> Summarizer<'a> {
         //       or at least pass some of the preamble as instructions.
         //       Iterate on this!
         let request = OpenAIRequest::default()
-            .model(Model::cheapest())
+            .model(OpenAIModel::cheapest())
             .input(self.input());
 
         // TODO: Error handling!

@@ -29,10 +29,26 @@ pub trait APIClient {
 /// `APIRequest`, you would create an API request like this:
 ///
 /// ```
-/// # use usaidwat::ai::client::APIRequest;
+/// # use usaidwat::ai::client::{AIModel, APIRequest};
 /// #
+/// # #[derive(Default)]
 /// # pub enum Model {
+/// #     #[default]
 /// #     AIModel,
+/// # }
+/// #
+/// # impl AIModel for Model {
+/// #     fn best() -> Self {
+/// #         Model::AIModel
+/// #     }
+/// #
+/// #     fn fastest() -> Self {
+/// #         Model::AIModel
+/// #     }
+/// #
+/// #     fn cheapest() -> Self {
+/// #         Model::AIModel
+/// #     }
 /// # }
 /// #
 /// # #[derive(Default)]
@@ -57,7 +73,7 @@ pub trait APIClient {
 pub trait APIRequest {
     /// An enum or other data structures providing options for different
     /// AI models, which are specific to each service.
-    type Model;
+    type Model: AIModel;
 
     /// Sets the model used by the API request and returns a new
     /// request.
@@ -96,3 +112,19 @@ pub type APIResult<T> = Result<T, APIError>;
 
 /// An API error.
 pub type APIError = HTTPError;
+
+/// An AI model specification.
+pub trait AIModel {
+    /// The "best" model available for a given LLM.
+    ///
+    /// "Best" is obviously subjective, but generally this is the model
+    /// that offers the best price/performance ratio, and is what its
+    /// provider has defined to be the "best".
+    fn best() -> Self;
+
+    /// The least expensive model available for a given LLM.
+    fn cheapest() -> Self;
+
+    /// The fastest model available for a given LLM.
+    fn fastest() -> Self;
+}
