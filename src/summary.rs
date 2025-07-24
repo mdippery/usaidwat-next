@@ -1,7 +1,5 @@
 //! AI summarization.
 
-use crate::ai::Auth;
-use crate::ai::client::openai::{OpenAIClient, OpenAIModel, OpenAIRequest, OpenAIResponse};
 use crate::ai::client::{APIClient, APIRequest};
 use crate::markdown;
 use crate::reddit::Redditor;
@@ -9,40 +7,44 @@ use itertools::Itertools;
 
 /// Summarizes a Redditor's comments and provides a sentiment analysis using AI.
 #[derive(Debug)]
-pub struct Summarizer<'a> {
-    auth: Auth,
+pub struct Summarizer<'a, C>
+where
+    C: APIClient,
+    C::APIRequest: APIRequest,
+{
+    client: C,
     user: &'a Redditor,
-    // TODO: Needs to be generalized (associated type?) to work with AI model
-    //       specific to client/request type
-    model: OpenAIModel,
+    model: <C::APIRequest as APIRequest>::Model,
 }
 
-impl<'a> Summarizer<'a> {
+impl<'a, C> Summarizer<'a, C>
+where
+    C: APIClient,
+{
     const PREAMBLE: &'static str = include_str!("summary_prompt.txt");
 
     /// Summarizes content from the given `user`.
     ///
     /// `auth` will be used when making requests to the AI service.
-    pub fn new(auth: Auth, user: &'a Redditor) -> Self {
+    pub fn new(client: C, user: &'a Redditor) -> Self {
         Self {
-            auth,
+            client,
             user,
-            model: OpenAIModel::default(),
+            model: <C::APIRequest as APIRequest>::Model::default(),
         }
     }
 
     /// Sets the AI model used for summarization.
     ///
-    /// By default, the summarizer uses [`OpenAIModel::default()`], but
-    /// that option can be changed here.
-    pub fn model(self, model: OpenAIModel) -> Self {
-        // TODO: Need to constrain this based on service being used.
+    /// By default, the summarizer uses the default model, but that option can
+    /// be changed here.
+    pub fn model(self, model: <C::APIRequest as APIRequest>::Model) -> Self {
         Self { model, ..self }
     }
 
     /// Summarize the Redditor's comments and return the summary as a string,
     /// along with a sentiment analysis at the end.
-    pub async fn summarize(&self) -> OpenAIResponse {
+    pub async fn summarize(&self) -> C::APIResponse {
         // TODO: TEST THIS!
         // Also, need an easy tool for generating mock input and output
         // that we can save for testing.
@@ -50,23 +52,18 @@ impl<'a> Summarizer<'a> {
         // TODO: Return a string, not an OpenAIResponse!
         //       Or maybe a structure suitable for passing to view(),
         //       or otherwise one that can be wrapped to terminal width.
-        // TODO: Let callers specify a client so we can test this easier!
-
-        // TODO: OpenAIClient should use an auth lifetime instead of cloning?
-        // If so, can remove Clone from Auth.
-        let client = OpenAIClient::new(self.auth.clone());
 
         // TODO: Might want to separate instructions from text to summarize,
         //       or at least pass some of the preamble as instructions.
         //       Iterate on this!
         // TODO: Really should test that request is formed properly, but
         //       that's going to be hard to do without accessors, etc.
-        let request = OpenAIRequest::default()
+        let request = C::APIRequest::default()
             .model(self.model)
             .input(self.input());
 
         // TODO: Error handling!
-        client.send(&request).await.unwrap()
+        self.client.send(&request).await.unwrap()
     }
 
     /// Raw content that will be sent to an LLM for summarization.
@@ -99,16 +96,85 @@ impl<'a> Summarizer<'a> {
 
 #[cfg(test)]
 mod tests {
-    use crate::ai::Auth;
-    use crate::ai::client::openai::OpenAIModel;
+    use crate::ai::client::{AIModel, APIClient, APIRequest, APIResponse, APIResult};
     use crate::reddit::Redditor;
     use crate::summary::Summarizer;
     use crate::test_utils::load_output;
     use pretty_assertions::assert_eq;
 
-    impl<'a> Summarizer<'a> {
+    #[derive(Clone, Copy, Default, Debug, PartialEq)]
+    enum TestAIModel {
+        #[default]
+        TestAIModel,
+
+        OtherAIModel,
+    }
+
+    impl AIModel for TestAIModel {
+        fn best() -> Self {
+            TestAIModel::TestAIModel
+        }
+
+        fn cheapest() -> Self {
+            TestAIModel::TestAIModel
+        }
+
+        fn fastest() -> Self {
+            TestAIModel::TestAIModel
+        }
+    }
+
+    #[derive(Debug, Default)]
+    #[allow(dead_code)]
+    struct TestAPIRequest {
+        model: TestAIModel,
+        instructions: String,
+        input: String,
+    }
+
+    impl APIRequest for TestAPIRequest {
+        type Model = TestAIModel;
+
+        fn model(self, model: Self::Model) -> Self {
+            Self { model, ..self }
+        }
+
+        fn instructions(self, instructions: impl Into<String>) -> Self {
+            Self {
+                instructions: instructions.into(),
+                ..self
+            }
+        }
+
+        fn input(self, input: impl Into<String>) -> Self {
+            Self {
+                input: input.into(),
+                ..self
+            }
+        }
+    }
+
+    #[derive(Debug)]
+    struct TestAPIResponse;
+
+    impl APIResponse for TestAPIResponse {}
+
+    #[derive(Debug, Default)]
+    struct TestAIClient;
+
+    impl APIClient for TestAIClient {
+        type APIRequest = TestAPIRequest;
+        type APIResponse = TestAPIResponse;
+
+        async fn send(&self, _request: &Self::APIRequest) -> APIResult<Self::APIResponse> {
+            Ok(Self::APIResponse {})
+        }
+    }
+
+    impl<'a> Summarizer<'a, TestAIClient> {
         pub fn test(user: &'a Redditor) -> Self {
-            Self::new(Auth::new("fake-api-key"), user)
+            let client = TestAIClient::default();
+            Self::new(client, user)
         }
     }
 
@@ -116,14 +182,14 @@ mod tests {
     async fn it_uses_the_default_model_if_one_is_not_provided() {
         let redditor = Redditor::test().await;
         let summarizer = Summarizer::test(&redditor);
-        assert_eq!(summarizer.model, OpenAIModel::default());
+        assert_eq!(summarizer.model, TestAIModel::default());
     }
 
     #[tokio::test]
     async fn it_allows_model_to_be_configured() {
         let redditor = Redditor::test().await;
-        let summarizer = Summarizer::test(&redditor).model(OpenAIModel::O1pro);
-        assert_eq!(summarizer.model, OpenAIModel::O1pro);
+        let summarizer = Summarizer::test(&redditor).model(TestAIModel::OtherAIModel);
+        assert_eq!(summarizer.model, TestAIModel::OtherAIModel);
     }
 
     #[tokio::test]

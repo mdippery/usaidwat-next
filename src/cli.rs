@@ -2,6 +2,7 @@
 
 use crate::ai::Auth;
 use crate::ai::client::AIModel;
+use crate::ai::client::openai::OpenAIClient;
 use crate::clock::SystemClock;
 use crate::count::{SortAlgorithm, SubredditCounter};
 use crate::filter::{RedditFilter, StringSet};
@@ -434,7 +435,9 @@ impl Runner {
             // TODO: Better error message, with instructions.
             .map_err(|_| format!("Please define $OPENAI_API_KEY in your environment"))?;
 
-        let summarizer = Summarizer::new(auth, self.user());
+        let client = OpenAIClient::new(auth);
+
+        let summarizer = Summarizer::new(client, self.user());
         debug!("Summarization output:\n{}", summarizer.context());
 
         let model = model.model();

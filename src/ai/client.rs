@@ -3,6 +3,7 @@
 pub mod openai;
 
 use crate::http::HTTPError;
+use std::fmt::Debug;
 
 /// A client for an AI service's API.
 pub trait APIClient {
@@ -31,7 +32,7 @@ pub trait APIClient {
 /// ```
 /// # use usaidwat::ai::client::{AIModel, APIRequest};
 /// #
-/// # #[derive(Default)]
+/// # #[derive(Clone, Copy, Debug, Default)]
 /// # pub enum Model {
 /// #     #[default]
 /// #     AIModel,
@@ -66,11 +67,7 @@ pub trait APIClient {
 ///     .instructions("Be really snarky.")
 ///     .input("How do I make an API request?");
 /// ```
-///
-/// It is often useful for your concrete implementation to also implement [`Default`]
-/// to return an instance with default values already set, although this is not
-/// required.
-pub trait APIRequest {
+pub trait APIRequest: Default {
     /// An enum or other data structures providing options for different
     /// AI models, which are specific to each service.
     type Model: AIModel;
@@ -114,7 +111,7 @@ pub type APIResult<T> = Result<T, APIError>;
 pub type APIError = HTTPError;
 
 /// An AI model specification.
-pub trait AIModel: Default {
+pub trait AIModel: Clone + Copy + Default + Debug {
     /// The "best" model available for a given LLM.
     ///
     /// "Best" is obviously subjective, but generally this is the model
