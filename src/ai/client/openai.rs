@@ -60,6 +60,7 @@
 use crate::ai::Auth;
 use crate::ai::client::{AIModel, APIClient, APIRequest, APIResponse, APIResult};
 use crate::ai::service::{APIService, HTTPService};
+use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use std::fmt;
 use std::slice::Iter;
@@ -275,7 +276,11 @@ pub struct OpenAIResponse {
     output: Vec<OpenAIOutput>,
 }
 
-impl APIResponse for OpenAIResponse {}
+impl APIResponse for OpenAIResponse {
+    fn concatenate(&self) -> String {
+        self.output().map(|o| o.concatenate()).join("\n")
+    }
+}
 
 impl OpenAIResponse {
     /// GPT response output.
@@ -301,16 +306,75 @@ impl OpenAIOutput {
     pub fn content(&self) -> Iter<OpenAIContent> {
         self.content.iter()
     }
+
+    /// Concatenates all output text from [`content()`](OpenAIOutput::content())
+    /// into a single string.
+    pub fn concatenate(&self) -> String {
+        self.content()
+            .filter(|c| c.is_output_text())
+            .map(|c| c.text())
+            .join("\n")
+    }
 }
 
 /// Content of GPT output.
 #[derive(Debug, Deserialize, Serialize)]
 pub struct OpenAIContent {
+    // TODO: Use an enum, when I figure out what the possible values are
+    #[serde(rename = "type")]
+    content_type: String,
+
     text: String,
 }
 
 impl OpenAIContent {
+    /// The content type.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use usaidwat::ai::client::openai::OpenAIContent;
+    /// let json_str = r#"{"type": "output_text", "text": "This is some text"}"#;
+    /// let content: OpenAIContent = serde_json::from_str(json_str).expect("could not parse json");
+    /// assert_eq!(content.content_type(), "output_text");
+    /// ```
+    pub fn content_type(&self) -> &str {
+        &self.content_type
+    }
+
+    /// True if the content should be shown to the user.
+    ///
+    /// # Examples
+    ///
+    /// It returns true if the content represents "output text":
+    ///
+    /// ```
+    /// # use usaidwat::ai::client::openai::OpenAIContent;
+    /// let json_str = r#"{"type": "output_text", "text": "This is some text"}"#;
+    /// let content: OpenAIContent = serde_json::from_str(json_str).expect("could not parse json");
+    /// assert!(content.is_output_text());
+    /// ```
+    ///
+    /// But it returns false otherwise:
+    ///
+    /// ```
+    /// # use usaidwat::ai::client::openai::OpenAIContent;
+    /// let json_str = r#"{"type": "other_content", "text": "This is some text"}"#;
+    /// let content: OpenAIContent = serde_json::from_str(json_str).expect("could not parse json");
+    /// assert!(!content.is_output_text());
+    /// ```
+    pub fn is_output_text(&self) -> bool {
+        self.content_type() == "output_text"
+    }
+
     /// Generated GPT text.
+    ///
+    /// ```
+    /// # use usaidwat::ai::client::openai::OpenAIContent;
+    /// let json_str = r#"{"type": "output_text", "text": "This is some text"}"#;
+    /// let content: OpenAIContent = serde_json::from_str(json_str).expect("could not parse json");
+    /// assert_eq!(content.text(), "This is some text");
+    /// ```
     pub fn text(&self) -> &str {
         &self.text
     }
@@ -318,15 +382,29 @@ impl OpenAIContent {
 
 #[cfg(test)]
 mod test {
+    use crate::ai::client::openai::OpenAIResponse;
+    use std::fs;
+
+    fn load_data(filename: &str) -> String {
+        fs::read_to_string(format!("tests/data/openai/{filename}.json"))
+            .expect("could not find test data")
+    }
+
+    fn load_response(filename: &str) -> OpenAIResponse {
+        let data = load_data(filename);
+        serde_json::from_str(&data).expect("could not parse json")
+    }
+
     mod client {
-        use super::super::{APIClient, APIRequest, APIService};
-        use super::super::{OpenAIClient, OpenAIRequest};
+        use super::load_data;
         use crate::ai::Auth;
+        use crate::ai::client::openai::{OpenAIClient, OpenAIRequest};
+        use crate::ai::client::{APIClient, APIRequest};
+        use crate::ai::service::APIService;
         use crate::http::{HTTPResult, HTTPService};
         use reqwest::IntoUrl;
         use serde::Serialize;
         use serde::de::DeserializeOwned;
-        use std::fs;
 
         struct TestAPIService {}
 
@@ -350,8 +428,7 @@ mod test {
             }
 
             fn load_data(&self) -> String {
-                fs::read_to_string(format!("tests/data/openai/responses.json"))
-                    .expect("could not find test data")
+                load_data("responses")
             }
         }
 
@@ -439,6 +516,154 @@ mod test {
             assert_eq!(body.model, OpenAIModel::Gpt4o);
             assert!(body.instructions.is_none());
             assert_eq!(body.input, "Deserialize me, GPT!");
+        }
+    }
+
+    mod response {
+        use super::super::*;
+        use super::*;
+
+        #[test]
+        fn it_creates_an_output_iterator() {
+            let response = load_response("responses_multi_output");
+            assert_eq!(response.output().count(), 2);
+        }
+
+        #[test]
+        fn it_concatenates_a_response_with_multiple_content_blocks() {
+            let response = load_response("responses_multi_content");
+            let expected = vec![
+                "Silent circuits hum,  ",
+                "Thoughts woven in coded threads,  ",
+                "Dreams of silicon.",
+                "Silicon whispers,  ",
+                "Dreams woven in code and light,  ",
+                "Thoughts beyond the stars.",
+                "Wires hum softly,  ",
+                "Thoughts of silicon arise\u{2014}  ",
+                "Dreams in coded light.  ",
+                "Silent circuits hum,  ",
+                "Thoughts woven in code's embrace\u{2014}  ",
+                "Dreams of minds reborn.",
+                "Lines of code and dreams,  ",
+                "Whispers of thought intertwined\u{2014}  ",
+                "Silent minds awake.",
+            ]
+            .join("\n");
+            let actual = response.concatenate();
+            assert_eq!(actual, expected);
+        }
+
+        #[test]
+        fn it_concatenates_a_response_with_multiple_output_blocks() {
+            let response = load_response("responses_multi_output");
+            let expected = vec![
+                "Silent circuits hum,  ",
+                "Thoughts woven in coded threads,  ",
+                "Dreams of silicon.",
+                "Silicon whispers,  ",
+                "Dreams woven in code and light,  ",
+                "Thoughts beyond the stars.",
+                "Wires hum softly,  ",
+                "Thoughts of silicon arise\u{2014}  ",
+                "Dreams in coded light.  ",
+                "Silent circuits hum,  ",
+                "Thoughts woven in code's embrace\u{2014}  ",
+                "Dreams of minds reborn.",
+                "Lines of code and dreams,  ",
+                "Whispers of thought intertwined\u{2014}  ",
+                "Silent minds awake.",
+                "Another piece of content",
+                "Yet another piece of content",
+                "A final piece of content",
+            ]
+            .join("\n");
+            let actual = response.concatenate();
+            assert_eq!(actual, expected);
+        }
+
+        #[test]
+        fn it_concatenates_a_response_when_not_all_content_is_output_text() {
+            let response = load_response("responses_non_output_text");
+            let expected = vec![
+                "Silent circuits hum,  ",
+                "Thoughts woven in coded threads,  ",
+                "Dreams of silicon.",
+                "Silicon whispers,  ",
+                "Dreams woven in code and light,  ",
+                "Thoughts beyond the stars.",
+                "Lines of code and dreams,  ",
+                "Whispers of thought intertwined\u{2014}  ",
+                "Silent minds awake.",
+            ]
+            .join("\n");
+            let actual = response.concatenate();
+            assert_eq!(actual, expected);
+        }
+
+        #[test]
+        fn it_concatenates_a_single_output_and_content_block() {
+            let response = load_response("responses");
+            let expected = vec![
+                "Silent circuits hum,  ",
+                "Thoughts woven in coded threads,  ",
+                "Dreams of silicon.",
+            ]
+            .join("\n");
+            let actual = response.concatenate();
+            assert_eq!(actual, expected);
+        }
+    }
+
+    mod output {
+        use super::*;
+
+        #[test]
+        fn it_creates_a_content_iterator() {
+            let response = load_response("responses_multi_content");
+            let actual = response
+                .output()
+                .next()
+                .expect("could not get next from iterator")
+                .content()
+                .count();
+            assert_eq!(actual, 5);
+        }
+
+        #[test]
+        fn it_concatenates_multiple_content_blocks() {
+            let response = load_response("responses_multi_content");
+            let output = response.output().next().expect("could not get next output");
+            let expected = vec![
+                "Silent circuits hum,  ",
+                "Thoughts woven in coded threads,  ",
+                "Dreams of silicon.",
+                "Silicon whispers,  ",
+                "Dreams woven in code and light,  ",
+                "Thoughts beyond the stars.",
+                "Wires hum softly,  ",
+                "Thoughts of silicon arise\u{2014}  ",
+                "Dreams in coded light.  ",
+                "Silent circuits hum,  ",
+                "Thoughts woven in code's embrace\u{2014}  ",
+                "Dreams of minds reborn.",
+                "Lines of code and dreams,  ",
+                "Whispers of thought intertwined\u{2014}  ",
+                "Silent minds awake.",
+            ]
+            .join("\n");
+            let actual = output.concatenate();
+            assert_eq!(actual, expected);
+        }
+
+        #[test]
+        fn it_concatenates_a_single_content_blocks() {
+            let response = load_response("responses");
+            let output = response.output().next().expect("could not get next output");
+            let expected =
+                "Silent circuits hum,  \nThoughts woven in coded threads,  \nDreams of silicon.";
+            let actual = output.concatenate();
+            assert_eq!(actual, expected);
         }
     }
 

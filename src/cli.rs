@@ -443,20 +443,10 @@ impl Runner {
         let model = model.model();
         debug!("Using model: {:?} - {}", model, model);
 
-        let response = summarizer.model(model).summarize().await;
-
-        // TODO: summarize() should ultimately grab data from the API
-        //       response and return a string itself.
         // TODO: Should we return raw JSON here in debug mode?
-        let output = response
-            .output()
-            .next()
-            .unwrap()
-            .content()
-            .next()
-            .unwrap()
-            .text();
-        let output = textwrap::fill(output, textwrap::termwidth());
+
+        let output = summarizer.model(model).summarize().await;
+        let output = textwrap::fill(&output, textwrap::termwidth());
         Pager::new(PagerEnv::default()).page(&output).await
     }
 

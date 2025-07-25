@@ -1,6 +1,6 @@
 //! AI summarization.
 
-use crate::ai::client::{APIClient, APIRequest};
+use crate::ai::client::{APIClient, APIRequest, APIResponse};
 use crate::markdown;
 use crate::reddit::Redditor;
 use itertools::Itertools;
@@ -43,33 +43,26 @@ where
     }
 
     /// Summarize the Redditor's comments and return the summary as a string,
-    /// along with a sentiment analysis at the end.
-    pub async fn summarize(&self) -> C::APIResponse {
-        // TODO: TEST THIS!
-        // Also, need an easy tool for generating mock input and output
-        // that we can save for testing.
-
-        // TODO: Return a string, not an OpenAIResponse!
-        //       Or maybe a structure suitable for passing to view(),
-        //       or otherwise one that can be wrapped to terminal width.
-
-        // TODO: Might want to separate instructions from text to summarize,
-        //       or at least pass some of the preamble as instructions.
-        //       Iterate on this!
+    /// including an analysis of sentiment and tone.
+    pub async fn summarize(&self) -> String {
+        // We might want to separate instructions from text to summarize,
+        // or at least pass some of the preamble as instructions.
+        // Iterate on this.
         let request = C::APIRequest::default()
             .model(self.model)
             .input(self.input());
 
         // TODO: Error handling!
-        self.client.send(&request).await.unwrap()
+        // Do we need a unified Result and Error enum, or at least a
+        // unified module?
+        self.client.send(&request).await.unwrap().concatenate()
     }
 
     /// Raw content that will be sent to an LLM for summarization.
     ///
     /// This is essentially all of a Redditor's comments stripped of
-    /// formatting. It does not include the introductory instructions;
-    /// see [`Summarizer::preamble()`] for the complete prompt that is
-    /// sent to the LLM.
+    /// formatting. It does not include the introductory instructions
+    /// set by the [preamble](Summarizer::preamble()).
     pub fn context(&self) -> String {
         self.user
             .comments()
@@ -86,7 +79,7 @@ where
     }
 
     /// The full input sent to the LLM, including any introductory
-    /// instructions along with the [`Summarizer::context()`].
+    /// instructions along with the [context](Summarizer::context()).
     pub fn input(&self) -> String {
         format!("{}\n\n{}", self.preamble(), self.context())
     }
@@ -94,11 +87,12 @@ where
 
 #[cfg(test)]
 mod tests {
+    use crate::ai::client::openai::OpenAIResponse;
     use crate::ai::client::{AIModel, APIClient, APIRequest, APIResponse, APIResult};
     use crate::reddit::Redditor;
     use crate::summary::Summarizer;
     use crate::test_utils::load_output;
-    use pretty_assertions::assert_eq;
+    use std::fs;
     use std::sync::{Arc, Mutex};
 
     #[derive(Clone, Copy, Default, Debug, PartialEq)]
@@ -155,7 +149,15 @@ mod tests {
     #[derive(Debug)]
     struct TestAPIResponse;
 
-    impl APIResponse for TestAPIResponse {}
+    impl APIResponse for TestAPIResponse {
+        fn concatenate(&self) -> String {
+            let json_data = fs::read_to_string("tests/data/openai/responses_multi_content.json")
+                .expect("could not load file");
+            let wrapped: OpenAIResponse =
+                serde_json::from_str(&json_data).expect("could not parse json");
+            wrapped.concatenate()
+        }
+    }
 
     #[derive(Debug)]
     struct RequestSpy {
@@ -275,5 +277,37 @@ mod tests {
         assert_eq!(request.model, TestAIModel::OtherAIModel);
         assert_eq!(request.input, expected_instructions);
         assert!(request.instructions.is_none());
+    }
+
+    #[tokio::test]
+    async fn it_summarizes_a_response_and_returns_a_string() {
+        let redditor = Redditor::test().await;
+        let summarizer = Summarizer::test(&redditor);
+        let expected = vec![
+            "Silent circuits hum,  ",
+            "Thoughts woven in coded threads,  ",
+            "Dreams of silicon.",
+            "Silicon whispers,  ",
+            "Dreams woven in code and light,  ",
+            "Thoughts beyond the stars.",
+            "Wires hum softly,  ",
+            "Thoughts of silicon arise\u{2014}  ",
+            "Dreams in coded light.  ",
+            "Silent circuits hum,  ",
+            "Thoughts woven in code's embrace\u{2014}  ",
+            "Dreams of minds reborn.",
+            "Lines of code and dreams,  ",
+            "Whispers of thought intertwined\u{2014}  ",
+            "Silent minds awake.",
+        ]
+        .join("\n");
+        let actual = summarizer.summarize().await;
+        assert_eq!(actual, expected);
+    }
+
+    #[tokio::test]
+    #[ignore = "figure out how to spy well"]
+    async fn it_calls_concatenate_on_the_response() {
+        todo!()
     }
 }

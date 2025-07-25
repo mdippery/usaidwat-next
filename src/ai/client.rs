@@ -101,7 +101,10 @@ pub trait APIRequest: Default {
 }
 
 /// A response from an AI service's API.
-pub trait APIResponse {}
+pub trait APIResponse {
+    /// Concatenates the output from an AI service into a single string.
+    fn concatenate(&self) -> String;
+}
 
 /// An API result that includes the response if successful or an error
 /// if unsuccessful.
