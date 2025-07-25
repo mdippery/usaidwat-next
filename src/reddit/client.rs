@@ -6,7 +6,7 @@ use crate::reddit::service::{RedditService, Service};
 use crate::thing::{self, Comment, Submission, User};
 pub use chrono::Weekday;
 use chrono::{Datelike, Timelike};
-use std::{error, fmt};
+use thiserror::Error;
 use tokio::try_join;
 
 /// Represents a Reddit user.
@@ -147,43 +147,15 @@ impl Timeline {
 }
 
 /// A client error.
-#[derive(Debug)]
+#[derive(Debug, Error)]
 pub enum Error {
     /// An error from the underlying HTTP service.
-    Service(http::HTTPError),
+    #[error("Service error: {0}")]
+    Service(#[from] http::HTTPError),
 
     /// An error parsing data.
-    Parse(thing::Error),
-}
-
-impl From<http::HTTPError> for Error {
-    fn from(error: http::HTTPError) -> Self {
-        Error::Service(error)
-    }
-}
-
-impl From<thing::Error> for Error {
-    fn from(error: thing::Error) -> Self {
-        Error::Parse(error)
-    }
-}
-
-impl fmt::Display for Error {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            Error::Service(err) => write!(f, "Service error: {err}"),
-            Error::Parse(err) => write!(f, "Parse error: {err}"),
-        }
-    }
-}
-
-impl error::Error for Error {
-    fn source(&self) -> Option<&(dyn error::Error + 'static)> {
-        match self {
-            Error::Service(err) => Some(err),
-            Error::Parse(err) => Some(err),
-        }
-    }
+    #[error("Parse error: {0}")]
+    Parse(#[from] thing::Error),
 }
 
 #[derive(Debug)]

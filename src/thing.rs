@@ -9,35 +9,14 @@ use crate::clock::{DateTime, HasAge, Utc};
 use crate::filter::Searchable;
 use crate::{markdown, text};
 use serde::{Deserialize, Deserializer};
-use std::{error, fmt};
+use thiserror::Error;
 
 /// An error processing or creating a thing.
-#[derive(Debug)]
+#[derive(Debug, Error)]
 pub enum Error {
     /// A parsing error.
-    Parse(serde_json::Error),
-}
-
-impl From<serde_json::Error> for Error {
-    fn from(error: serde_json::Error) -> Self {
-        Error::Parse(error)
-    }
-}
-
-impl fmt::Display for Error {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            Error::Parse(err) => write!(f, "Parsing error occurred: {err}"),
-        }
-    }
-}
-
-impl error::Error for Error {
-    fn source(&self) -> Option<&(dyn error::Error + 'static)> {
-        match self {
-            Error::Parse(err) => Some(err),
-        }
-    }
+    #[error("Parsing error occurred: {0}")]
+    Parse(#[from] serde_json::Error),
 }
 
 /// A standard parsing result.

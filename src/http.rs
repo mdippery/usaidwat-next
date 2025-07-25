@@ -1,7 +1,7 @@
 //! Services for communicating with APIs using HTTP.
 
 use reqwest::{Client, ClientBuilder, header};
-use std::{error, fmt};
+use thiserror::Error;
 
 /// A general service for making HTTP calls.
 ///
@@ -34,75 +34,31 @@ pub trait HTTPService {
 pub type HTTPResult<T> = Result<T, HTTPError>;
 
 /// Indicates an error has occurred when making an HTTP call.
-#[derive(Debug)]
+#[derive(Debug, Error)]
 pub enum HTTPError {
     /// An error that occurred while making an HTTP request.
-    Request(reqwest::Error),
+    #[error("Error while making or processing an HTTP request: {0}")]
+    Request(#[from] reqwest::Error),
 
     /// An error that occurred while trying to serialize a POST body.
-    Serialization(serde_json::Error),
+    #[error("Error serializing POST body: {0}")]
+    Serialization(#[from] serde_json::Error),
 
     /// An unsuccessful HTTP status code in an HTTP response.
+    #[error("Request returned HTTP {0}")]
     Http(reqwest::StatusCode),
 
     /// A missing Content-Type header in a response.
+    #[error("Missing Content-Type header")]
     MissingContentType,
 
     /// An invalid Content-Type header.
-    InvalidContentType(header::ToStrError),
+    #[error("Invalid Content-Type header value: {0}")]
+    InvalidContentType(#[from] header::ToStrError),
 
     /// A Content-Type that is not understood by the service.
+    #[error("Unexpected content type: {0}")]
     UnexpectedContentType(String),
-}
-
-impl From<reqwest::Error> for HTTPError {
-    fn from(error: reqwest::Error) -> Self {
-        HTTPError::Request(error)
-    }
-}
-
-impl From<header::ToStrError> for HTTPError {
-    fn from(value: header::ToStrError) -> Self {
-        HTTPError::InvalidContentType(value)
-    }
-}
-
-impl From<serde_json::Error> for HTTPError {
-    fn from(error: serde_json::Error) -> Self {
-        HTTPError::Serialization(error)
-    }
-}
-
-impl fmt::Display for HTTPError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            HTTPError::Request(err) => {
-                write!(f, "Error while making or processing an HTTP request: {err}")
-            }
-            HTTPError::Serialization(err) => write!(f, "Error serializing POST body: {err}"),
-            HTTPError::Http(status) => write!(f, "Request returned HTTP {status}"),
-            HTTPError::MissingContentType => write!(f, "Missing Content-Type header"),
-            HTTPError::InvalidContentType(err) => {
-                write!(f, "Invalid Content-Type header value: {err}")
-            }
-            HTTPError::UnexpectedContentType(content_type) => {
-                write!(f, "Unexpected content type: {content_type}")
-            }
-        }
-    }
-}
-
-impl error::Error for HTTPError {
-    fn source(&self) -> Option<&(dyn error::Error + 'static)> {
-        match self {
-            HTTPError::Request(err) => Some(err),
-            HTTPError::Serialization(err) => Some(err),
-            HTTPError::Http(_) => None,
-            HTTPError::MissingContentType => None,
-            HTTPError::InvalidContentType(err) => Some(err),
-            HTTPError::UnexpectedContentType(_) => None,
-        }
-    }
 }
 
 #[cfg(test)]
