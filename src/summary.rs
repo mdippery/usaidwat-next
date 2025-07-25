@@ -94,8 +94,7 @@ where
 
 #[cfg(test)]
 mod tests {
-    use crate::ai::client::openai::OpenAIResponse;
-    use crate::ai::client::{AIModel, APIClient, APIRequest, APIResult};
+    use crate::ai::client::{AIModel, APIClient, APIRequest, APIResponse, APIResult};
     use crate::reddit::Redditor;
     use crate::summary::Summarizer;
     use crate::test_utils::load_output;
@@ -154,6 +153,11 @@ mod tests {
     }
 
     #[derive(Debug)]
+    struct TestAPIResponse;
+
+    impl APIResponse for TestAPIResponse {}
+
+    #[derive(Debug)]
     struct RequestSpy {
         request: Option<TestAPIRequest>,
     }
@@ -174,8 +178,6 @@ mod tests {
     }
 
     impl TestAIClient {
-        const EMPTY_RESPONSE: &'static str = r#"{"output": []}"#;
-
         fn new() -> Self {
             let request_spy = Arc::new(Mutex::new(RequestSpy::new()));
             Self { request_spy }
@@ -184,18 +186,14 @@ mod tests {
 
     impl APIClient for TestAIClient {
         type APIRequest = TestAPIRequest;
-        type APIResponse = OpenAIResponse;
+        type APIResponse = TestAPIResponse;
 
         async fn send(&self, request: &Self::APIRequest) -> APIResult<Self::APIResponse> {
             self.request_spy
                 .lock()
                 .expect("could not lock mutex")
                 .record(request.clone());
-
-            let response: OpenAIResponse =
-                serde_json::from_str(Self::EMPTY_RESPONSE).expect("could not parse json");
-
-            Ok(response)
+            Ok(Self::APIResponse {})
         }
     }
 
