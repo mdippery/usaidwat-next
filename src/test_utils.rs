@@ -14,7 +14,7 @@ pub fn load_data(file: &str) -> String {
 }
 
 pub fn load_output(filename: &str) -> String {
-    let filename = format!("tests/output/{filename}.out");
+    let filename = format!("tests/output/{filename}.txt");
     String::from(
         fs::read_to_string(&filename)
             .expect(&format!("could not load test data from {filename}"))
