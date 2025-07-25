@@ -56,8 +56,6 @@ where
         // TODO: Might want to separate instructions from text to summarize,
         //       or at least pass some of the preamble as instructions.
         //       Iterate on this!
-        // TODO: Really should test that request is formed properly, but
-        //       that's going to be hard to do without accessors, etc.
         let request = C::APIRequest::default()
             .model(self.model)
             .input(self.input());
@@ -101,6 +99,7 @@ mod tests {
     use crate::summary::Summarizer;
     use crate::test_utils::load_output;
     use pretty_assertions::assert_eq;
+    use std::sync::{Arc, Mutex};
 
     #[derive(Clone, Copy, Default, Debug, PartialEq)]
     enum TestAIModel {
@@ -124,11 +123,10 @@ mod tests {
         }
     }
 
-    #[derive(Debug, Default)]
-    #[allow(dead_code)]
+    #[derive(Clone, Debug, Default)]
     struct TestAPIRequest {
         model: TestAIModel,
-        instructions: String,
+        instructions: Option<String>,
         input: String,
     }
 
@@ -141,7 +139,7 @@ mod tests {
 
         fn instructions(self, instructions: impl Into<String>) -> Self {
             Self {
-                instructions: instructions.into(),
+                instructions: Some(instructions.into()),
                 ..self
             }
         }
@@ -159,21 +157,49 @@ mod tests {
 
     impl APIResponse for TestAPIResponse {}
 
-    #[derive(Debug, Default)]
-    struct TestAIClient;
+    #[derive(Debug)]
+    struct RequestSpy {
+        request: Option<TestAPIRequest>,
+    }
+
+    impl RequestSpy {
+        fn new() -> Self {
+            Self { request: None }
+        }
+
+        fn record(&mut self, request: TestAPIRequest) {
+            self.request = Some(request)
+        }
+    }
+
+    #[derive(Debug)]
+    struct TestAIClient {
+        request_spy: Arc<Mutex<RequestSpy>>,
+    }
+
+    impl TestAIClient {
+        fn new() -> Self {
+            let request_spy = Arc::new(Mutex::new(RequestSpy::new()));
+            Self { request_spy }
+        }
+    }
 
     impl APIClient for TestAIClient {
         type APIRequest = TestAPIRequest;
         type APIResponse = TestAPIResponse;
 
-        async fn send(&self, _request: &Self::APIRequest) -> APIResult<Self::APIResponse> {
+        async fn send(&self, request: &Self::APIRequest) -> APIResult<Self::APIResponse> {
+            self.request_spy
+                .lock()
+                .expect("could not lock mutex")
+                .record(request.clone());
             Ok(Self::APIResponse {})
         }
     }
 
     impl<'a> Summarizer<'a, TestAIClient> {
         pub fn test(user: &'a Redditor) -> Self {
-            let client = TestAIClient::default();
+            let client = TestAIClient::new();
             Self::new(client, user)
         }
     }
@@ -218,5 +244,29 @@ mod tests {
         let expected = format!("{}\n\n{}", instructions, summary);
         let actual = Summarizer::test(&redditor).input();
         assert_eq!(actual, expected);
+    }
+
+    #[tokio::test]
+    async fn it_sends_a_request_with_the_correct_model_and_input() {
+        let instructions = include_str!("summary_prompt.txt");
+        let instructions = instructions.replace('\n', " ");
+        let summary = load_output("summary_raw");
+        let expected_instructions = format!("{}\n\n{}", instructions, summary);
+
+        let redditor = Redditor::test().await;
+        let summarizer = Summarizer::test(&redditor).model(TestAIModel::OtherAIModel);
+        let _ = summarizer.summarize().await;
+        let client = summarizer.client;
+        let request = &client
+            .request_spy
+            .lock()
+            .expect("could not lock mutex")
+            .request
+            .take()
+            .expect("could not get request");
+
+        assert_eq!(request.model, TestAIModel::OtherAIModel);
+        assert_eq!(request.input, expected_instructions);
+        assert!(request.instructions.is_none());
     }
 }
