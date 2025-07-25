@@ -305,10 +305,4 @@ mod tests {
         let actual = actual.unwrap();
         assert_eq!(actual, expected);
     }
-
-    #[tokio::test]
-    #[ignore = "figure out how to spy well"]
-    async fn it_calls_concatenate_on_the_response() {
-        todo!()
-    }
 }
