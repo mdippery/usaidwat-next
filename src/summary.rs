@@ -204,6 +204,20 @@ mod tests {
         }
     }
 
+    fn load_preamble() -> String {
+        include_str!("summary_prompt.txt").replace('\n', " ")
+    }
+
+    fn load_summary() -> String {
+        load_output("summary_raw")
+    }
+
+    fn load_input() -> String {
+        let premble = load_preamble();
+        let summary = load_summary();
+        format!("{}\n\n{}", premble, summary)
+    }
+
     #[tokio::test]
     async fn it_uses_the_default_model_if_one_is_not_provided() {
         let redditor = Redditor::test().await;
@@ -221,7 +235,7 @@ mod tests {
     #[tokio::test]
     async fn it_provides_context_for_an_llm() {
         let redditor = Redditor::test().await;
-        let expected = load_output("summary_raw");
+        let expected = load_summary();
         let actual = Summarizer::test(&redditor).context();
         assert_eq!(actual, expected);
     }
@@ -229,8 +243,7 @@ mod tests {
     #[tokio::test]
     async fn it_provides_a_preamble_for_an_llm() {
         let redditor = Redditor::test().await;
-        let expected = include_str!("summary_prompt.txt");
-        let expected = expected.replace('\n', " ");
+        let expected = load_preamble();
         let actual = Summarizer::test(&redditor).preamble();
         assert_eq!(actual, expected);
     }
@@ -238,20 +251,14 @@ mod tests {
     #[tokio::test]
     async fn it_provides_input_for_an_llm() {
         let redditor = Redditor::test().await;
-        let instructions = include_str!("summary_prompt.txt");
-        let instructions = instructions.replace('\n', " ");
-        let summary = load_output("summary_raw");
-        let expected = format!("{}\n\n{}", instructions, summary);
+        let expected = load_input();
         let actual = Summarizer::test(&redditor).input();
         assert_eq!(actual, expected);
     }
 
     #[tokio::test]
     async fn it_sends_a_request_with_the_correct_model_and_input() {
-        let instructions = include_str!("summary_prompt.txt");
-        let instructions = instructions.replace('\n', " ");
-        let summary = load_output("summary_raw");
-        let expected_instructions = format!("{}\n\n{}", instructions, summary);
+        let expected_instructions = load_input();
 
         let redditor = Redditor::test().await;
         let summarizer = Summarizer::test(&redditor).model(TestAIModel::OtherAIModel);
