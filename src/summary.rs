@@ -1,6 +1,6 @@
 //! AI summarization.
 
-use crate::ai::client::{APIClient, APIRequest, APIResponse};
+use crate::ai::client::{APIClient, APIRequest, APIResponse, APIResult};
 use crate::markdown;
 use crate::reddit::Redditor;
 use itertools::Itertools;
@@ -44,7 +44,7 @@ where
 
     /// Summarize the Redditor's comments and return the summary as a string,
     /// including an analysis of sentiment and tone.
-    pub async fn summarize(&self) -> String {
+    pub async fn summarize(&self) -> APIResult<String> {
         // We might want to separate instructions from text to summarize,
         // or at least pass some of the preamble as instructions.
         // Iterate on this.
@@ -52,10 +52,8 @@ where
             .model(self.model)
             .input(self.input());
 
-        // TODO: Error handling!
-        // Do we need a unified Result and Error enum, or at least a
-        // unified module?
-        self.client.send(&request).await.unwrap().concatenate()
+        // TODO: Do we need a unified Result and Error enum, or at least a unified module?
+        Ok(self.client.send(&request).await?.concatenate())
     }
 
     /// Raw content that will be sent to an LLM for summarization.
@@ -302,6 +300,9 @@ mod tests {
         ]
         .join("\n");
         let actual = summarizer.summarize().await;
+        assert!(actual.is_ok());
+
+        let actual = actual.unwrap();
         assert_eq!(actual, expected);
     }
 

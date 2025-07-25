@@ -445,7 +445,11 @@ impl Runner {
 
         // TODO: Should we return raw JSON here in debug mode?
 
-        let output = summarizer.model(model).summarize().await;
+        let output = summarizer
+            .model(model)
+            .summarize()
+            .await
+            .map_err(|err| format!("Error in API request: {err}"))?;
         let output = textwrap::fill(&output, textwrap::termwidth());
         Pager::new(PagerEnv::default()).page(&output).await
     }

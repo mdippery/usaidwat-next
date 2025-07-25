@@ -13,11 +13,8 @@ async fn it_summarizes_a_redditors_comments() {
         .expect("could not create redditor");
     let summarizer = Summarizer::new(client, &user);
     let response = summarizer.summarize().await;
+    assert!(response.is_ok());
 
-    // TODO: Test results
-    eprintln!("Summarization:\n{:?}", response);
-    eprintln!(
-        "JSON:\n{}",
-        serde_json::to_string_pretty(&response).unwrap()
-    );
+    let response = response.unwrap();
+    assert!(response.len() > 0);
 }
