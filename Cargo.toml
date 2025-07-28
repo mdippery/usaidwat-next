@@ -1,8 +1,9 @@
 [package]
 name = "usaidwat"
-version = "2.0.0-beta.2"
+version = "2.0.0-beta.3"
 authors = ["Michael Dippery <michael@monkey-robot.com>"]
 description = "Answers the age-old question, \"Where does a Redditor comment the most?\""
+readme = "README.md"
 #repository
 #license
 keywords = ["ai", "cli", "web", "reddit"]
