@@ -21,7 +21,7 @@ impl Redditor {
     ///
     /// `username` should be the Redditor's username.
     ///
-    /// Returns an [`Error`] if data cannot be parsed for the given username.
+    /// Returns an [`enum@Error`] if data cannot be parsed for the given username.
     pub async fn new(username: impl Into<String>) -> Result<Self, Error> {
         let service = RedditService::new();
         Self::new_with_service(username, service).await
@@ -33,7 +33,7 @@ impl Redditor {
     /// actual service implementation that will be used to retrieve
     /// information about the Redditor.
     ///
-    /// Returns an [`Error`] if data cannot be parsed for the given username.
+    /// Returns an [`enum@Error`] if data cannot be parsed for the given username.
     pub(crate) async fn new_with_service<T: Service>(
         username: impl Into<String>,
         service: T,
