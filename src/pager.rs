@@ -68,10 +68,60 @@ impl Pager {
         self.pager_env.pager_env()
     }
 
+    /// True if the pager is `cat`.
+    ///
+    /// # Examples
+    ///
+    /// Returns true if `$PAGER` is `cat`:
+    ///
+    /// ```
+    /// # use usaidwat::pager::{Pager, PagerEnv};
+    /// # use temp_env::with_var;
+    /// # with_var("PAGER", Some("cat"), || {
+    /// // $PAGER == "cat"
+    /// let is_cat = Pager::new(PagerEnv::default()).is_cat();
+    /// assert!(is_cat);
+    /// # });
+    /// ```
+    ///
+    /// Or if `$PAGER` is `/usr/bin/cat`, or anything ending in `cat`:
+    ///
+    /// ```
+    /// # use usaidwat::pager::{Pager, PagerEnv};
+    /// # use temp_env::with_var;
+    /// # with_var("PAGER", Some("/usr/bin/cat"), || {
+    /// // $PAGER == "/usr/bin/cat"
+    /// let is_cat = Pager::new(PagerEnv::default()).is_cat();
+    /// assert!(is_cat);
+    /// # });
+    ///
+    ///
+    /// # with_var("PAGER", Some("/bin/cat"), || {
+    /// // $PAGER == "/bin/cat"
+    /// let is_cat = Pager::new(PagerEnv::default()).is_cat();
+    /// assert!(is_cat);
+    /// # });
+    /// ```
+    ///
+    /// But it returns false if `$PAGER` is something else:
+    ///
+    /// ```
+    /// # use usaidwat::pager::{Pager, PagerEnv};
+    /// # use temp_env::with_var;
+    /// # with_var("PAGER", Some("less"), || {
+    /// // $PAGER == "less"
+    /// let is_cat = Pager::new(PagerEnv::default()).is_cat();
+    /// assert!(!is_cat);
+    /// # });
+    /// ```
+    pub fn is_cat(&self) -> bool {
+        self.command() == "cat" || self.command().ends_with("/cat")
+    }
+
     /// Pages the output to the pager.
     ///
     /// Returns the exit status of the child pager process.
-    pub async fn page_with_error(&self, output: &str) -> io::Result<ExitStatus> {
+    pub async fn page_to_pager_with_error(&self, output: &str) -> io::Result<ExitStatus> {
         // TODO: Skip paging if pager == "cat"
         // TODO: Skip paging it not outputting to a tty
 
@@ -93,7 +143,29 @@ impl Pager {
         command.wait().await
     }
 
+    /// Pages output to stdout instead of a separate pager process.
+    pub async fn page_to_stdout_with_error(&self, output: &str) -> io::Result<ExitStatus> {
+        println!("{}", output);
+        Ok(ExitStatus::default())
+    }
+
+    /// Pages the output and returns an I/O result.
+    ///
+    /// The output will be sent to a separate pager process as defined by
+    /// `$PAGER`, unless `$PAGER` is `cat`, in which case the output will
+    /// simply be sent to stdout.
+    pub async fn page_with_error(&self, output: &str) -> io::Result<ExitStatus> {
+        if self.is_cat() {
+            self.page_to_stdout_with_error(output).await
+        } else {
+            self.page_to_pager_with_error(output).await
+        }
+    }
+
     /// Pages the output to the pager.
+    ///
+    /// If the `$PAGER` is `cat` or any variant like `/usr/bin/cat`, the output
+    /// will be sent directly to stdout instead of to a separate paging process.
     ///
     /// If no errors occur, `()` is returned; otherwise, a string describing
     /// the error is returned.
