@@ -14,6 +14,7 @@
 //! allows the use of a pager subprocess in a way that plays nicely with
 //! tokio.
 
+use atty::Stream;
 use std::process::{ExitStatus, Stdio};
 use std::{env, io, result};
 use tokio::io::AsyncWriteExt;
@@ -118,6 +119,11 @@ impl Pager {
         self.command() == "cat" || self.command().ends_with("/cat")
     }
 
+    /// True if stdout is a tty.
+    pub fn is_tty(&self) -> bool {
+        atty::is(Stream::Stdout)
+    }
+
     /// Pages the output to the pager.
     ///
     /// Returns the exit status of the child pager process.
@@ -155,7 +161,7 @@ impl Pager {
     /// `$PAGER`, unless `$PAGER` is `cat`, in which case the output will
     /// simply be sent to stdout.
     pub async fn page_with_error(&self, output: &str) -> io::Result<ExitStatus> {
-        if self.is_cat() {
+        if self.is_cat() || !self.is_tty() {
             self.page_to_stdout_with_error(output).await
         } else {
             self.page_to_pager_with_error(output).await
