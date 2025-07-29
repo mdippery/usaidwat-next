@@ -19,10 +19,7 @@ use std::{fmt, result};
 /// Result of running a command.
 pub type Result = result::Result<(), String>;
 
-const AFTER_HELP: &str = r#"Copyright (C) 2025 Michael Dippery <michael@monkey-robot.com>.
-Licensed under the Apache 2.0 license.
-See accompanying LICENSE file for details.
-"#;
+const AFTER_HELP: &str = include_str!("help/after.txt");
 
 /// Program configuration.
 #[derive(Debug, Parser)]
@@ -436,9 +433,8 @@ impl Runner {
     }
 
     async fn run_summary(&self, model: &AIModelClass) -> Result {
-        let auth = Auth::from_env("OPENAI_API_KEY")
-            // TODO: Better error message, with instructions.
-            .map_err(|_| format!("Please define $OPENAI_API_KEY in your environment"))?;
+        let auth =
+            Auth::from_env("OPENAI_API_KEY").map_err(|_| include_str!("help/summary.txt"))?;
 
         let client = OpenAIClient::new(auth);
 

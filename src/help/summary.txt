@@ -1,0 +1,2 @@
+Please define $OPENAI_API_KEY in your environment.
+Run `usaidwat --help` for setup instructions.
