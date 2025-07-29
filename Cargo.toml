@@ -5,7 +5,7 @@ authors = ["Michael Dippery <michael@monkey-robot.com>"]
 description = "Answers the age-old question, \"Where does a Redditor comment the most?\""
 readme = "README.md"
 #repository
-#license
+license = "Apache-2.0"
 keywords = ["ai", "cli", "web", "reddit"]
 categories = ["command-line-utilities"]
 edition = "2024"

@@ -19,11 +19,16 @@ use std::{fmt, result};
 /// Result of running a command.
 pub type Result = result::Result<(), String>;
 
+const AFTER_HELP: &str = r#"Copyright (C) 2025 Michael Dippery <michael@monkey-robot.com>.
+Licensed under the Apache 2.0 license.
+See accompanying LICENSE file for details.
+"#;
+
 /// Program configuration.
 #[derive(Debug, Parser)]
 #[command(version)]
-#[command(about = "Answers the age-old question, \"Where does a Redditor comment the most?\"", long_about = None
-)]
+#[command(about = "Answers the age-old question, \"Where does a Redditor comment the most?\"", long_about = None)]
+#[command(after_help = AFTER_HELP)]
 pub struct Config {
     #[command(flatten)]
     verbosity: Verbosity,
