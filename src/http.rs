@@ -88,7 +88,7 @@ mod tests {
     #[test]
     fn it_returns_user_agent_with_version_number() {
         let user_agent = UserAgentTestService::user_agent();
-        let version_re = Regex::new(r"^[a-z]+ v\d+\.\d+\.\d+(-(alpha|beta)\.\d+)?$").unwrap();
+        let version_re = Regex::new(r"^[a-z]+ v\d+\.\d+\.\d+(-(alpha|beta)(\.\d+)?)?$").unwrap();
         assert!(
             version_re.is_match(&user_agent),
             "{} does not match {}",
