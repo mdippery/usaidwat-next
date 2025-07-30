@@ -29,7 +29,8 @@ pub trait Searchable {
     /// The search is case-insensitive.
     ///
     /// `pattern` can be a regular expression.
-    fn matches(&self, pattern: &str) -> bool {
+    fn matches(&self, pattern: impl AsRef<str>) -> bool {
+        let pattern = pattern.as_ref();
         match Regex::new(&format!("(?i){pattern}")) {
             Ok(re) => re.is_match(&self.search_text()),
             Err(_) => self.search_text().find(pattern).is_some(),
@@ -146,7 +147,8 @@ impl StringSet {
     /// If there are only non-negated strings in the set, this means that
     /// `needle` is a member of the set. If there are only _negated_ strings
     /// in the set, this means that `needle` is _not_ contained in the set.
-    pub fn contains(&self, needle: &str) -> bool {
+    pub fn contains(&self, needle: impl AsRef<str>) -> bool {
+        let needle = needle.as_ref();
         match &self.kind {
             StringSetKind::Negative(set) => !set.contains(&needle.to_lowercase()),
             StringSetKind::Positive(set) => set.contains(&needle.to_lowercase()),
@@ -302,6 +304,13 @@ mod tests {
         fn it_treats_invalid_regexes_as_a_fixed_string() {
             let t = TestSearchable::default();
             assert!(!t.matches("pic{?}kl**ed"));
+        }
+
+        #[test]
+        fn it_takes_a_string() {
+            let t = TestSearchable::default();
+            let s = String::from("Piper");
+            assert!(t.matches(s))
         }
     }
 
@@ -585,6 +594,15 @@ mod tests {
                 let set =
                     StringSet::from(&strings).expect(&format!("should build set from {strings:?}"));
                 assert!(!set.contains("romeo"));
+            }
+
+            #[test]
+            fn it_takes_a_string_as_a_needle() {
+                let strings = vec!["alpha,beta", "charlie", "delta,echo,foxtrot", "golf"];
+                let set =
+                    StringSet::from(&strings).expect(&format!("should build set from {strings:?}"));
+                let needle = String::from("romeo");
+                assert!(!set.contains(needle));
             }
         }
 

@@ -142,7 +142,10 @@ impl Pager {
     /// Pages the output to the pager.
     ///
     /// Returns the exit status of the child pager process.
-    pub async fn page_to_pager_with_error(&self, output: &str) -> io::Result<ExitStatus> {
+    pub async fn page_to_pager_with_error(
+        &self,
+        output: impl AsRef<str>,
+    ) -> io::Result<ExitStatus> {
         // TODO: Skip paging if pager == "cat"
         // TODO: Skip paging it not outputting to a tty
 
@@ -158,14 +161,18 @@ impl Pager {
         })?;
 
         if let Some(mut stdin) = command.stdin.take() {
-            stdin.write_all(output.as_bytes()).await?;
+            stdin.write_all(output.as_ref().as_bytes()).await?;
         }
 
         command.wait().await
     }
 
     /// Pages output to stdout instead of a separate pager process.
-    pub async fn page_to_stdout_with_error(&self, output: &str) -> io::Result<ExitStatus> {
+    pub async fn page_to_stdout_with_error(
+        &self,
+        output: impl AsRef<str>,
+    ) -> io::Result<ExitStatus> {
+        let output = output.as_ref();
         println!("{}", output);
         Ok(ExitStatus::default())
     }
@@ -175,7 +182,7 @@ impl Pager {
     /// The output will be sent to a separate pager process as defined by
     /// `$PAGER`, unless `$PAGER` is `cat`, in which case the output will
     /// simply be sent to stdout.
-    pub async fn page_with_error(&self, output: &str) -> io::Result<ExitStatus> {
+    pub async fn page_with_error(&self, output: impl AsRef<str>) -> io::Result<ExitStatus> {
         if self.is_cat() || !self.is_tty() {
             self.page_to_stdout_with_error(output).await
         } else {
@@ -190,7 +197,7 @@ impl Pager {
     ///
     /// If no errors occur, `()` is returned; otherwise, a string describing
     /// the error is returned.
-    pub async fn page(&self, output: &str) -> Result {
+    pub async fn page(&self, output: impl AsRef<str>) -> Result {
         let status = self
             .page_with_error(output)
             .await

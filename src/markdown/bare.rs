@@ -34,8 +34,8 @@ use markdown::{Constructs, ParseOptions};
 /// all markup, including quoted text, headers, image links, and link URLs.
 ///
 /// The result is suitable for passing to an LLM for further processing.
-pub fn parse(markup: &str) -> String {
-    MarkdownParser::new().parse(&text::convert_html_entities(markup))
+pub fn parse(markup: impl AsRef<str>) -> String {
+    MarkdownParser::new().parse(text::convert_html_entities(markup))
 }
 
 /// A reusable Markdown parser for stripping formatting and producing
@@ -49,8 +49,8 @@ impl MarkdownParser {
         Self {}
     }
 
-    pub fn parse(&self, markup: &str) -> String {
-        let tree = markdown::to_mdast(markup, &self.parse_options()).unwrap();
+    pub fn parse(&self, markup: impl AsRef<str>) -> String {
+        let tree = markdown::to_mdast(markup.as_ref(), &self.parse_options()).unwrap();
         let mut visitor = MarkdownVisitor::new();
         tree.accept(&mut visitor);
         visitor.text()

@@ -45,8 +45,8 @@ use textwrap::Options;
 /// `markup` is the raw Markdown source code. `textwidth` is the column at
 /// which text should be wrapped for display on a terminal; normally
 /// this is [`textwrap::termwidth()`], but any value may be specified.
-pub fn parse(markup: &str, textwidth: usize) -> String {
-    MarkdownParser::new(textwidth).parse(&text::convert_html_entities(markup))
+pub fn parse(markup: impl AsRef<str>, textwidth: usize) -> String {
+    MarkdownParser::new(textwidth).parse(text::convert_html_entities(markup))
 }
 
 /// A reusable Markdown parser for formatting text suitable for output in a terminal.
@@ -62,8 +62,8 @@ impl MarkdownParser {
     }
 
     /// Converts Markdown markup into a formatted string.
-    pub fn parse(&self, markup: &str) -> String {
-        let tree = markdown::to_mdast(markup, &self.parse_options()).unwrap();
+    pub fn parse(&self, markup: impl AsRef<str>) -> String {
+        let tree = markdown::to_mdast(markup.as_ref(), &self.parse_options()).unwrap();
         let mut visitor = MarkdownVisitor::new(self.textwidth);
         tree.accept(&mut visitor);
         visitor.text()

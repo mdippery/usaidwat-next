@@ -113,10 +113,13 @@ impl User {
     /// a call to `/users/<user>/submitted.json`.
     ///
     /// Obviously parsing can fail so this method returns an `Option`.
-    pub fn parse(user_data: &str, comment_data: &str, post_data: &str) -> Result<Self> {
-        let about = About::parse(user_data)?;
-        let comments = Comment::parse(comment_data)?;
-        let submissions = Submission::parse(post_data)?;
+    pub fn parse<S>(user_data: S, comment_data: S, post_data: S) -> Result<Self>
+    where
+        S: AsRef<str>,
+    {
+        let about = About::parse(user_data.as_ref())?;
+        let comments = Comment::parse(comment_data.as_ref())?;
+        let submissions = Submission::parse(post_data.as_ref())?;
         Ok(User {
             about,
             comments,
