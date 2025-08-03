@@ -91,7 +91,6 @@ impl<T: APIService + Sync> APIClient for OpenAIClient<T> {
     type APIRequest = OpenAIRequest;
     type APIResponse = OpenAIResponse;
 
-    // TODO: Test with a dummy service
     async fn send(&self, request: &Self::APIRequest) -> APIResult<Self::APIResponse> {
         self.service.post(Self::BASE_URI, &self.auth, request).await
     }
