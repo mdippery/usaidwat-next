@@ -28,6 +28,22 @@
 //! allows the use of a pager subprocess in a way that plays nicely with
 //! Tokio.
 //!
+//! `Pager` pipes its output to program specified in the `$PAGER`
+//! environment variable, except under two conditions:
+//!
+//! 1. If the value of `$PAGER` is `cat`, `/usr/bin/cat`, or anything that
+//!    ends in `/cat` (`/bin/cat`, etc.), then the output is not paged
+//!    at all (`cat` is not launched).
+//! 2. If `stdout` is not a TTY, such as when output is being redirected
+//!    to a file, the output is not paged.
+//!
+//! `Pager` respects the value of the `$LESS` environment variable (with some
+//! caveats---see [`PagerEnv::pager_env()`] for details).
+//!
+//! Right now, `Pager` is also designed specifically to work with `less`, so
+//! it does not make use of any other environment variables, but support
+//! for other pagers may expand in the future.
+//!
 //! [pager]: https://crates.io/crates/pager
 
 use atty::Stream;
@@ -101,7 +117,7 @@ impl Pager {
     /// # });
     /// ```
     ///
-    /// Or if `$PAGER` is `/usr/bin/cat`, or anything ending in `cat`:
+    /// Or if `$PAGER` is `/usr/bin/cat`, or anything ending in `/cat`:
     ///
     /// ```
     /// # use usaidwat::pager::{Pager, PagerEnv};
