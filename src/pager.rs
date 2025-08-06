@@ -13,21 +13,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//! Asynchronous, tokio-friendly pager implementation.
+//! Asynchronous, Tokio-friendly pager implementation.
 //!
-//! Unfortunately, Rust's [pager](https://crates.io/crates/pager) crate does
-//! not play nicely with tokio. It leaves threads open after the tokio
-//! runtime exits, resulting in a nasty I/O error after a CLI program using
-//! both pager and a tokio runtime exits. This may be due to the fact that
-//! the pager crate actually runs the pager in the _parent_ process, meaning
-//! that the tokio runtime, in the child process, exits before the pager,
-//! leaving dangling file descriptors and the aforementioned I/O error from
-//! tokio.
+//! Unfortunately, Rust's [pager] crate does not play nicely with Tokio.
+//! It leaves threads open after the Tokio runtime exits, resulting in a
+//! nasty I/O error after a CLI program using both pager and a Tokio runtime
+//! exits. This may be due to the fact that the pager crate actually runs the
+//! pager in the _parent_ process, meaning that the Tokio runtime, in the
+//! child process, exits before the pager, leaving dangling file descriptors
+//! and the aforementioned I/O error from Tokio.
 //!
 //! Unfortunately, there isn't a great away to customize the behavior of
 //! the pager crate, so this module implements a [`Pager`] struct that
 //! allows the use of a pager subprocess in a way that plays nicely with
-//! tokio.
+//! Tokio.
+//!
+//! [pager]: https://crates.io/crates/pager
 
 use atty::Stream;
 use std::process::{ExitStatus, Stdio};
