@@ -211,7 +211,7 @@ impl Comment {
     ///
     /// HTML entities in the title will be converted.
     pub fn link_title(&self) -> String {
-        text::convert_html_entities(&self.link_title)
+        text::convert_html_entities(&self.link_title).replace('\n', "")
     }
 
     /// The comment's total score.
@@ -649,6 +649,14 @@ mod tests {
         fn it_returns_an_empty_collection() {
             let comments = Comment::parse(&load_data("comments_empty")).unwrap();
             assert!(comments.is_empty());
+        }
+
+        #[test]
+        fn it_removes_new_lines_in_comment_title() {
+            let comments = Comment::parse(&load_data("comments_title_newline")).unwrap();
+            let comment = &comments[0];
+            let expected = "[OC] I've always wondered if people know this shortcut exists, or if it's just largely unknown. I've been using it almost since the game's release and haven't seen anyone else use it yet.";
+            assert_eq!(comment.link_title(), expected);
         }
     }
 
