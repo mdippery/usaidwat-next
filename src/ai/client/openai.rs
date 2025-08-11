@@ -301,7 +301,7 @@ impl OpenAIResponse {
     ///
     /// There should be at least item in the output, but there could be
     /// multiple output objects.
-    pub fn output(&self) -> Iter<OpenAIOutput> {
+    pub fn output(&self) -> Iter<'_, OpenAIOutput> {
         self.output.iter()
     }
 }
@@ -317,7 +317,7 @@ impl OpenAIOutput {
     ///
     /// There should be at least one piece of content in the output,
     /// but there could be multiple content objects.
-    pub fn content(&self) -> Iter<OpenAIContent> {
+    pub fn content(&self) -> Iter<'_, OpenAIContent> {
         self.content.iter()
     }
 
