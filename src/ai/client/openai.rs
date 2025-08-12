@@ -291,7 +291,8 @@ impl AIModel for OpenAIModel {
     }
 
     fn fastest() -> Self {
-        OpenAIModel::Gpt5nano
+        // GPT 4.1-nano is noticeably faster than GPT 5-nano.
+        OpenAIModel::Gpt4_1nano
     }
 }
 
