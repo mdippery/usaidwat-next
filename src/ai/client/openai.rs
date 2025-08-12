@@ -54,19 +54,22 @@
 //! docs.
 //!
 //! | Model      | Descriptor        | Input    | Cached Input | Output  |
-//! |------------|-------------------|----------|--------------|---------|
-//! | Gpt4_1nano | gpt-4.1-nano      | $0.10   | $0.025        | $0.40   |
-//! | Gpt4omini  | gpt-4o-mini       | $0.15   | $0.075        | $0.60   |
-//! | Gpt4_1mini | gpt-4.1-mini      | $0.40   | $0.10         | $1.60   |
-//! | O4mini     | o4-mini           | $1.10   | $0.275        | $4.40   |
-//! | O3mini     | o3-mini           | $1.10   | $0.55         | $4.40   |
-//! | Gpt4_1     | gpt-4.1           | $2.00   | $0.50         | $8.00   |
-//! | O3         | o3                | $2.00   | $0.50         | $8.00   |
-//! | Gpt4o      | gpt-4o            | $2.50   | $1.25         | $10.00  |
-//! | ChatGpt4o  | chatgpt-4o-latest | $5.00   | -             | $15.00  |
-//! | O1         | o1                | $15.00  | $7.50         | $60.00  |
-//! | O3pro      | o3-pro            | $20.00  | -             | $80.00  |
-//! | 01pro      | o1-pro            | $150.00 | -             | $600.00 |
+//! |------------|-------------------|---------:|-------------:|--------:|
+//! | Gpt5       | gpt-5             | $1.25    | $0.125       | $10.00  |
+//! | Gpt5mini   | gpt-5-mini        | $0.25    | $0.025       | $2.00   |
+//! | Gpt5nano   | gpt-5-nano        | $0.05    | $0.005       | $0.40   |
+//! | Gpt4_1nano | gpt-4.1-nano      | $0.10    | $0.025       | $0.40   |
+//! | Gpt4omini  | gpt-4o-mini       | $0.15    | $0.075       | $0.60   |
+//! | Gpt4_1mini | gpt-4.1-mini      | $0.40    | $0.10        | $1.60   |
+//! | O4mini     | o4-mini           | $1.10    | $0.275       | $4.40   |
+//! | O3mini     | o3-mini           | $1.10    | $0.55        | $4.40   |
+//! | Gpt4_1     | gpt-4.1           | $2.00    | $0.50        | $8.00   |
+//! | O3         | o3                | $2.00    | $0.50        | $8.00   |
+//! | Gpt4o      | gpt-4o            | $2.50    | $1.25        | $10.00  |
+//! | ChatGpt4o  | chatgpt-4o-latest | $5.00    | -            | $15.00  |
+//! | O1         | o1                | $15.00   | $7.50        | $60.00  |
+//! | O3pro      | o3-pro            | $20.00   | -            | $80.00  |
+//! | 01pro      | o1-pro            | $150.00  | -            | $600.00 |
 //!
 //! # See Also
 //!
@@ -196,14 +199,25 @@ impl APIRequest for OpenAIRequest {
 /// [1]: https://platform.openai.com/docs/guides/text?api-mode=responses#choosing-a-model
 #[derive(Clone, Copy, Debug, Default, PartialEq, Deserialize, Serialize)]
 pub enum OpenAIModel {
-    /// The model currently used by ChatGPT.
-    #[serde(rename = "chatgpt-4o-latest")]
-    ChatGpt4o,
+    /// OpenAI's flagship model for coding, reasoning, and agentic tasks
+    /// across domains.
+    #[default]
+    #[serde(rename = "gpt-5")]
+    Gpt5,
+
+    /// A faster, more cost-efficient version of [`GPT-5`](OpenAIModel::Gpt5).
+    ///
+    /// It's great for well-defined tasks and precise prompts.
+    #[serde(rename = "gpt-5-mini")]
+    Gpt5mini,
+
+    /// Fastest, cheapest version of [`GPT-5`](OpenAIModel::Gpt5).
+    ///
+    /// It's great for summarization and classification tasks.
+    #[serde(rename = "gpt-5-nano")]
+    Gpt5nano,
 
     /// Versatile, high-intelligence flagship model.
-    ///
-    /// This is the best model to use for most tasks.
-    #[default]
     #[serde(rename = "gpt-4o")]
     Gpt4o,
 
@@ -255,7 +269,7 @@ pub enum OpenAIModel {
     #[serde(rename = "o1")]
     O1,
 
-    /// A version of the [`o1`][OpenAIModel::O1] model that thinks even harder
+    /// A version of the [`o1`](OpenAIModel::O1) model that thinks even harder
     /// before responding.
     #[serde(rename = "o1-pro")]
     O1pro,
@@ -273,11 +287,11 @@ impl AIModel for OpenAIModel {
     }
 
     fn cheapest() -> Self {
-        OpenAIModel::Gpt4_1nano
+        OpenAIModel::Gpt5nano
     }
 
     fn fastest() -> Self {
-        OpenAIModel::Gpt4_1nano
+        OpenAIModel::Gpt5nano
     }
 }
 
@@ -498,7 +512,7 @@ mod test {
         fn it_serializes_without_instructions() {
             let body = OpenAIRequest::default().input("Serialize me, GPT!");
             let expected = indoc! {"{
-              \"model\": \"gpt-4o\",
+              \"model\": \"gpt-5\",
               \"input\": \"Serialize me, GPT!\",
               \"store\": false
             }"};
@@ -692,7 +706,9 @@ mod test {
         #[test]
         fn it_returns_valid_descriptors() {
             let test_cases = vec![
-                (OpenAIModel::ChatGpt4o, "chatgpt-4o-latest"),
+                (OpenAIModel::Gpt5, "gpt-5"),
+                (OpenAIModel::Gpt5mini, "gpt-5-mini"),
+                (OpenAIModel::Gpt5nano, "gpt-5-nano"),
                 (OpenAIModel::Gpt4o, "gpt-4o"),
                 (OpenAIModel::Gpt4omini, "gpt-4o-mini"),
                 (OpenAIModel::Gpt4_1, "gpt-4.1"),
