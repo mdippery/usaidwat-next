@@ -325,10 +325,23 @@ impl OpenAIResponse {
     }
 }
 
+/*
+   Prior to GPT-5, the content of a response was a vector of
+   output structs, and the response had a "type" of "message".
+   GPT-5 introduced a "reasoning" type that lacks a "content" field,
+   instead having a "summary" field. We're not terribly interested
+   in that output right now so we don't do anything with it, but
+   we have to handle that type of output regardless, and just ignore it.
+*/
 /// Generated GPT output.
 #[derive(Debug, Deserialize, Serialize)]
-pub struct OpenAIOutput {
-    content: Vec<OpenAIContent>,
+#[serde(tag = "type", rename_all = "lowercase")]
+pub enum OpenAIOutput {
+    /// Contents of a meaningful response from the LLM.
+    Message { content: Vec<OpenAIContent> },
+
+    /// Metadata about the reasoning employed by a GPT-5 model.
+    Reasoning,
 }
 
 impl OpenAIOutput {
@@ -337,12 +350,18 @@ impl OpenAIOutput {
     /// There should be at least one piece of content in the output,
     /// but there could be multiple content objects.
     pub fn content(&self) -> Iter<'_, OpenAIContent> {
-        self.content.iter()
+        // TODO: Test with Reasoning enums
+        match self {
+            OpenAIOutput::Message { content } => content.iter(),
+            OpenAIOutput::Reasoning => [].iter(),
+        }
     }
 
     /// Concatenates all output text from [`content()`](OpenAIOutput::content())
     /// into a single string.
     pub fn concatenate(&self) -> String {
+        // TODO: Test with Reasoning enums
+        // Might make sense to return an Option here to support reasoning type...
         self.content()
             .filter(|c| c.is_output_text())
             .map(|c| c.text())
@@ -555,6 +574,8 @@ mod test {
     mod response {
         use super::super::*;
         use super::*;
+
+        // TODO: Test GPT-5 response output
 
         #[test]
         fn it_creates_an_output_iterator() {

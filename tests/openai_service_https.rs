@@ -4,17 +4,17 @@
 // of each individual component.
 
 use usaidwat::ai::Auth;
+use usaidwat::ai::client::APIRequest;
 use usaidwat::ai::client::openai::{OpenAIModel, OpenAIRequest, OpenAIResponse};
-use usaidwat::ai::client::{AIModel, APIRequest};
 use usaidwat::ai::service::{APIService, HTTPService};
 use usaidwat::http::HTTPResult;
 
 #[tokio::test]
-async fn it_sends_a_post_request() {
+async fn it_sends_a_post_request_using_gpt4o() {
     let auth =
         Auth::from_env("OPENAI_API_KEY").expect("Could not create auth. Is $OPENAI_API_KEY set?");
     let request = OpenAIRequest::default()
-        .model(OpenAIModel::cheapest())
+        .model(OpenAIModel::Gpt4o)
         .input("write a haiku about ai");
     let service = HTTPService::new();
     let response: HTTPResult<OpenAIResponse> = service
@@ -23,4 +23,25 @@ async fn it_sends_a_post_request() {
     let resp = response.expect("could not make OpenAI API request");
     assert_eq!(resp.output().count(), 1);
     assert_eq!(resp.output().next().unwrap().content().count(), 1);
+}
+
+#[tokio::test]
+async fn it_sends_a_post_request_using_gpt5nano() {
+    let auth =
+        Auth::from_env("OPENAI_API_KEY").expect("Could not create auth. Is $OPENAI_API_KEY set?");
+    let request = OpenAIRequest::default()
+        .model(OpenAIModel::Gpt5nano)
+        .input("write a haiku about ai");
+    let service = HTTPService::new();
+    let response: HTTPResult<OpenAIResponse> = service
+        .post("https://api.openai.com/v1/responses", &auth, &request)
+        .await;
+    let resp = response.expect("could not make OpenAI API request");
+    assert_eq!(resp.output().count(), 2);
+
+    let output = resp.output().nth(1).expect(&format!(
+        "could not get second element of output: {:?}",
+        resp
+    ));
+    assert_eq!(output.content().count(), 1);
 }

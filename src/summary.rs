@@ -68,7 +68,13 @@ where
             .input(self.input());
 
         // TODO: Do we need a unified Result and Error enum, or at least a unified module?
-        Ok(self.client.send(&request).await?.concatenate())
+        Ok(self
+            .client
+            .send(&request)
+            .await?
+            .concatenate()
+            .trim()
+            .to_string())
     }
 
     /// Raw content that will be sent to an LLM for summarization.
