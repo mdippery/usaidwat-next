@@ -2,7 +2,7 @@
 
 use crate::ai::Auth;
 use crate::ai::client::AIModel;
-use crate::ai::client::openai::OpenAIClient;
+use crate::ai::client::openai::{OpenAIClient, OpenAIModel};
 use crate::clock::SystemClock;
 use crate::count::{SortAlgorithm, SubredditCounter};
 use crate::filter::{RedditFilter, StringSet};
@@ -13,7 +13,7 @@ use crate::summary::Summarizer;
 use crate::view::{ViewOptions, Viewable};
 use clap::{Args, Parser, Subcommand, ValueEnum};
 use clap_verbosity_flag::Verbosity;
-use log::debug;
+use log::{Level, debug};
 use std::{fmt, result};
 
 /// Result of running a command.
@@ -107,7 +107,6 @@ enum Command {
            Maybe there's a way to enable that feature _only_ in a test build,
            I don't know...
         */
-        /* TODO: Should also offer a way to show what specific models are used for each option */
         /// Use this AI model for summarization
         #[arg(short = 'm', long, default_value_t)]
         model: AIModelClass,
@@ -448,7 +447,31 @@ impl Runner {
         }
     }
 
+    fn show_available_models(&self, min_level: Level) {
+        if let Some(level) = self.config.verbosity().log_level()
+            && level >= min_level
+        {
+            eprintln!("Available models:");
+            eprintln!(
+                "  flagship\t{}",
+                AIModelClass::Flagship.model::<OpenAIModel>()
+            );
+            eprintln!("  best\t\t{}", AIModelClass::Best.model::<OpenAIModel>());
+            eprintln!(
+                "  cheapest\t{}",
+                AIModelClass::Cheapest.model::<OpenAIModel>()
+            );
+            eprintln!(
+                "* fastest\t{}",
+                AIModelClass::Fastest.model::<OpenAIModel>()
+            );
+        }
+    }
+
     async fn run_summary(&self, model: &AIModelClass) -> Result {
+        // TODO: Show this when running --help instead
+        self.show_available_models(Level::Info);
+
         let auth =
             Auth::from_env("OPENAI_API_KEY").map_err(|_| include_str!("help/summary.txt"))?;
 
@@ -461,6 +484,7 @@ impl Runner {
         debug!("Using model: {:?} - {}", model, model);
 
         // TODO: Should we return raw JSON here in debug mode?
+        // TODO: Tracking timing in Summarizer and print stats in debug or trace mode
 
         let output = summarizer
             .model(model)
