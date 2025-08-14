@@ -54,6 +54,10 @@ pub trait APIClient {
 /// # }
 /// #
 /// # impl AIModel for Model {
+/// #     fn flagship() -> Self {
+/// #         Model::AIModel
+/// #     }
+/// #
 /// #     fn best() -> Self {
 /// #         Model::AIModel
 /// #     }
@@ -130,6 +134,12 @@ pub type APIError = HTTPError;
 
 /// An AI model specification.
 pub trait AIModel: Clone + Copy + Default + Debug {
+    /// The service's standard or default model.
+    ///
+    /// Often this is the same as the [best](AIModel::best()), but
+    /// there is no guarantee that is true.
+    fn flagship() -> Self;
+
     /// The "best" model available for a given LLM.
     ///
     /// "Best" is obviously subjective, but generally this is the model

@@ -203,11 +203,11 @@ impl fmt::Display for DateFormat {
 /// Determines the qualities of the AI model used for summarization.
 #[derive(Clone, Debug, Default, ValueEnum)]
 pub enum AIModelClass {
-    /// Use the "default" as determined by the AI service.
+    /// Use the service's flagship model.
     ///
-    /// This is often referred to as the service's "flagship" model.
-    // TODO: Change name? Might be confusing since it's _not_ the default option.
-    Default,
+    /// This is the model that a particular AI service promotes as their
+    /// standard or "default" model.
+    Flagship,
 
     /// Use the AI service's "best" model.
     ///
@@ -227,7 +227,7 @@ pub enum AIModelClass {
 impl fmt::Display for AIModelClass {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            AIModelClass::Default => write!(f, "default"),
+            AIModelClass::Flagship => write!(f, "flagship"),
             AIModelClass::Best => write!(f, "best"),
             AIModelClass::Cheapest => write!(f, "cheapest"),
             AIModelClass::Fastest => write!(f, "fastest"),
@@ -243,7 +243,7 @@ impl AIModelClass {
     /// ```
     /// use usaidwat::ai::client::openai::OpenAIModel;
     /// use usaidwat::cli::AIModelClass;
-    /// let flag = AIModelClass::Default;
+    /// let flag = AIModelClass::Flagship;
     /// let model: OpenAIModel = flag.model();
     /// assert_eq!(model, OpenAIModel::default());
     /// ```
@@ -273,7 +273,7 @@ impl AIModelClass {
     /// ```
     pub fn model<T: AIModel>(&self) -> T {
         match self {
-            AIModelClass::Default => T::default(),
+            AIModelClass::Flagship => T::flagship(),
             AIModelClass::Best => T::best(),
             AIModelClass::Cheapest => T::cheapest(),
             AIModelClass::Fastest => T::fastest(),

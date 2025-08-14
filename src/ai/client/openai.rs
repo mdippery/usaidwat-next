@@ -262,6 +262,11 @@ pub enum OpenAIModel {
 }
 
 impl AIModel for OpenAIModel {
+    /// OpenAI's standard model.
+    fn flagship() -> Self {
+        OpenAIModel::default()
+    }
+
     /// The "best" GPT model as defined by OpenAI.
     fn best() -> Self {
         OpenAIModel::default()

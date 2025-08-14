@@ -117,6 +117,10 @@ mod tests {
     }
 
     impl AIModel for TestAIModel {
+        fn flagship() -> Self {
+            TestAIModel::TestAIModel
+        }
+
         fn best() -> Self {
             TestAIModel::TestAIModel
         }

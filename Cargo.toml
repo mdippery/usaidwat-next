@@ -1,6 +1,6 @@
 [package]
 name = "usaidwat"
-version = "2.0.1"
+version = "2.0.2-alpha.1"
 authors = ["Michael Dippery <michael@monkey-robot.com>"]
 description = "Answers the age-old question, \"Where does a Redditor comment the most?\""
 readme = "README.md"
