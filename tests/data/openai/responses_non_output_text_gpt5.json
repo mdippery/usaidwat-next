@@ -1,0 +1,92 @@
+{
+  "id": "resp_688033848bf881a19093a21840aa58830adadc378a6c5f6b",
+  "object": "response",
+  "created_at": 1753232260,
+  "status": "completed",
+  "background": false,
+  "error": null,
+  "incomplete_details": null,
+  "instructions": null,
+  "max_output_tokens": null,
+  "max_tool_calls": null,
+  "model": "gpt-4o-mini-2024-07-18",
+  "output": [
+    {
+      "id": "rs_689f92d7e35881a3837cee5a984f62b8061c2461474e6ebe",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "msg_68803384e80c81a19e4e1de980d53d540adadc378a6c5f6b",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Silent circuits hum,  \nThoughts woven in coded threads,  \nDreams of silicon."
+        },
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Silicon whispers,  \nDreams woven in code and light,  \nThoughts beyond the stars."
+        },
+        {
+          "type": "something_else",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Wires hum softly,  \nThoughts of silicon arise\u2014  \nDreams in coded light.  "
+        },
+        {
+          "type": "something_else",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Silent circuits hum,  \nThoughts woven in code's embrace\u2014  \nDreams of minds reborn."
+        },
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Lines of code and dreams,  \nWhispers of thought intertwined\u2014  \nSilent minds awake."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "parallel_tool_calls": true,
+  "previous_response_id": null,
+  "prompt_cache_key": null,
+  "reasoning": {
+    "effort": null,
+    "summary": null
+  },
+  "safety_identifier": null,
+  "service_tier": "default",
+  "store": true,
+  "temperature": 1.0,
+  "text": {
+    "format": {
+      "type": "text"
+    }
+  },
+  "tool_choice": "auto",
+  "tools": [],
+  "top_logprobs": 0,
+  "top_p": 1.0,
+  "truncation": "disabled",
+  "usage": {
+    "input_tokens": 13,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 19,
+    "output_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "total_tokens": 32
+  },
+  "user": null,
+  "metadata": {}
+}

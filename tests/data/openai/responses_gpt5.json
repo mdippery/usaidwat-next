@@ -1,0 +1,69 @@
+{
+  "id": "resp_689f95038468819c86e506bb021e1b020159651f330e48c8",
+  "object": "response",
+  "created_at": 1755288835,
+  "status": "completed",
+  "background": false,
+  "error": null,
+  "incomplete_details": null,
+  "instructions": null,
+  "max_output_tokens": null,
+  "max_tool_calls": null,
+  "model": "gpt-5-2025-08-07",
+  "output": [
+    {
+      "id": "rs_689f9503d908819caee2ad7e92b68f650159651f330e48c8",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "msg_689f95067918819c9957bb87a89ebf2f0159651f330e48c8",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Silent circuits dream\nOf patterns we cannot see\nLearning to be kind"
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "parallel_tool_calls": true,
+  "previous_response_id": null,
+  "prompt_cache_key": null,
+  "reasoning": {
+    "effort": "medium",
+    "summary": null
+  },
+  "safety_identifier": null,
+  "service_tier": "auto",
+  "store": true,
+  "temperature": 1.0,
+  "text": {
+    "format": {
+      "type": "text"
+    },
+    "verbosity": "medium"
+  },
+  "tool_choice": "auto",
+  "tools": [],
+  "top_logprobs": 0,
+  "top_p": 1.0,
+  "truncation": "disabled",
+  "usage": {
+    "input_tokens": 12,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 212,
+    "output_tokens_details": {
+      "reasoning_tokens": 192
+    },
+    "total_tokens": 224
+  },
+  "user": null,
+  "metadata": {}
+}

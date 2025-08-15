@@ -1,0 +1,131 @@
+{
+  "id": "resp_689f92d7831881a38cb1fe42f4e97b96061c2461474e6ebe",
+  "object": "response",
+  "created_at": 1755288279,
+  "status": "completed",
+  "background": false,
+  "error": null,
+  "incomplete_details": null,
+  "instructions": null,
+  "max_output_tokens": null,
+  "max_tool_calls": null,
+  "model": "gpt-5-2025-08-07",
+  "output": [
+    {
+      "id": "rs_689f92d7e35881a3837cee5a984f62b8061c2461474e6ebe",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "msg_689f92dc8c6481a392d73df189509517061c2461474e6ebe",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Silent circuits dream,\nPatterns bloom from borrowed light\u2014\nWe teach stars to think."
+        },
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Silicon whispers,  \nDreams woven in code and light,  \nThoughts beyond the stars."
+        },
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Wires hum softly,  \nThoughts of silicon arise\u2014  \nDreams in coded light.  "
+        },
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Silent circuits hum,  \nThoughts woven in code's embrace\u2014  \nDreams of minds reborn."
+        },
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Lines of code and dreams,  \nWhispers of thought intertwined\u2014  \nSilent minds awake."
+        }
+      ],
+      "role": "assistant"
+    },
+    {
+      "id": "msg_689f92dc8c6481a392d73df189509517061c2461474e6ebe",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Silent circuits dream,\nPatterns bloom from borrowed light\u2014\nWe teach stars to think."
+        },
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Silicon whispers,  \nDreams woven in code and light,  \nThoughts beyond the stars."
+        },
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Wires hum softly,  \nThoughts of silicon arise\u2014  \nDreams in coded light.  "
+        },
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Silent circuits hum,  \nThoughts woven in code's embrace\u2014  \nDreams of minds reborn."
+        },
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Lines of code and dreams,  \nWhispers of thought intertwined\u2014  \nSilent minds awake."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "parallel_tool_calls": true,
+  "previous_response_id": null,
+  "prompt_cache_key": null,
+  "reasoning": {
+    "effort": "medium",
+    "summary": null
+  },
+  "safety_identifier": null,
+  "service_tier": "auto",
+  "store": true,
+  "temperature": 1.0,
+  "text": {
+    "format": {
+      "type": "text"
+    },
+    "verbosity": "medium"
+  },
+  "tool_choice": "auto",
+  "tools": [],
+  "top_logprobs": 0,
+  "top_p": 1.0,
+  "truncation": "disabled",
+  "usage": {
+    "input_tokens": 12,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 278,
+    "output_tokens_details": {
+      "reasoning_tokens": 256
+    },
+    "total_tokens": 290
+  },
+  "user": null,
+  "metadata": {}
+}

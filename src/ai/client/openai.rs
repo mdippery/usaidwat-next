@@ -312,7 +312,11 @@ pub struct OpenAIResponse {
 
 impl APIResponse for OpenAIResponse {
     fn concatenate(&self) -> String {
-        self.output().map(|o| o.concatenate()).join("\n")
+        self.output()
+            .map(|o| o.concatenate())
+            .join("\n")
+            .trim()
+            .to_string()
     }
 }
 
@@ -351,7 +355,6 @@ impl OpenAIOutput {
     /// There should be at least one piece of content in the output,
     /// but there could be multiple content objects.
     pub fn content(&self) -> Iter<'_, OpenAIContent> {
-        // TODO: Test with Reasoning enums
         match self {
             OpenAIOutput::Message { content } => content.iter(),
             OpenAIOutput::Reasoning => [].iter(),
@@ -361,7 +364,6 @@ impl OpenAIOutput {
     /// Concatenates all output text from [`content()`](OpenAIOutput::content())
     /// into a single string.
     pub fn concatenate(&self) -> String {
-        // TODO: Test with Reasoning enums
         // Might make sense to return an Option here to support reasoning type...
         self.content()
             .filter(|c| c.is_output_text())
@@ -575,17 +577,22 @@ mod test {
     mod response {
         use super::super::*;
         use super::*;
-
-        // TODO: Test GPT-5 response output
+        use pretty_assertions::assert_eq;
 
         #[test]
-        fn it_creates_an_output_iterator() {
+        fn it_creates_an_output_iterator_for_gpt4() {
             let response = load_response("responses_multi_output");
             assert_eq!(response.output().count(), 2);
         }
 
         #[test]
-        fn it_concatenates_a_response_with_multiple_content_blocks() {
+        fn it_creates_an_output_iterator_for_gpt5() {
+            let response = load_response("responses_multi_output_gpt5");
+            assert_eq!(response.output().count(), 3);
+        }
+
+        #[test]
+        fn it_concatenates_a_response_with_multiple_content_blocks_for_gpt4() {
             let response = load_response("responses_multi_content");
             let expected = vec![
                 "Silent circuits hum,  ",
@@ -610,7 +617,32 @@ mod test {
         }
 
         #[test]
-        fn it_concatenates_a_response_with_multiple_output_blocks() {
+        fn it_concatenates_a_response_with_multiple_content_blocks_for_gpt5() {
+            let response = load_response("responses_multi_content_gpt5");
+            let expected = vec![
+                "Silent circuits dream,",
+                "Patterns bloom from borrowed light\u{2014}",
+                "We teach stars to think.",
+                "Silicon whispers,  ",
+                "Dreams woven in code and light,  ",
+                "Thoughts beyond the stars.",
+                "Wires hum softly,  ",
+                "Thoughts of silicon arise\u{2014}  ",
+                "Dreams in coded light.  ",
+                "Silent circuits hum,  ",
+                "Thoughts woven in code's embrace\u{2014}  ",
+                "Dreams of minds reborn.",
+                "Lines of code and dreams,  ",
+                "Whispers of thought intertwined\u{2014}  ",
+                "Silent minds awake.",
+            ]
+            .join("\n");
+            let actual = response.concatenate();
+            assert_eq!(actual, expected);
+        }
+
+        #[test]
+        fn it_concatenates_a_response_with_multiple_output_blocks_for_gpt4() {
             let response = load_response("responses_multi_output");
             let expected = vec![
                 "Silent circuits hum,  ",
@@ -638,7 +670,47 @@ mod test {
         }
 
         #[test]
-        fn it_concatenates_a_response_when_not_all_content_is_output_text() {
+        fn it_concatenates_a_response_with_multiple_output_blocks_for_gpt5() {
+            let response = load_response("responses_multi_output_gpt5");
+            let expected = vec![
+                "Silent circuits dream,",
+                "Patterns bloom from borrowed light\u{2014}",
+                "We teach stars to think.",
+                "Silicon whispers,  ",
+                "Dreams woven in code and light,  ",
+                "Thoughts beyond the stars.",
+                "Wires hum softly,  ",
+                "Thoughts of silicon arise\u{2014}  ",
+                "Dreams in coded light.  ",
+                "Silent circuits hum,  ",
+                "Thoughts woven in code's embrace\u{2014}  ",
+                "Dreams of minds reborn.",
+                "Lines of code and dreams,  ",
+                "Whispers of thought intertwined\u{2014}  ",
+                "Silent minds awake.",
+                "Silent circuits dream,",
+                "Patterns bloom from borrowed light\u{2014}",
+                "We teach stars to think.",
+                "Silicon whispers,  ",
+                "Dreams woven in code and light,  ",
+                "Thoughts beyond the stars.",
+                "Wires hum softly,  ",
+                "Thoughts of silicon arise\u{2014}  ",
+                "Dreams in coded light.  ",
+                "Silent circuits hum,  ",
+                "Thoughts woven in code's embrace\u{2014}  ",
+                "Dreams of minds reborn.",
+                "Lines of code and dreams,  ",
+                "Whispers of thought intertwined\u{2014}  ",
+                "Silent minds awake.",
+            ]
+            .join("\n");
+            let actual = response.concatenate();
+            assert_eq!(actual, expected);
+        }
+
+        #[test]
+        fn it_concatenates_a_response_when_not_all_content_is_output_text_for_gpt4() {
             let response = load_response("responses_non_output_text");
             let expected = vec![
                 "Silent circuits hum,  ",
@@ -657,7 +729,39 @@ mod test {
         }
 
         #[test]
-        fn it_concatenates_a_single_output_and_content_block() {
+        fn it_concatenates_a_response_when_not_all_content_is_output_text_for_gpt5() {
+            let response = load_response("responses_non_output_text_gpt5");
+            let expected = vec![
+                "Silent circuits hum,  ",
+                "Thoughts woven in coded threads,  ",
+                "Dreams of silicon.",
+                "Silicon whispers,  ",
+                "Dreams woven in code and light,  ",
+                "Thoughts beyond the stars.",
+                "Lines of code and dreams,  ",
+                "Whispers of thought intertwined\u{2014}  ",
+                "Silent minds awake.",
+            ]
+            .join("\n");
+            let actual = response.concatenate();
+            assert_eq!(actual, expected);
+        }
+
+        #[test]
+        fn it_concatenates_a_single_output_and_content_block_for_gpt4() {
+            let response = load_response("responses");
+            let expected = vec![
+                "Silent circuits hum,  ",
+                "Thoughts woven in coded threads,  ",
+                "Dreams of silicon.",
+            ]
+            .join("\n");
+            let actual = response.concatenate();
+            assert_eq!(actual, expected);
+        }
+
+        #[test]
+        fn it_concatenates_a_single_output_and_content_block_for_gpt5() {
             let response = load_response("responses");
             let expected = vec![
                 "Silent circuits hum,  ",
@@ -672,9 +776,10 @@ mod test {
 
     mod output {
         use super::*;
+        use crate::ai::client::openai::OpenAIOutput;
 
         #[test]
-        fn it_creates_a_content_iterator() {
+        fn it_creates_a_content_iterator_for_gpt4() {
             let response = load_response("responses_multi_content");
             let actual = response
                 .output()
@@ -686,7 +791,25 @@ mod test {
         }
 
         #[test]
-        fn it_concatenates_multiple_content_blocks() {
+        fn it_creates_a_content_iterator_for_gpt5() {
+            let response = load_response("responses_multi_content_gpt5");
+            let actual = response
+                .output()
+                .nth(1)
+                .expect("could not get message output from iterator")
+                .content()
+                .count();
+            assert_eq!(actual, 5);
+        }
+
+        #[test]
+        fn it_creates_an_empty_content_iterator_for_reasoning_output() {
+            let output = OpenAIOutput::Reasoning;
+            assert_eq!(output.content().count(), 0);
+        }
+
+        #[test]
+        fn it_concatenates_multiple_content_blocks_for_gpt4() {
             let response = load_response("responses_multi_content");
             let output = response.output().next().expect("could not get next output");
             let expected = vec![
@@ -712,11 +835,52 @@ mod test {
         }
 
         #[test]
-        fn it_concatenates_a_single_content_blocks() {
+        fn it_concatenates_multiple_content_blocks_for_gpt5() {
+            let response = load_response("responses_multi_content_gpt5");
+            let output = response
+                .output()
+                .nth(1)
+                .expect("could not get message output");
+            let expected = vec![
+                "Silent circuits dream,",
+                "Patterns bloom from borrowed light\u{2014}",
+                "We teach stars to think.",
+                "Silicon whispers,  ",
+                "Dreams woven in code and light,  ",
+                "Thoughts beyond the stars.",
+                "Wires hum softly,  ",
+                "Thoughts of silicon arise\u{2014}  ",
+                "Dreams in coded light.  ",
+                "Silent circuits hum,  ",
+                "Thoughts woven in code's embrace\u{2014}  ",
+                "Dreams of minds reborn.",
+                "Lines of code and dreams,  ",
+                "Whispers of thought intertwined\u{2014}  ",
+                "Silent minds awake.",
+            ]
+            .join("\n");
+            let actual = output.concatenate();
+            assert_eq!(actual, expected);
+        }
+
+        #[test]
+        fn it_concatenates_a_single_content_blocks_for_gpt4() {
             let response = load_response("responses");
             let output = response.output().next().expect("could not get next output");
             let expected =
                 "Silent circuits hum,  \nThoughts woven in coded threads,  \nDreams of silicon.";
+            let actual = output.concatenate();
+            assert_eq!(actual, expected);
+        }
+
+        #[test]
+        fn it_concatenates_a_single_content_blocks_for_gpt5() {
+            let response = load_response("responses_gpt5");
+            let output = response
+                .output()
+                .nth(1)
+                .expect("could not get message output");
+            let expected = "Silent circuits dream\nOf patterns we cannot see\nLearning to be kind";
             let actual = output.concatenate();
             assert_eq!(actual, expected);
         }
