@@ -251,41 +251,8 @@ impl fmt::Display for AIModelClass {
 }
 
 impl AIModelClass {
-    /// Returns a specific AI model.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use usaidwat::ai::client::openai::OpenAIModel;
-    /// use usaidwat::cli::AIModelClass;
-    /// let flag = AIModelClass::Flagship;
-    /// let model: OpenAIModel = flag.model();
-    /// assert_eq!(model, OpenAIModel::default());
-    /// ```
-    ///
-    /// ```
-    /// use usaidwat::ai::client::{AIModel, openai::OpenAIModel};
-    /// use usaidwat::cli::AIModelClass;
-    /// let flag = AIModelClass::Best;
-    /// let model: OpenAIModel = flag.model();
-    /// assert_eq!(model, OpenAIModel::best());
-    /// ```
-    ///
-    /// ```
-    /// use usaidwat::ai::client::{AIModel, openai::OpenAIModel};
-    /// use usaidwat::cli::AIModelClass;
-    /// let flag = AIModelClass::Cheapest;
-    /// let model: OpenAIModel = flag.model();
-    /// assert_eq!(model, OpenAIModel::cheapest());
-    /// ```
-    ///
-    /// ```
-    /// use usaidwat::ai::client::{AIModel, openai::OpenAIModel};
-    /// use usaidwat::cli::AIModelClass;
-    /// let flag = AIModelClass::Fastest;
-    /// let model: OpenAIModel = flag.model();
-    /// assert_eq!(model, OpenAIModel::fastest());
-    /// ```
+    /// Returns the AI model corresponding to the model selected by the
+    /// command-line flags.
     pub fn model<T: AIModel>(&self) -> T {
         match self {
             AIModelClass::Flagship => T::flagship(),
@@ -529,6 +496,43 @@ impl Runner {
         } else {
             println!("{} has no comments.", self.user().username());
             Ok(())
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    mod ai_model_class {
+        use super::super::AIModelClass;
+        use crate::ai::client::AIModel;
+        use crate::ai::client::openai::OpenAIModel;
+
+        #[test]
+        fn it_selects_the_flagship_model() {
+            let flag = AIModelClass::Flagship;
+            let model: OpenAIModel = flag.model();
+            assert_eq!(model, OpenAIModel::flagship());
+        }
+
+        #[test]
+        fn it_selects_the_best_model() {
+            let flag = AIModelClass::Best;
+            let model: OpenAIModel = flag.model();
+            assert_eq!(model, OpenAIModel::best());
+        }
+
+        #[test]
+        fn it_selects_the_cheapest_model() {
+            let flag = AIModelClass::Cheapest;
+            let model: OpenAIModel = flag.model();
+            assert_eq!(model, OpenAIModel::cheapest());
+        }
+
+        #[test]
+        fn it_selects_the_fastest_model() {
+            let flag = AIModelClass::Fastest;
+            let model: OpenAIModel = flag.model();
+            assert_eq!(model, OpenAIModel::fastest());
         }
     }
 }
