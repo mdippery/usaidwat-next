@@ -230,7 +230,10 @@ mod tests {
     }
 
     fn load_preamble() -> String {
-        include_str!("summary_prompt.txt").replace('\n', " ")
+        include_str!("summary_prompt.txt")
+            .replace('\n', " ")
+            .trim()
+            .to_string()
     }
 
     fn load_summary() -> String {

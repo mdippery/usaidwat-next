@@ -1,4 +1,5 @@
 The following text is a series of posts by a single author on social media.
 Please summarize the text, including tone and sentiment.
 Give a broad overview in the form of prose, not detailed bullet points.
+Thoroughness is good, but be brief: 400 words or less is fine.
 Do not identify the text as a series of social media posts in your response.
