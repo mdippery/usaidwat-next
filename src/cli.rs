@@ -506,33 +506,23 @@ mod tests {
         use super::super::AIModelClass;
         use crate::ai::client::AIModel;
         use crate::ai::client::openai::OpenAIModel;
+        use paste::paste;
 
-        #[test]
-        fn it_selects_the_flagship_model() {
-            let flag = AIModelClass::Flagship;
-            let model: OpenAIModel = flag.model();
-            assert_eq!(model, OpenAIModel::flagship());
+        macro_rules! model_tests {
+            ( $( $name:ident ),* $(,)? ) => {
+                paste! {
+                    $(
+                        #[test]
+                        fn [<it_selects_the_ $name:snake _model>]() {
+                            let flag = AIModelClass::$name;
+                            let model: OpenAIModel = flag.model();
+                            assert_eq!(model, OpenAIModel::[<$name:snake>]());
+                        }
+                    )*
+                }
+            }
         }
 
-        #[test]
-        fn it_selects_the_best_model() {
-            let flag = AIModelClass::Best;
-            let model: OpenAIModel = flag.model();
-            assert_eq!(model, OpenAIModel::best());
-        }
-
-        #[test]
-        fn it_selects_the_cheapest_model() {
-            let flag = AIModelClass::Cheapest;
-            let model: OpenAIModel = flag.model();
-            assert_eq!(model, OpenAIModel::cheapest());
-        }
-
-        #[test]
-        fn it_selects_the_fastest_model() {
-            let flag = AIModelClass::Fastest;
-            let model: OpenAIModel = flag.model();
-            assert_eq!(model, OpenAIModel::fastest());
-        }
+        model_tests!(Flagship, Best, Cheapest, Fastest);
     }
 }
