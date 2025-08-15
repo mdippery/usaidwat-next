@@ -36,7 +36,7 @@ impl<'a, C> Summarizer<'a, C>
 where
     C: APIClient,
 {
-    const PREAMBLE: &'static str = include_str!("summary_prompt.txt");
+    const INSTRUCTIONS: &'static str = include_str!("summary_prompt.txt");
 
     /// Summarizes content from the given `user`.
     ///
@@ -81,7 +81,7 @@ where
     ///
     /// This is essentially all of a Redditor's comments stripped of
     /// formatting. It does not include the introductory instructions
-    /// set by the [preamble](Summarizer::preamble()).
+    /// set by the [preamble](Summarizer::instructions()).
     pub fn context(&self) -> String {
         self.user
             .comments()
@@ -93,14 +93,14 @@ where
     ///
     /// This is the set of instructions occurring before the text to be
     /// summarized.
-    pub fn preamble(&self) -> String {
-        Self::PREAMBLE.replace('\n', " ")
+    pub fn instructions(&self) -> String {
+        Self::INSTRUCTIONS.replace('\n', " ").trim().to_string()
     }
 
     /// The full input sent to the LLM, including any introductory
     /// instructions along with the [context](Summarizer::context()).
     pub fn input(&self) -> String {
-        format!("{}\n\n{}", self.preamble(), self.context())
+        format!("{}\n\n{}", self.instructions(), self.context())
     }
 }
 
@@ -272,7 +272,7 @@ mod tests {
     async fn it_provides_a_preamble_for_an_llm() {
         let redditor = Redditor::test().await;
         let expected = load_preamble();
-        let actual = Summarizer::test(&redditor).preamble();
+        let actual = Summarizer::test(&redditor).instructions();
         assert_eq!(actual, expected);
     }
 

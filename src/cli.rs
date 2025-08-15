@@ -13,7 +13,7 @@ use crate::summary::Summarizer;
 use crate::view::{ViewOptions, Viewable};
 use clap::{Args, Parser, Subcommand, ValueEnum};
 use clap_verbosity_flag::Verbosity;
-use log::{Level, debug};
+use log::{Level, debug, info};
 use std::{fmt, result};
 
 /// Result of running a command.
@@ -478,6 +478,7 @@ impl Runner {
         let client = OpenAIClient::new(auth);
 
         let summarizer = Summarizer::new(client, self.user());
+        info!("Instructions:\n{}", summarizer.instructions());
         debug!("Summarization output:\n{}", summarizer.context());
 
         let model = model.model();
