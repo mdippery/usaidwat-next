@@ -154,6 +154,7 @@ mod tests {
     use super::parse;
     use crate::markdown::test_utils::load_markdown;
     use crate::test_utils::do_logging;
+    use crate::{header_tests, parse_assert_eq};
     use pretty_assertions::assert_eq;
 
     fn load_output(file: &str) -> String {
@@ -168,172 +169,162 @@ mod tests {
     #[test]
     fn it_does_not_touch_normal_text() {
         let text = "Lorem ipsum dolor sit amet";
-        assert_eq!(parse(&text), text);
+        parse_assert_eq!(text, text);
     }
 
     #[test]
     fn it_separates_paragraphs_by_a_single_newline() {
         let (text, expected) = load_test("paragraphs");
-        let actual = parse(&text);
-        assert_eq!(actual, expected);
+        parse_assert_eq!(text, expected);
     }
 
     #[test]
     fn it_removes_spoiler_markers() {
         let text = "This is >!Reddit spoiler text!< and is hidden.";
         let expected = "This is Reddit spoiler text and is hidden.";
-        let actual = parse(&text);
-        assert_eq!(actual, expected);
+        parse_assert_eq!(text, expected);
     }
 
     #[test]
     fn it_removes_emphasis_asterisks() {
         let text = "this text is *emphasized*";
         let expected = "this text is emphasized";
-        assert_eq!(parse(&text), expected);
+        parse_assert_eq!(text, expected);
     }
 
     #[test]
     fn it_removes_emphasis_underscores() {
         let text = "this text is _emphasized_";
         let expected = "this text is emphasized";
-        assert_eq!(parse(&text), expected);
+        parse_assert_eq!(text, expected);
     }
 
     #[test]
     fn it_removes_emphasis_double_underscores() {
         let text = "this text is __really emphasized__";
         let expected = "this text is really emphasized";
-        assert_eq!(parse(&text), expected);
+        parse_assert_eq!(text, expected);
     }
 
     #[test]
     fn it_removes_emphasis_triple_asterisks() {
         let text = "this text is ***really really emphasized***";
         let expected = "this text is really really emphasized";
-        assert_eq!(parse(&text), expected);
+        parse_assert_eq!(text, expected);
     }
 
     #[test]
     fn it_removes_emphasis_underscores_and_double_asterisks() {
         let text = "this text is **_really really emphasized_**";
         let expected = "this text is really really emphasized";
-        assert_eq!(parse(&text), expected);
+        parse_assert_eq!(text, expected);
     }
 
     #[test]
     fn it_removes_emphasis_underscores_and_double_asterisks_reversed() {
         let text = "this text is _**really really emphasized**_";
         let expected = "this text is really really emphasized";
-        assert_eq!(parse(&text), expected);
+        parse_assert_eq!(text, expected);
     }
 
     #[test]
     fn it_removes_quadruple_underscores() {
         let text = "this text is ____really really emphasized____";
         let expected = "this text is really really emphasized";
-        assert_eq!(parse(&text), expected);
+        parse_assert_eq!(text, expected);
     }
 
     #[test]
     fn it_removes_quadruple_asterisks() {
         let text = "this text is ****really really emphasized****";
         let expected = "this text is really really emphasized";
-        assert_eq!(parse(&text), expected);
+        parse_assert_eq!(text, expected);
     }
 
     #[test]
     fn it_removes_nested_emphasis_beginning_with_an_underscore() {
         let text = "this _text **is really emphasized** text_";
         let expected = "this text is really emphasized text";
-        assert_eq!(parse(&text), expected);
+        parse_assert_eq!(text, expected);
     }
 
     #[test]
     fn it_removes_nested_emphasis_beginning_with_asterisks() {
         let text = "this **text _is really emphasized_ text**";
         let expected = "this text is really emphasized text";
-        assert_eq!(parse(&text), expected);
+        parse_assert_eq!(text, expected);
     }
 
     #[test]
     fn it_removes_nested_emphasis_beginning_with_a_single_asterisk() {
         let text = "this text is really emphasized text";
         let expected = "this text is really emphasized text";
-        assert_eq!(parse(&text), expected);
+        parse_assert_eq!(text, expected);
     }
 
     #[test]
     fn it_removes_nested_emphasis_beginning_with_double_asterisks() {
         let text = "this **text *is really emphasized* text**";
         let expected = "this text is really emphasized text";
-        assert_eq!(parse(&text), expected);
+        parse_assert_eq!(text, expected);
     }
 
-    #[test]
-    fn it_removes_headers() {
-        for i in 1..=6 {
-            let header = (0..i).map(|_| "#").collect::<Vec<_>>().join("");
-            let text = format!("{header} Some Text");
-            let expected = "";
-            assert_eq!(parse(&text), expected);
-        }
-    }
+    header_tests!("");
 
     #[test]
     fn it_removes_link_urls() {
         do_logging();
         let text = "[usaidwat source](https://github.com/mdippery/usaidwat-next)";
         let expected = "usaidwat source";
-        assert_eq!(parse(&text), expected);
+        parse_assert_eq!(text, expected);
     }
 
     #[test]
     fn it_retains_inline_links() {
         let text = "<https://github.com/mdippery/usaidwat-next>";
         let expected = "https://github.com/mdippery/usaidwat-next";
-        assert_eq!(parse(&text), expected);
+        parse_assert_eq!(text, expected);
     }
 
     #[test]
     fn it_removes_emphasis_in_links() {
         let text = "[_usaidwat source_](https://github.com/mdippery/usaidwat-next)";
         let expected = "usaidwat source";
-        assert_eq!(parse(&text), expected);
+        parse_assert_eq!(text, expected);
     }
 
     #[test]
     fn it_removes_strong_emphasis_in_links() {
         let text = "[**usaidwat source**](https://github.com/mdippery/usaidwat-next)";
         let expected = "usaidwat source";
-        assert_eq!(parse(&text), expected);
+        parse_assert_eq!(text, expected);
     }
 
     #[test]
     fn it_retains_inline_code_in_links() {
         let text = "[`usaidwat source`](https://github.com/mdippery/usaidwat-next)";
         let expected = "`usaidwat source`";
-        assert_eq!(parse(&text), expected);
+        parse_assert_eq!(text, expected);
     }
 
     #[test]
     fn it_removes_images() {
         let text = "![A beautiful picture](https://www.example.com/a-beautiful-picture.jpg)";
         let expected = "";
-        assert_eq!(parse(&text), expected);
+        parse_assert_eq!(text, expected);
     }
 
     #[test]
     fn it_does_not_touch_inline_code() {
         let text = "Here is a Rust struct: `struct SomeStruct;`";
-        assert_eq!(parse(&text), text);
+        parse_assert_eq!(text, text);
     }
 
     #[test]
     fn it_removes_markers_around_strikethrough_text_with_single_tildes() {
         let text = "this text is ~gone~";
         let expected = "this text is gone";
-        assert_eq!(parse(&text), expected);
+        parse_assert_eq!(text, expected);
     }
 
     #[test]
@@ -341,156 +332,140 @@ mod tests {
         do_logging();
         let text = "this text is ~~gone~~";
         let expected = "this text is gone";
-        assert_eq!(parse(&text), expected);
+        parse_assert_eq!(text, expected);
     }
 
     #[test]
     fn it_prepends_a_caret_to_superscripts() {
         let text = "x^y";
-        assert_eq!(parse(&text), text);
+        parse_assert_eq!(text, text);
     }
 
     #[test]
     fn it_wraps_long_superscript_text_in_parentheses() {
         let text = "x^(y + z)";
-        assert_eq!(parse(&text), text);
+        parse_assert_eq!(text, text);
     }
 
     #[test]
     fn it_removes_indentation_from_unordered_lists() {
         let (text, expected) = load_test("unordered_list");
-        let actual = parse(&text);
-        assert_eq!(actual, expected);
+        parse_assert_eq!(text, expected);
     }
 
     #[test]
     fn it_retains_unordered_lists_as_is() {
         let text = load_markdown("unordered_list_unindented");
         let expected = load_output("unordered_list");
-        let actual = parse(&text);
-        assert_eq!(actual, expected);
+        parse_assert_eq!(text, expected);
     }
 
     #[test]
     fn it_handles_markdown_in_unordered_list_items() {
         let (text, expected) = load_test("unordered_list_embedded");
-        let actual = parse(&text);
-        assert_eq!(actual, expected);
+        parse_assert_eq!(text, expected);
     }
 
     #[test]
     fn it_parses_nested_unordered_lists() {
         let (text, expected) = load_test("nested_unordered_list");
-        let actual = parse(&text);
-        assert_eq!(actual, expected);
+        parse_assert_eq!(text, expected);
     }
 
     #[test]
     fn it_removes_indentation_from_ordered_lists() {
         let (text, expected) = load_test("ordered_list");
-        let actual = parse(&text);
-        assert_eq!(actual, expected);
+        parse_assert_eq!(text, expected);
     }
 
     #[test]
     fn it_retains_ordered_lists_as_is() {
         let text = load_markdown("ordered_list_unindented");
         let expected = load_output("ordered_list");
-        let actual = parse(&text);
-        assert_eq!(actual, expected);
+        parse_assert_eq!(text, expected);
     }
 
     #[test]
     fn it_handles_markdown_in_ordered_list_items() {
         let (text, expected) = load_test("ordered_list_embedded");
-        let actual = parse(&text);
-        assert_eq!(actual, expected);
+        parse_assert_eq!(text, expected);
     }
 
     #[test]
     fn it_parses_nested_ordered_lists() {
         let (text, expected) = load_test("nested_ordered_list");
-        let actual = parse(&text);
-        assert_eq!(actual, expected);
+        parse_assert_eq!(text, expected);
     }
 
     #[test]
     fn it_doesnt_worry_about_nonsequential_ordering_markers() {
         let text = load_markdown("ordered_list_nonsequential");
         let expected = load_output("ordered_list");
-        let actual = parse(&text);
-        assert_eq!(actual, expected);
+        parse_assert_eq!(text, expected);
     }
 
     #[test]
     fn it_retains_code_blocks() {
         let (text, expected) = load_test("code");
         let actual = parse(&text);
-        std::assert_eq!(actual, expected, "\nleft:\n{actual}\n\nright:\n{expected}");
+        assert_eq!(actual, expected, "\nleft:\n{actual}\n\nright:\n{expected}");
     }
 
     #[test]
     fn it_removes_fenced_code_block_markers() {
         let text = load_markdown("code_fenced");
         let expected = load_output("code");
-        let actual = parse(&text);
-        assert_eq!(actual, expected);
+        parse_assert_eq!(text, expected);
     }
 
     #[test]
     fn it_removes_block_quotes() {
         let (text, expected) = load_test("blockquote");
-        let actual = parse(&text);
-        assert_eq!(actual, expected);
+        parse_assert_eq!(text, expected);
     }
 
     #[test]
     fn it_removes_adjacent_block_quotes() {
         let (text, expected) = load_test("blockquote_single");
-        let actual = parse(&text);
-        assert_eq!(actual, expected);
+        parse_assert_eq!(text, expected);
     }
 
     #[test]
     fn it_removes_inline_html() {
         let text = "this HTML has <span>inline text</span>";
         let expected = "this HTML has inline text";
-        let actual = parse(&text);
-        assert_eq!(actual, expected);
+        parse_assert_eq!(text, expected);
     }
 
     #[test]
     fn it_processes_inline_html_containing_markdown() {
         let text = "this HTML has <span>_emphasized_ inline text</span>";
         let expected = "this HTML has emphasized inline text";
-        let actual = parse(&text);
-        assert_eq!(actual, expected);
+        parse_assert_eq!(text, expected);
     }
 
     #[test]
     fn it_removes_block_html() {
         let (text, expected) = load_test("block_html");
-        let actual = parse(&text);
-        assert_eq!(actual, expected);
+        parse_assert_eq!(text, expected);
     }
 
     #[test]
     fn it_removes_horizontal_rules() {
         let text = "---\n";
-        assert_eq!(parse(&text), "");
+        parse_assert_eq!(text, "");
     }
 
     #[test]
     fn it_processes_html_entities() {
         let text = "&lt;this &amp; &quot;that&quot;&gt;";
-        assert_eq!(parse(&text), "<this & \"that\">");
+        parse_assert_eq!(text, "<this & \"that\">");
     }
 
     #[test]
     #[ignore = "double-check output but this test is not vital"]
     fn it_parses_complex_markdown() {
         let (text, expected) = load_test("markdown");
-        let actual = parse(&text);
-        assert_eq!(actual, expected);
+        parse_assert_eq!(text, expected);
     }
 }
