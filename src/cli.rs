@@ -509,7 +509,7 @@ mod tests {
         use paste::paste;
 
         macro_rules! model_tests {
-            ( $( $name:ident ),* $(,)? ) => {
+            ( $( $name:ident ),* ) => {
                 paste! {
                     $(
                         #[test]
