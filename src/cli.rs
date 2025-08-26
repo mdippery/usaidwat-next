@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: Apache-2.0
+// Copyright (C) 2025 Michael Dippery <michael@monkey-robot.com>
+
 //! Drives the command-line program.
 
 use crate::ai::Auth;
