@@ -364,7 +364,7 @@ impl Runner {
                 date,
                 oneline,
                 ..
-            } => Ok(self.run_posts_log(subreddits, date, &oneline).await?),
+            } => Ok(self.run_posts_log(subreddits, date, oneline).await?),
             PostSubcommand::Tally(config) => self.run_posts_tally(&config.sort_algorithm()),
         }
     }

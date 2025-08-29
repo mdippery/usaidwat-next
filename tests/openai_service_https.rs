@@ -16,7 +16,7 @@ async fn it_sends_a_post_request_using_gpt4o() {
     let request = OpenAIRequest::default()
         .model(OpenAIModel::Gpt4o)
         .input("write a haiku about ai");
-    let service = HTTPService::new();
+    let service = HTTPService::default();
     let response: HTTPResult<OpenAIResponse> = service
         .post("https://api.openai.com/v1/responses", &auth, &request)
         .await;
@@ -32,7 +32,7 @@ async fn it_sends_a_post_request_using_gpt5nano() {
     let request = OpenAIRequest::default()
         .model(OpenAIModel::Gpt5nano)
         .input("write a haiku about ai");
-    let service = HTTPService::new();
+    let service = HTTPService::default();
     let response: HTTPResult<OpenAIResponse> = service
         .post("https://api.openai.com/v1/responses", &auth, &request)
         .await;

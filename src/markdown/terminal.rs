@@ -276,7 +276,7 @@ impl AnyEmphasisVisitor for MarkdownEmphasisVisitor {
     }
 
     fn visit_strong(&mut self, node: &Node) {
-        if self.text.len() == 0 {
+        if self.text.is_empty() {
             self.in_strong = true;
         } else {
             self.text += "\u{1b}[1m";
@@ -326,7 +326,7 @@ impl AnyEmphasisVisitor for MarkdownStrongEmphasisVisitor {
     }
 
     fn visit_emphasis(&mut self, node: &Node) {
-        if self.text.len() == 0 {
+        if self.text.is_empty() {
             self.in_emphasis = true;
         } else {
             self.text += "\u{1b}[4m";
@@ -400,14 +400,14 @@ enum ListType {
 }
 
 impl ListType {
-    fn mark(&self, list_items: &Vec<String>, textwidth: &usize) -> String {
+    fn mark(&self, list_items: &[String], textwidth: &usize) -> String {
         match self {
             ListType::Ordered(start) => self.mark_ordered(start, list_items, textwidth),
             ListType::Unordered => self.mark_unordered(list_items, textwidth),
         }
     }
 
-    fn mark_unordered(&self, list_items: &Vec<String>, textwidth: &usize) -> String {
+    fn mark_unordered(&self, list_items: &[String], textwidth: &usize) -> String {
         let opts = Options::new(*textwidth)
             .initial_indent("  * ")
             .subsequent_indent("    ");
@@ -417,7 +417,7 @@ impl ListType {
             .join("\n")
     }
 
-    fn mark_ordered(&self, start: &u32, list_items: &Vec<String>, textwidth: &usize) -> String {
+    fn mark_ordered(&self, start: &u32, list_items: &[String], textwidth: &usize) -> String {
         let width = list_items.len().to_string().len();
         let mut i = *start;
         list_items
@@ -561,7 +561,7 @@ impl Visitor for MarkdownBlockquoteVisitor {
         let opts = Options::new(self.textwidth)
             .initial_indent(indent)
             .subsequent_indent(indent);
-        textwrap::fill(&self.text.trim(), opts)
+        textwrap::fill(self.text.trim(), opts)
     }
 
     fn visit(&mut self, node: &Node) {

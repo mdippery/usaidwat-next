@@ -181,7 +181,7 @@ impl Comment {
 
     /// The full URL at which the comment can be retrieved.
     pub fn permalink(&self) -> String {
-        self.link_id.split("_").last().and_then(|link_id| {
+        self.link_id.split("_").last().map(|link_id| {
             // Reddit itself uses the submission title here, but in practice,
             // it can be anything. Since a Comment doesn't have a link back
             // to its submission, we'll just use a placeholder instead of
@@ -190,8 +190,7 @@ impl Comment {
 
             let subreddit = self.subreddit();
             let comment_id = &self.id;
-            let uri = format!("https://www.reddit.com/r/{subreddit}/comments/{link_id}/{placeholder}/{comment_id}");
-            Some(uri)
+            format!("https://www.reddit.com/r/{subreddit}/comments/{link_id}/{placeholder}/{comment_id}")
         }).unwrap_or(String::from("?"))
     }
 
@@ -270,7 +269,7 @@ impl HasAge for Comment {
 impl HasSubreddit for Comment {
     /// The subreddit the comment was posted in.
     fn subreddit(&self) -> &str {
-        &self.subreddit.trim()
+        self.subreddit.trim()
     }
 }
 

@@ -99,7 +99,7 @@ impl<T: APIService + Sync> OpenAIClient<T> {
 impl OpenAIClient<HTTPService> {
     /// Create a new OpenAI client using the given authentication data.
     pub fn new(auth: Auth) -> Self {
-        let service = HTTPService::new();
+        let service = HTTPService::default();
         Self::new_with_service(auth, service)
     }
 }
@@ -286,7 +286,8 @@ impl AIModel for OpenAIModel {
 
 impl fmt::Display for OpenAIModel {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let s = serde_json::to_string(&self).expect(&format!("could not serialize {:?}", self));
+        let s = serde_json::to_string(&self)
+            .unwrap_or_else(|_| panic!("could not serialize {:?}", self));
         let s = s.trim_matches('"');
         f.write_fmt(format_args!("{}", s))
     }

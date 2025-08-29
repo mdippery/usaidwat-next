@@ -9,28 +9,28 @@ use uuid::Uuid;
 
 #[tokio::test]
 async fn it_retrieves_profiles() {
-    let service = RedditService::new();
+    let service = RedditService::default();
     let resp = service.get_resource("mipadi", "about").await.unwrap();
     assert_ne!(resp, "");
 }
 
 #[tokio::test]
 async fn it_retrieves_comments() {
-    let service = RedditService::new();
+    let service = RedditService::default();
     let resp = service.get_resource("mipadi", "comments").await.unwrap();
     assert_ne!(resp, "");
 }
 
 #[tokio::test]
 async fn it_retrieves_posts() {
-    let service = RedditService::new();
+    let service = RedditService::default();
     let resp = service.get_resource("mipadi", "submitted").await.unwrap();
     assert_ne!(resp, "");
 }
 
 #[tokio::test]
 async fn it_returns_an_error_for_invalid_users() {
-    let service = RedditService::new();
+    let service = RedditService::default();
     let user = Uuid::new_v4().to_string();
     let resp = service.get_resource(&user, "about").await;
     assert!(resp.is_err(), "response was {resp:?}");

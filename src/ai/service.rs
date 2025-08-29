@@ -44,8 +44,8 @@ pub struct HTTPService {
     client: Client,
 }
 
-impl HTTPService {
-    pub fn new() -> Self {
+impl Default for HTTPService {
+    fn default() -> Self {
         let client = Self::client();
         Self { client }
     }

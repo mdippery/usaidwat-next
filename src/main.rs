@@ -30,10 +30,11 @@ async fn main() {
         .filter_level(config.verbosity().into())
         .init();
     match Runner::new(config).await {
-        Ok(runner) => match runner.run().await {
-            Err(message) => die(1, &message),
-            Ok(()) => (),
-        },
+        Ok(runner) => {
+            if let Err(message) = runner.run().await {
+                die(1, &message)
+            }
+        }
         Err(err) => dispatch_err(&username, &err),
     }
 }

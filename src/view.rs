@@ -238,7 +238,7 @@ impl Viewable for Timeline {
                 let wday = format!("{wday}")
                     .chars()
                     .nth(0)
-                    .expect(&format!("could not get first character of {wday}"));
+                    .unwrap_or_else(|| panic!("could not get first character of {wday}"));
                 let days = day
                     // Remove this line to print the number of comments instead of a *
                     .map(|d| if d > 0 { '*' } else { ' ' })

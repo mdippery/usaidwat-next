@@ -21,7 +21,7 @@ pub trait Searchable {
         let pattern = pattern.as_ref();
         match Regex::new(&format!("(?i){pattern}")) {
             Ok(re) => re.is_match(&self.search_text()),
-            Err(_) => self.search_text().find(pattern).is_some(),
+            Err(_) => self.search_text().contains(pattern),
         }
     }
 }

@@ -154,7 +154,7 @@ impl Pager {
         // TODO: Skip paging if pager == "cat"
         // TODO: Skip paging it not outputting to a tty
 
-        let mut command = Command::new(&self.command());
+        let mut command = Command::new(self.command());
 
         if let Some((key, value)) = &self.env() {
             command.env(key, value);
@@ -162,7 +162,7 @@ impl Pager {
 
         let mut command = command.stdin(Stdio::piped()).spawn().map_err(|e| {
             let message = format!("failed to spawn pager: {e}");
-            io::Error::new(io::ErrorKind::Other, message)
+            io::Error::other(message)
         })?;
 
         if let Some(mut stdin) = command.stdin.take() {

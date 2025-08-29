@@ -26,7 +26,7 @@ impl Redditor {
     ///
     /// Returns an [`enum@Error`] if data cannot be parsed for the given username.
     pub async fn new(username: impl Into<String>) -> Result<Self, Error> {
-        let service = RedditService::new();
+        let service = RedditService::default();
         Self::new_with_service(username, service).await
     }
 
@@ -129,7 +129,7 @@ impl Timeline {
     /// Iterate through timeline, returning a 2-tuple of `(Weekday, TimelineDay)`
     /// for each day of the week.
     pub fn days(&self) -> impl Iterator<Item = (Weekday, TimelineDay)> {
-        TimelineIterator::new(&self)
+        TimelineIterator::new(self)
     }
 
     fn grouped_by_weekdays_and_hours(user: &Redditor) -> impl Iterator<Item = (Weekday, Hour)> {
