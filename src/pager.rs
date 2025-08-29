@@ -147,13 +147,7 @@ impl Pager {
     /// Pages the output to the pager.
     ///
     /// Returns the exit status of the child pager process.
-    pub async fn page_to_pager_with_error(
-        &self,
-        output: impl AsRef<str>,
-    ) -> io::Result<ExitStatus> {
-        // TODO: Skip paging if pager == "cat"
-        // TODO: Skip paging it not outputting to a tty
-
+    async fn page_to_pager_with_error(&self, output: impl AsRef<str>) -> io::Result<ExitStatus> {
         let mut command = Command::new(self.command());
 
         if let Some((key, value)) = &self.env() {
@@ -173,10 +167,7 @@ impl Pager {
     }
 
     /// Pages output to stdout instead of a separate pager process.
-    pub async fn page_to_stdout_with_error(
-        &self,
-        output: impl AsRef<str>,
-    ) -> io::Result<ExitStatus> {
+    async fn page_to_stdout_with_error(&self, output: impl AsRef<str>) -> io::Result<ExitStatus> {
         let output = output.as_ref();
         println!("{}", output);
         Ok(ExitStatus::default())
@@ -187,7 +178,7 @@ impl Pager {
     /// The output will be sent to a separate pager process as defined by
     /// `$PAGER`, unless `$PAGER` is `cat`, in which case the output will
     /// simply be sent to stdout.
-    pub async fn page_with_error(&self, output: impl AsRef<str>) -> io::Result<ExitStatus> {
+    async fn page_with_error(&self, output: impl AsRef<str>) -> io::Result<ExitStatus> {
         if self.is_cat() || !self.is_tty() {
             self.page_to_stdout_with_error(output).await
         } else {
@@ -199,6 +190,8 @@ impl Pager {
     ///
     /// If the `$PAGER` is `cat` or any variant like `/usr/bin/cat`, the output
     /// will be sent directly to stdout instead of to a separate paging process.
+    /// The output will also be sent directly to stdout if stdout is not a
+    /// tty (it is a file or pipe, for example).
     ///
     /// If no errors occur, `()` is returned; otherwise, a string describing
     /// the error is returned.
