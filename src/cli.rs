@@ -455,7 +455,7 @@ impl Runner {
         debug!("Using model: {:?} - {}", model, model);
 
         // TODO: Should we return raw JSON here in debug mode?
-        // TODO: Tracking timing in Summarizer and print stats in debug or trace mode
+        // TODO: Track timing in Summarizer and print stats in debug or trace mode
 
         let output = summarizer
             .model(model)
