@@ -5,7 +5,7 @@
 
 use crate::ai::Auth;
 use crate::ai::client::AIModel;
-use crate::ai::client::openai::OpenAIClient;
+use crate::ai::client::openai::{OpenAIClient, OpenAIModel};
 use crate::clock::SystemClock;
 use crate::count::{SortAlgorithm, SubredditCounter};
 use crate::filter::{RedditFilter, StringSet};
@@ -16,6 +16,7 @@ use crate::summary::Summarizer;
 use crate::view::{ViewOptions, Viewable};
 use clap::{Args, Parser, Subcommand, ValueEnum};
 use clap_verbosity_flag::Verbosity;
+use indoc::formatdoc;
 use log::{debug, info};
 use std::{fmt, result};
 
@@ -24,10 +25,22 @@ pub type Result = result::Result<(), String>;
 
 const AFTER_HELP: &str = include_str!("help/after.txt");
 
-// TODO: BAD! Create this string using a macro.
-// That way, it still keeps in sync with changes to the enum, but can
-// easily be show as part of --help.
-const AFTER_SUMMARY_HELP: &str = include_str!("help/after_summary.txt");
+fn after_summary_help<T>() -> String
+where
+    T: AIModel + fmt::Display,
+{
+    let flagship: T = AIModelClass::Flagship.model();
+    let best: T = AIModelClass::Best.model();
+    let cheapest: T = AIModelClass::Cheapest.model();
+    let fastest: T = AIModelClass::Fastest.model();
+    formatdoc! {
+        "[4mAvailable models:[24m
+          flagship    {flagship}
+          best        {best}
+          cheapest    {cheapest}
+        * fastest     {fastest}"
+    }
+}
 
 /// Program configuration.
 #[derive(Debug, Parser)]
@@ -96,7 +109,11 @@ enum Command {
     /// Summarize a user's posting history
     #[clap(visible_alias = "summarize")]
     #[clap(visible_alias = "s")]
-    #[clap(after_help = AFTER_SUMMARY_HELP)]
+    // TODO: Would be nice to not specify OpenAIModel here and instead
+    //       defer to run_summary's definition, but we might have to
+    //       do something with generics to achieve that, so this is
+    //       good enough for now.
+    #[clap(after_help = after_summary_help::<OpenAIModel>())]
     Summary {
         /// Reddit username
         username: String,
