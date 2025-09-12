@@ -244,7 +244,7 @@ impl fmt::Display for DateFormat {
 /// Determines the qualities of the AI model used for summarization.
 #[derive(Clone, Debug, Default, ValueEnum)]
 pub enum AIModelClass {
-    /// Use the service's flagship model.
+    /// Use the AI service's flagship model.
     ///
     /// This is the model that a particular AI service promotes as their
     /// standard or "default" model.
