@@ -5,7 +5,7 @@
 
 use crate::ai::Auth;
 use crate::ai::client::AIModel;
-use crate::ai::client::openai::{OpenAIClient, OpenAIModel};
+use crate::ai::client::openai::OpenAIClient;
 use crate::clock::SystemClock;
 use crate::count::{SortAlgorithm, SubredditCounter};
 use crate::filter::{RedditFilter, StringSet};
@@ -16,13 +16,18 @@ use crate::summary::Summarizer;
 use crate::view::{ViewOptions, Viewable};
 use clap::{Args, Parser, Subcommand, ValueEnum};
 use clap_verbosity_flag::Verbosity;
-use log::{Level, debug, info};
+use log::{debug, info};
 use std::{fmt, result};
 
 /// Result of running a command.
 pub type Result = result::Result<(), String>;
 
 const AFTER_HELP: &str = include_str!("help/after.txt");
+
+// TODO: BAD! Create this string using a macro.
+// That way, it still keeps in sync with changes to the enum, but can
+// easily be show as part of --help.
+const AFTER_SUMMARY_HELP: &str = include_str!("help/after_summary.txt");
 
 /// Program configuration.
 #[derive(Debug, Parser)]
@@ -91,6 +96,7 @@ enum Command {
     /// Summarize a user's posting history
     #[clap(visible_alias = "summarize")]
     #[clap(visible_alias = "s")]
+    #[clap(after_help = AFTER_SUMMARY_HELP)]
     Summary {
         /// Reddit username
         username: String,
@@ -417,31 +423,7 @@ impl Runner {
         }
     }
 
-    fn show_available_models(&self, min_level: Level) {
-        if let Some(level) = self.config.verbosity().log_level()
-            && level >= min_level
-        {
-            eprintln!("Available models:");
-            eprintln!(
-                "  flagship\t{}",
-                AIModelClass::Flagship.model::<OpenAIModel>()
-            );
-            eprintln!("  best\t\t{}", AIModelClass::Best.model::<OpenAIModel>());
-            eprintln!(
-                "  cheapest\t{}",
-                AIModelClass::Cheapest.model::<OpenAIModel>()
-            );
-            eprintln!(
-                "* fastest\t{}",
-                AIModelClass::Fastest.model::<OpenAIModel>()
-            );
-        }
-    }
-
     async fn run_summary(&self, model: &AIModelClass) -> Result {
-        // TODO: Show this when running --help instead
-        self.show_available_models(Level::Info);
-
         let auth =
             Auth::from_env("OPENAI_API_KEY").map_err(|_| include_str!("help/summary.txt"))?;
 

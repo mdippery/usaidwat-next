@@ -1,0 +1,5 @@
+[4mAvailable models:[24m
+  flagship    gpt-5
+  best        gpt-5
+  cheapest    gpt-5-nano
+* fastest     gpt-4.1-nano
