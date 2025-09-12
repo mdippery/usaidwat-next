@@ -1,6 +1,6 @@
 [package]
 name = "usaidwat"
-version = "2.1.0-alpha.5"
+version = "2.1.0-alpha.6"
 authors = ["Michael Dippery <michael@monkey-robot.com>"]
 description = "Answers the age-old question, \"Where does a Redditor comment the most?\""
 readme = "README.md"
@@ -19,7 +19,7 @@ chrono = { version = "0.4.41", features = ["serde"] }
 clap = { version = "4.5.38", features = ["derive"] }
 clap-verbosity-flag = "3.0.3"
 colored = "3.0.0"
-counter = "0.6.0"
+counter = "0.7.0"
 env_logger = "0.11.8"
 htmlentity = "1.3.2"
 indoc = "2.0.6"
