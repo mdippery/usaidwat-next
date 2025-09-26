@@ -6,7 +6,6 @@ use crate::ai::client::openai::OpenAIClient;
 use crate::clock::SystemClock;
 use crate::count::{SortAlgorithm, SubredditCounter};
 use crate::filter::{RedditFilter, StringSet};
-use crate::pager::{Pager, PagerEnv};
 use crate::reddit::Redditor;
 pub use crate::reddit::client::Error;
 use crate::summary::Summarizer;
@@ -15,6 +14,7 @@ use clap::{Args, Parser, Subcommand, ValueEnum};
 use clap_verbosity_flag::Verbosity;
 use log::debug;
 use std::{fmt, result};
+use tokio_pager::{Pager, PagerEnv};
 
 /// Result of running a command.
 pub type Result = result::Result<(), String>;

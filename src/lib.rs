@@ -124,7 +124,6 @@ pub mod count;
 pub mod filter;
 pub mod http;
 pub mod markdown;
-pub mod pager;
 pub mod reddit;
 pub mod summary;
 pub mod text;
