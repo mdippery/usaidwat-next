@@ -1,6 +1,6 @@
 [package]
 name = "usaidwat"
-version = "2.1.0-alpha.8"
+version = "2.1.0-alpha.9"
 authors = ["Michael Dippery <michael@monkey-robot.com>"]
 description = "Answers the age-old question, \"Where does a Redditor comment the most?\""
 readme = "README.md"
@@ -33,7 +33,7 @@ serde_json = "1.0.140"
 textwrap = { version = "0.16.2", features = ["terminal_size"] }
 thiserror = "2.0.12"
 tokio = { version = "1.46.1", features = ["rt-multi-thread", "macros", "process"] }
-tokio-pager = "1.0.0"
+tokio-pager = { version = "1.0.1", git = "https://github.com/mdippery/tokio-pager.git" }
 
 [dev-dependencies]
 paste = "1.0.15"
