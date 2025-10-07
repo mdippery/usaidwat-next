@@ -115,7 +115,6 @@ pub mod markdown;
 pub mod reddit;
 pub mod summary;
 pub mod text;
-pub mod thing;
 pub mod view;
 
 #[cfg(test)]

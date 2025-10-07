@@ -3,7 +3,7 @@
 
 //! General-purpose search utilities.
 
-use crate::thing::HasSubreddit;
+use crate::reddit::thing::HasSubreddit;
 use regex::Regex;
 use std::collections::HashSet;
 

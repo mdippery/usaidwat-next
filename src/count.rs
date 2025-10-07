@@ -3,7 +3,7 @@
 
 //! General-purpose counting capabilities.
 
-use crate::thing::HasSubreddit;
+use crate::reddit::thing::HasSubreddit;
 use counter::Counter;
 use itertools::Itertools;
 

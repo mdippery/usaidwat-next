@@ -6,7 +6,7 @@
 use crate::clock::{DateTime, HasAge, Utc};
 use crate::http;
 use crate::reddit::service::{RedditService, Service};
-use crate::thing::{self, Comment, Submission, User};
+use crate::reddit::thing::{self, Comment, Submission, User};
 pub use chrono::Weekday;
 use chrono::{Datelike, Timelike};
 use thiserror::Error;

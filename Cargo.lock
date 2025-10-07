@@ -1778,7 +1778,7 @@ dependencies = [
 
 [[package]]
 name = "usaidwat"
-version = "2.1.0-alpha.9"
+version = "3.0.0-alpha.1"
 dependencies = [
  "chrono",
  "clap",

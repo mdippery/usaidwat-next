@@ -7,8 +7,8 @@ use crate::cli::DateFormat;
 use crate::clock::{Clock, HasAge};
 use crate::count::SubredditCount;
 use crate::reddit::client::{Redditor, Timeline};
+use crate::reddit::thing::{Comment, HasSubreddit, Submission};
 use crate::text::RegexReplaceable;
-use crate::thing::{Comment, HasSubreddit, Submission};
 use colored::Colorize;
 use indoc::formatdoc;
 use itertools::Itertools;
@@ -430,9 +430,8 @@ mod tests {
 
     mod format_submission {
         use super::super::*;
-        use crate::reddit::Redditor;
+        use crate::reddit::{Redditor, thing::Submission};
         use crate::test_utils::{FrozenClock, load_output};
-        use crate::thing::Submission;
         use pretty_assertions::assert_eq;
 
         async fn get_post(n: usize) -> Submission {
