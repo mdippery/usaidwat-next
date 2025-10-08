@@ -517,9 +517,10 @@ mod tests {
         }
 
         #[test]
-        #[ignore]
         fn it_trims_whitespace_from_its_subreddit() {
-            todo!("figure out how to test this");
+            let comments = Comment::parse(&load_data("comments_subreddit_whitespace")).unwrap();
+            let comment = &comments[0];
+            assert_eq!(comment.subreddit(), "LowSodiumHellDivers");
         }
 
         #[test]
@@ -820,9 +821,11 @@ mod tests {
         }
 
         #[test]
-        #[ignore]
         fn it_converts_html_entities_in_its_title() {
-            todo!("find or create post data with &gt; or &amp; in title");
+            let submissions = Submission::parse(&load_data("submitted_mipadi")).unwrap();
+            let submission = &submissions[10];
+            let expected = "System Scorn: The Excesses of 3rd Edition Dungeons & Dragons";
+            assert_eq!(submission.title(), expected);
         }
 
         #[test]
