@@ -220,7 +220,9 @@ impl Comment {
     /// This is essentially the comment's body stripped of all markup so
     /// it is only the basic text. Text contained in extra markup, like link
     /// text and quotes, are completely removed.
-    // TODO: Test this!
+    ///
+    /// Paragraphs are unwrapped (they appear on one line), and spaces between
+    /// paragraphs are removed.
     pub fn summarized_body(&self) -> String {
         markdown::summarize(&self.body)
     }
@@ -239,7 +241,6 @@ impl Comment {
     /// The returned text is wrapped to the current terminal width, so it
     /// is also suitable for output to a terminal. For raw, unwrapped text,
     /// without converted entities, use [`Comment::markdown_body`].
-    // TODO: Test this!
     pub fn raw_body(&self) -> String {
         textwrap::fill(
             &text::convert_html_entities(&self.body),
@@ -253,7 +254,6 @@ impl Comment {
     /// Like [`Comment::raw_body`], this text is suitable for passing to a
     /// Markdown parser. Unlike [`Comment::raw_body`], the text is not wrapped,
     /// and HTML entities have not yet been converted.
-    // TODO: Test this!
     pub fn markdown_body(&self) -> &str {
         &self.body
     }
@@ -574,6 +574,33 @@ mod tests {
             let comment = &comments[0];
             let actual = comment.body();
             assert_eq!(actual, expected);
+        }
+
+        #[test]
+        fn it_returns_a_summarized_body() {
+            let expected = load_output("comments_body_summary");
+            let comments = Comment::parse(&load_data("comments_mipadi")).unwrap();
+            let comment = &comments[9];
+            let actual = comment.summarized_body();
+            assert_eq!(actual, expected, "\nleft:\n{actual}\n\nright:\n{expected}");
+        }
+
+        #[test]
+        fn it_returns_a_raw_body() {
+            let expected = load_output("comments_body_raw");
+            let comments = Comment::parse(&load_data("comments_mipadi")).unwrap();
+            let comment = &comments[2];
+            let actual = comment.raw_body();
+            assert_eq!(actual, expected, "\nleft:\n{actual}\n\nright:\n{expected}");
+        }
+
+        #[test]
+        fn it_returns_a_really_raw_body() {
+            let expected = load_output("comments_body_raw_markdown");
+            let comments = Comment::parse(&load_data("comments_mipadi")).unwrap();
+            let comment = &comments[2];
+            let actual = comment.markdown_body();
+            assert_eq!(actual, expected, "\nleft:\n{actual}\n\nright:\n{expected}");
         }
 
         #[test]
