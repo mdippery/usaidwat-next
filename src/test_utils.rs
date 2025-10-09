@@ -4,7 +4,7 @@
 use crate::clock::{Clock, DateTime, Utc};
 use crate::reddit::Redditor;
 use crate::reddit::service::Service;
-use hypertyper::{HTTPResult, HTTPService};
+use hypertyper::HTTPResult;
 use reqwest::IntoUrl;
 use std::fs;
 
@@ -32,12 +32,6 @@ pub struct TestService<'a> {
 impl<'a> TestService<'a> {
     pub fn new(suffix: &'a str) -> Self {
         Self { suffix }
-    }
-}
-
-impl<'a> HTTPService for TestService<'a> {
-    fn user_agent() -> String {
-        format!("test-service-please-ignore v{}", env!("CARGO_PKG_VERSION"))
     }
 }
 

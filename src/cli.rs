@@ -15,6 +15,7 @@ use crate::summary::Summarizer;
 use crate::view::{ViewOptions, Viewable};
 use clap::{Args, Parser, Subcommand, ValueEnum};
 use clap_verbosity_flag::Verbosity;
+use hypertyper::HTTPClientFactory;
 use indoc::formatdoc;
 use log::{debug, info};
 use std::{fmt, result};
@@ -444,7 +445,8 @@ impl Runner {
         let auth =
             Auth::from_env("OPENAI_API_KEY").map_err(|_| include_str!("help/summary.txt"))?;
 
-        let client = OpenAIClient::new(auth);
+        let factory = HTTPClientFactory::new(env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION"));
+        let client = OpenAIClient::new(auth, factory);
 
         let summarizer = Summarizer::new(client, self.user());
         info!("Instructions:\n{}", summarizer.instructions());

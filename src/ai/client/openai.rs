@@ -66,9 +66,8 @@
 use crate::ai::Auth;
 use crate::ai::client::{AIModel, APIClient, APIRequest, APIResponse, APIResult};
 use crate::ai::service::{APIService, HTTPService};
-use hypertyper::HTTPService as BaseHTTPService;
+use hypertyper::HTTPClientFactory;
 use itertools::Itertools;
-use log::debug;
 use serde::{Deserialize, Serialize};
 use std::fmt;
 use std::slice::Iter;
@@ -99,10 +98,10 @@ impl<T: APIService + Sync> OpenAIClient<T> {
 }
 
 impl OpenAIClient<HTTPService> {
-    /// Create a new OpenAI client using the given authentication data.
-    pub fn new(auth: Auth) -> Self {
-        debug!("Using user agent: {}", HTTPService::user_agent());
-        let service = HTTPService::default();
+    /// Create a new OpenAI client using the given authentication data and
+    /// the given factory to create underlying HTTP clients.
+    pub fn new(auth: Auth, factory: HTTPClientFactory) -> Self {
+        let service = HTTPService::new(factory);
         Self::new_with_service(auth, service)
     }
 }
@@ -448,14 +447,12 @@ mod test {
         use crate::ai::client::openai::{OpenAIClient, OpenAIRequest};
         use crate::ai::client::{APIClient, APIRequest};
         use crate::ai::service::APIService;
-        use hypertyper::{HTTPResult, HTTPService};
+        use hypertyper::HTTPResult;
         use reqwest::IntoUrl;
         use serde::Serialize;
         use serde::de::DeserializeOwned;
 
         struct TestAPIService {}
-
-        impl HTTPService for TestAPIService {}
 
         impl APIService for TestAPIService {
             async fn post<U, D, R>(&self, _uri: U, _auth: &Auth, _data: &D) -> HTTPResult<R>

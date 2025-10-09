@@ -7,7 +7,7 @@
 //! with the Reddit API over HTTPS, essentially a specialized HTTPS client
 //! specifically for Reddit.
 
-use hypertyper::{Client, HTTPError, HTTPResult, HTTPService};
+use hypertyper::{HTTPClient, HTTPClientFactory, HTTPError, HTTPResult};
 use reqwest::IntoUrl;
 use reqwest::header;
 
@@ -16,7 +16,7 @@ use reqwest::header;
 /// Using this trait, clients can implement different ways of connecting
 /// to the Reddit API, such as an actual connector for production code,
 /// and a mocked connector for testing purposes.
-pub trait Service: HTTPService {
+pub trait Service {
     /// Performs a GET request to the given URI and returns the raw body.
     fn get<U>(&self, uri: U) -> impl Future<Output = HTTPResult<String>> + Send
     where
@@ -33,13 +33,14 @@ pub trait Service: HTTPService {
 
 /// A service that contacts the Reddit API directly to retrieve information.
 pub struct RedditService {
-    client: Client,
+    client: HTTPClient,
 }
 
 impl Default for RedditService {
     /// Creates a new Reddit service.
     fn default() -> Self {
-        let client = Self::client();
+        let factory = HTTPClientFactory::new(env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION"));
+        let client = factory.create();
         Self { client }
     }
 }
@@ -56,12 +57,6 @@ impl RedditService {
     fn uri(&self, username: &str, resource: &str) -> String {
         let qs = self.query_string(resource);
         format!("https://www.reddit.com/user/{username}/{resource}.json{qs}")
-    }
-}
-
-impl HTTPService for RedditService {
-    fn user_agent() -> String {
-        format!("{} v{}", env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION"))
     }
 }
 
