@@ -4,11 +4,12 @@
 //! Clients for reading data from the Reddit API.
 
 use crate::clock::{DateTime, HasAge, Utc};
-use crate::http;
 use crate::reddit::service::{RedditService, Service};
 use crate::reddit::thing::{self, Comment, Submission, User};
 pub use chrono::Weekday;
 use chrono::{Datelike, Timelike};
+use hypertyper::{self, HTTPService};
+use log::debug;
 use thiserror::Error;
 use tokio::try_join;
 
@@ -26,6 +27,7 @@ impl Redditor {
     ///
     /// Returns an [`enum@Error`] if data cannot be parsed for the given username.
     pub async fn new(username: impl Into<String>) -> Result<Self, Error> {
+        debug!("Using user agent: {}", RedditService::user_agent());
         let service = RedditService::default();
         Self::new_with_service(username, service).await
     }
@@ -154,7 +156,7 @@ impl Timeline {
 pub enum Error {
     /// An error from the underlying HTTP service.
     #[error("Service error: {0}")]
-    Service(#[from] http::HTTPError),
+    Service(#[from] hypertyper::HTTPError),
 
     /// An error parsing data.
     #[error("Parse error: {0}")]

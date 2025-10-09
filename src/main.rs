@@ -2,10 +2,10 @@
 // Copyright (C) 2025 Michael Dippery <michael@monkey-robot.com>
 
 use clap::Parser;
+use hypertyper::HTTPError;
 use reqwest::StatusCode;
 use std::process;
 use usaidwat::cli::{Config, Error, Runner};
-use usaidwat::http::HTTPError;
 
 fn die(error_code: i32, message: &str) {
     eprintln!("{}", message);

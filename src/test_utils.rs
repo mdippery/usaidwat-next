@@ -1,7 +1,10 @@
+// SPDX-License-Identifier: Apache-2.0
+// Copyright (C) 2025 Michael Dippery <michael@monkey-robot.com>
+
 use crate::clock::{Clock, DateTime, Utc};
-use crate::http::{HTTPResult, HTTPService};
 use crate::reddit::Redditor;
 use crate::reddit::service::Service;
+use hypertyper::{HTTPResult, HTTPService};
 use reqwest::IntoUrl;
 use std::fs;
 

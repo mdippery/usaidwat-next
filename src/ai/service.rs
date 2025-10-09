@@ -4,9 +4,8 @@
 //! Services for communicating with APIs using HTTP.
 
 use crate::ai::Auth;
-use crate::http::{HTTPResult, HTTPService as BaseHTTPService};
-use reqwest::header;
-use reqwest::{Client, IntoUrl};
+use hypertyper::{Client, HTTPResult, HTTPService as BaseHTTPService};
+use reqwest::{IntoUrl, header};
 use serde::Serialize;
 use serde::de::DeserializeOwned;
 
@@ -51,7 +50,16 @@ impl Default for HTTPService {
     }
 }
 
-impl BaseHTTPService for HTTPService {}
+impl BaseHTTPService for HTTPService {
+    fn user_agent() -> String {
+        // TODO: Correctly infer user agent in crate
+        // When this code is split off into a separate crate, this is going
+        // to end up using the name of the _crate_, not the consumer of the
+        // crate. I'm going to have to figure out how best to deal with that
+        // issue.
+        format!("{} v{}", env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION"))
+    }
+}
 
 impl APIService for HTTPService {
     // This is covered by the openai_service_https integration test.

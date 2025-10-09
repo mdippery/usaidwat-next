@@ -5,7 +5,7 @@
 
 pub mod openai;
 
-use crate::http::HTTPError;
+use hypertyper::HTTPError;
 use std::fmt::Debug;
 
 /// A client for an AI service's API.

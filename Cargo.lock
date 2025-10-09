@@ -612,6 +612,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "hypertyper"
+version = "0.1.0"
+dependencies = [
+ "reqwest",
+ "serde_json",
+ "thiserror 2.0.17",
+]
+
+[[package]]
 name = "iana-time-zone"
 version = "0.1.64"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1778,7 +1787,7 @@ dependencies = [
 
 [[package]]
 name = "usaidwat"
-version = "3.0.0-alpha.1"
+version = "3.0.0-alpha.2"
 dependencies = [
  "chrono",
  "clap",
@@ -1787,6 +1796,7 @@ dependencies = [
  "counter",
  "env_logger",
  "htmlentity",
+ "hypertyper",
  "indoc",
  "itertools",
  "log",

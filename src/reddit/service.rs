@@ -7,9 +7,9 @@
 //! with the Reddit API over HTTPS, essentially a specialized HTTPS client
 //! specifically for Reddit.
 
-use crate::http::{HTTPError, HTTPResult, HTTPService};
+use hypertyper::{Client, HTTPError, HTTPResult, HTTPService};
+use reqwest::IntoUrl;
 use reqwest::header;
-use reqwest::{Client, IntoUrl};
 
 /// A service for retrieving information for Reddit users.
 ///
@@ -59,7 +59,11 @@ impl RedditService {
     }
 }
 
-impl HTTPService for RedditService {}
+impl HTTPService for RedditService {
+    fn user_agent() -> String {
+        format!("{} v{}", env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION"))
+    }
+}
 
 impl Service for RedditService {
     async fn get<U>(&self, uri: U) -> HTTPResult<String>

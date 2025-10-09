@@ -66,7 +66,9 @@
 use crate::ai::Auth;
 use crate::ai::client::{AIModel, APIClient, APIRequest, APIResponse, APIResult};
 use crate::ai::service::{APIService, HTTPService};
+use hypertyper::HTTPService as BaseHTTPService;
 use itertools::Itertools;
+use log::debug;
 use serde::{Deserialize, Serialize};
 use std::fmt;
 use std::slice::Iter;
@@ -99,6 +101,7 @@ impl<T: APIService + Sync> OpenAIClient<T> {
 impl OpenAIClient<HTTPService> {
     /// Create a new OpenAI client using the given authentication data.
     pub fn new(auth: Auth) -> Self {
+        debug!("Using user agent: {}", HTTPService::user_agent());
         let service = HTTPService::default();
         Self::new_with_service(auth, service)
     }
@@ -445,7 +448,7 @@ mod test {
         use crate::ai::client::openai::{OpenAIClient, OpenAIRequest};
         use crate::ai::client::{APIClient, APIRequest};
         use crate::ai::service::APIService;
-        use crate::http::{HTTPResult, HTTPService};
+        use hypertyper::{HTTPResult, HTTPService};
         use reqwest::IntoUrl;
         use serde::Serialize;
         use serde::de::DeserializeOwned;
