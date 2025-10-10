@@ -234,7 +234,7 @@ version = "3.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "fde0e0ec90c9dfb3b4b1a0891a7dcd0e2bffde2f7efed5fe7c9bb00e5bfb915e"
 dependencies = [
- "windows-sys 0.59.0",
+ "windows-sys 0.52.0",
 ]
 
 [[package]]
@@ -1646,7 +1646,7 @@ dependencies = [
 [[package]]
 name = "tokio-pager"
 version = "1.0.1"
-source = "git+https://github.com/mdippery/tokio-pager.git#b0b07deb61edb51a3ad3899a5abec90cfd4fc88d"
+source = "git+https://github.com/mdippery/tokio-pager.git#d435acd4a70201f4421d821d637c8d332383e5ff"
 dependencies = [
  "tokio",
 ]
