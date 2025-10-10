@@ -92,7 +92,7 @@ impl<T: APIService + Sync> OpenAIClient<T> {
     /// The base URI for OpenAI API requests.
     const BASE_URI: &'static str = "https://api.openai.com/v1/responses";
 
-    fn new_with_service(auth: Auth, service: T) -> Self {
+    fn with_service(auth: Auth, service: T) -> Self {
         Self { auth, service }
     }
 }
@@ -102,7 +102,7 @@ impl OpenAIClient<HTTPService> {
     /// the given factory to create underlying HTTP clients.
     pub fn new(auth: Auth, factory: HTTPClientFactory) -> Self {
         let service = HTTPService::new(factory);
-        Self::new_with_service(auth, service)
+        Self::with_service(auth, service)
     }
 }
 
@@ -479,7 +479,7 @@ mod test {
         impl OpenAIClient<TestAPIService> {
             fn test() -> Self {
                 let auth = Auth::new("some-api-key");
-                OpenAIClient::new_with_service(auth, TestAPIService::new())
+                OpenAIClient::with_service(auth, TestAPIService::new())
             }
         }
 
