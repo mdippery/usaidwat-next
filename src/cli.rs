@@ -17,7 +17,8 @@ use clap::{Args, Parser, Subcommand, ValueEnum};
 use clap_verbosity_flag::Verbosity;
 use hypertyper::HTTPClientFactory;
 use indoc::formatdoc;
-use log::{debug, info};
+use log::{debug, info, trace};
+use std::time::Instant;
 use std::{fmt, result};
 use tokio_pager::{Pager, PagerEnv};
 
@@ -456,13 +457,22 @@ impl Runner {
         debug!("Using model: {:?} - {}", model, model);
 
         // TODO: Should we return raw JSON here in debug mode?
-        // TODO: Track timing in Summarizer and print stats in debug or trace mode
 
+        // TODO: Track timing in Summarizer and print stats in debug or trace mode
+        // I think I can use https://docs.rs/timethis for this.
+        // Except I want to return the value of summarize() as well, so maybe I'll
+        // have to write my own macro or function returns a 2-tuple (duration, value),
+        // or just add it to the Summarize class itself (but more general would be
+        // better).
+
+        let now = Instant::now();
         let output = summarizer
             .model(model)
             .summarize()
             .await
             .map_err(|err| format!("Error in API request: {err}"))?;
+        let elapsed = now.elapsed();
+        trace!("Summarization time: {:.4} secs", elapsed.as_secs_f64());
         let output = textwrap::fill(&output, textwrap::termwidth());
         Pager::new(PagerEnv::default()).page(&output).await
     }
