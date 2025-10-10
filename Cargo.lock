@@ -614,6 +614,7 @@ dependencies = [
 [[package]]
 name = "hypertyper"
 version = "0.1.0"
+source = "git+https://github.com/mdippery/hypertyper.git#24958a7a28ebb1fb66a139848cd79356a4164825"
 dependencies = [
  "reqwest",
  "serde_json",
