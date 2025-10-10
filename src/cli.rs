@@ -132,8 +132,18 @@ enum Command {
            without changing code and recompiling. It would be nice to do it
            as a CLI flag.
 
-           Maybe there's a way to enable that feature _only_ in a test build,
+           Maybe there's a way to enable that feature _only_ in a dev* build,
            I don't know...
+
+           Regardless, this new flag should either supersede the existing
+           -m flag, or we should forbid both from being set at once.**
+
+           Should I also list out all available models in after_summary_help?
+
+           This new flag could be -M.
+
+           *  https://doc.rust-lang.org/cargo/reference/profiles.html#dev
+           ** https://docs.rs/clap/latest/clap/_derive/_tutorial/index.html#argument-relations
         */
         /// Use this AI model for summarization
         #[arg(short = 'm', long, default_value_t)]
