@@ -111,40 +111,11 @@ enum Command {
     /// Summarize a user's posting history
     #[clap(visible_alias = "summarize")]
     #[clap(visible_alias = "s")]
-    // TODO: Would be nice to not specify OpenAIModel here and instead
-    //       defer to run_summary's definition, but we might have to
-    //       do something with generics to achieve that, so this is
-    //       good enough for now.
     #[clap(after_help = after_summary_help::<OpenAIModel>())]
     Summary {
         /// Reddit username
         username: String,
 
-        /*
-           TODO: Let users select a specific model rather than just a class.
-           "model" here is more like a class: default, best, cheapest, fastest.
-           It would be nice if users could set a specific model; that option
-           could greatly aid debugging and QA as well.
-
-           (For example, I don't particularly care for GPT 5-nano's output,
-           so I set the "fastest" option to GPT 4.1-nano, but since "cheapest"
-           is GPT 5-nano, and "best" is GPT 5, I can no longer test GPT 5-nano
-           without changing code and recompiling. It would be nice to do it
-           as a CLI flag.
-
-           Maybe there's a way to enable that feature _only_ in a dev* build,
-           I don't know...
-
-           Regardless, this new flag should either supersede the existing
-           -m flag, or we should forbid both from being set at once.**
-
-           Should I also list out all available models in after_summary_help?
-
-           This new flag could be -M.
-
-           *  https://doc.rust-lang.org/cargo/reference/profiles.html#dev
-           ** https://docs.rs/clap/latest/clap/_derive/_tutorial/index.html#argument-relations
-        */
         /// Use this AI model for summarization
         #[arg(short = 'm', long, default_value_t)]
         model: AIModelClass,

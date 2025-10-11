@@ -173,11 +173,6 @@ impl MarkdownVisitor {
     }
 
     fn visit_code(&mut self, code: &str) {
-        // TODO: Long lines of code should not be wrapped.
-        // If a line of code is longer than 80 characters when indented,
-        // it will be wrapped by the general mechanism that wraps all
-        // the text (in MarkdownVisitor::text()). I would prefer lines
-        // of code not be wrapped, but I have no idea how to prevent that.
         trace!("got code:\n{code}");
         self.push_text("\n\n");
         self.push_text(
