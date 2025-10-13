@@ -234,7 +234,7 @@ version = "3.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "fde0e0ec90c9dfb3b4b1a0891a7dcd0e2bffde2f7efed5fe7c9bb00e5bfb915e"
 dependencies = [
- "windows-sys 0.52.0",
+ "windows-sys 0.59.0",
 ]
 
 [[package]]
@@ -330,7 +330,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "39cab71617ae0d63f51a36d69f866391735b51691dbda63cf6f96d042b63efeb"
 dependencies = [
  "libc",
- "windows-sys 0.60.2",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
@@ -614,7 +614,7 @@ dependencies = [
 [[package]]
 name = "hypertyper"
 version = "0.1.0"
-source = "git+https://github.com/mdippery/hypertyper.git#367c15701df83e3bf9fd1cdac3d86e08df389004"
+source = "git+https://github.com/mdippery/hypertyper.git#e1ca12e336b059e3231ff6210af8822048ba6b97"
 dependencies = [
  "reqwest",
  "serde_json",
@@ -1249,7 +1249,7 @@ dependencies = [
  "errno",
  "libc",
  "linux-raw-sys",
- "windows-sys 0.60.2",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
@@ -1528,7 +1528,7 @@ dependencies = [
  "getrandom 0.3.3",
  "once_cell",
  "rustix",
- "windows-sys 0.60.2",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
