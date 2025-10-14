@@ -3,7 +3,7 @@
 
 //! AI summarization.
 
-use crate::ai::client::{APIClient, APIRequest, APIResponse, APIResult};
+use crate::ai::client::{AIClient, AIRequest, AIResponse, AIResult};
 use crate::markdown;
 use crate::reddit::Redditor;
 use itertools::Itertools;
@@ -12,17 +12,17 @@ use itertools::Itertools;
 #[derive(Debug)]
 pub struct Summarizer<'a, C>
 where
-    C: APIClient,
-    C::APIRequest: APIRequest,
+    C: AIClient,
+    C::AIRequest: AIRequest,
 {
     client: C,
     user: &'a Redditor,
-    model: <C::APIRequest as APIRequest>::Model,
+    model: <C::AIRequest as AIRequest>::Model,
 }
 
 impl<'a, C> Summarizer<'a, C>
 where
-    C: APIClient,
+    C: AIClient,
 {
     const INSTRUCTIONS: &'static str = include_str!("summary_prompt.txt");
 
@@ -33,7 +33,7 @@ where
         Self {
             client,
             user,
-            model: <C::APIRequest as APIRequest>::Model::default(),
+            model: <C::AIRequest as AIRequest>::Model::default(),
         }
     }
 
@@ -41,17 +41,17 @@ where
     ///
     /// By default, the summarizer uses the default model, but that option can
     /// be changed here.
-    pub fn model(self, model: <C::APIRequest as APIRequest>::Model) -> Self {
+    pub fn model(self, model: <C::AIRequest as AIRequest>::Model) -> Self {
         Self { model, ..self }
     }
 
     /// Summarize the Redditor's comments and return the summary as a string,
     /// including an analysis of sentiment and tone.
-    pub async fn summarize(&self) -> APIResult<String> {
+    pub async fn summarize(&self) -> AIResult<String> {
         // We might want to separate instructions from text to summarize,
         // or at least pass some of the preamble as instructions.
         // Iterate on this.
-        let request = C::APIRequest::default()
+        let request = C::AIRequest::default()
             .model(self.model)
             .input(self.input());
 
@@ -95,7 +95,7 @@ where
 #[cfg(test)]
 mod tests {
     use crate::ai::client::openai::OpenAIResponse;
-    use crate::ai::client::{AIModel, APIClient, APIRequest, APIResponse, APIResult};
+    use crate::ai::client::{AIClient, AIModel, AIRequest, AIResponse, AIResult};
     use crate::reddit::Redditor;
     use crate::summary::Summarizer;
     use crate::test_utils::load_output;
@@ -135,7 +135,7 @@ mod tests {
         input: String,
     }
 
-    impl APIRequest for TestAPIRequest {
+    impl AIRequest for TestAPIRequest {
         type Model = TestAIModel;
 
         fn model(self, model: Self::Model) -> Self {
@@ -160,7 +160,7 @@ mod tests {
     #[derive(Debug)]
     struct TestAPIResponse;
 
-    impl APIResponse for TestAPIResponse {
+    impl AIResponse for TestAPIResponse {
         fn concatenate(&self) -> String {
             let json_data = fs::read_to_string("tests/data/openai/responses_multi_content.json")
                 .expect("could not load file");
@@ -197,16 +197,16 @@ mod tests {
         }
     }
 
-    impl APIClient for TestAIClient {
-        type APIRequest = TestAPIRequest;
-        type APIResponse = TestAPIResponse;
+    impl AIClient for TestAIClient {
+        type AIRequest = TestAPIRequest;
+        type AIResponse = TestAPIResponse;
 
-        async fn send(&self, request: &Self::APIRequest) -> APIResult<Self::APIResponse> {
+        async fn send(&self, request: &Self::AIRequest) -> AIResult<Self::AIResponse> {
             self.request_spy
                 .lock()
                 .expect("could not lock mutex")
                 .record(request.clone());
-            Ok(Self::APIResponse {})
+            Ok(Self::AIResponse {})
         }
     }
 

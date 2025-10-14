@@ -9,31 +9,43 @@ use hypertyper::HTTPError;
 use std::fmt::Debug;
 
 /// A client for an AI service's API.
-pub trait APIClient {
+///
+/// API clients for specific AI services should adopt this trait to provide
+/// a common interface for interacting with all AI services in a uniform manner.
+pub trait AIClient {
     /// The client can make API requests of this type.
-    type APIRequest: APIRequest;
+    type AIRequest: AIRequest;
 
     /// The client receives API responses of this type.
-    type APIResponse: APIResponse;
+    type AIResponse: AIResponse;
 
     /// Sends the request to the AI service and receives a response.
     fn send(
         &self,
-        request: &Self::APIRequest,
-    ) -> impl Future<Output = APIResult<Self::APIResponse>> + Send;
+        request: &Self::AIRequest,
+    ) -> impl Future<Output = AIResult<Self::AIResponse>> + Send;
 }
 
 /// A request to an AI service's API.
+///
+/// Different AI services may offer different options when making API requests,
+/// and different [`AIClient`] implementations may offer different capabilities.
+/// `AIRequest` offers a uniform way to make requests to AI services that
+/// may differ slightly in behavior. If a service does not offer a particular
+/// feature, then its `AIRequest` implementations can do nothing for calls
+/// to the accompanying methods.
+///
+/// # Examples
 ///
 /// This trait follows a "builder" pattern where elements of the request
 /// are built up over time.
 ///
 /// Assuming you have enum called `Model` that specifies available AI models
 /// for your service, and a `ConcreteAPIRequest` struct that implements
-/// `APIRequest`, you would create an API request like this:
+/// `AIRequest`, you would create an API request like this:
 ///
 /// ```
-/// # use usaidwat::ai::client::{AIModel, APIRequest};
+/// # use usaidwat::ai::client::{AIModel, AIRequest};
 /// #
 /// # #[derive(Clone, Copy, Debug, Default)]
 /// # pub enum Model {
@@ -62,7 +74,7 @@ pub trait APIClient {
 /// # #[derive(Default)]
 /// # pub struct ConcreteAPIRequest;
 /// #
-/// # impl APIRequest for ConcreteAPIRequest {
+/// # impl AIRequest for ConcreteAPIRequest {
 /// #     type Model = Model;
 /// #     fn model(self, model: Self::Model) -> Self { self }
 /// #     fn instructions(self, instructions: impl Into<String>) -> Self { self }
@@ -74,7 +86,7 @@ pub trait APIClient {
 ///     .instructions("Be really snarky.")
 ///     .input("How do I make an API request?");
 /// ```
-pub trait APIRequest: Default {
+pub trait AIRequest: Default {
     /// An enum or other data structures providing options for different
     /// AI models, which are specific to each service.
     type Model: AIModel;
@@ -96,7 +108,7 @@ pub trait APIRequest: Default {
     /// specified. If not, this method can be a no-op.
     ///
     /// Often specialized instructions will take precedence over the
-    /// request's [input](APIRequest::input). Consult the documentation
+    /// request's [input](AIRequest::input). Consult the documentation
     /// for your specific service to see if that is the case.
     fn instructions(self, instructions: impl Into<String>) -> Self;
 
@@ -108,17 +120,17 @@ pub trait APIRequest: Default {
 }
 
 /// A response from an AI service's API.
-pub trait APIResponse {
+pub trait AIResponse {
     /// Concatenates the output from an AI service into a single string.
     fn concatenate(&self) -> String;
 }
 
 /// An API result that includes the response if successful or an error
 /// if unsuccessful.
-pub type APIResult<T> = Result<T, APIError>;
+pub type AIResult<T> = Result<T, AIError>;
 
-/// An API error.
-pub type APIError = HTTPError;
+/// An error from an AI service's API.
+pub type AIError = HTTPError;
 
 /// An AI model specification.
 pub trait AIModel: Clone + Copy + Default + Debug {

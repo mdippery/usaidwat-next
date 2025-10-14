@@ -1,7 +1,7 @@
 use hypertyper::HTTPClientFactory;
 use usaidwat::ai::Auth;
 use usaidwat::ai::client::openai::{OpenAIClient, OpenAIModel, OpenAIRequest};
-use usaidwat::ai::client::{APIClient, APIRequest};
+use usaidwat::ai::client::{AIClient, AIRequest};
 
 // These tests aren't particularly interesting and mostly serve to ensure
 // that we can actually connect to the OpenAI service.
