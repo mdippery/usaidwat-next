@@ -12,8 +12,7 @@ use serde::de::DeserializeOwned;
 /// A general service for making HTTP calls to an API.
 ///
 /// While this may appear to be more like a "client", think of it as a
-/// proxy for a (possibly remote) API service. The term "service" is used
-/// here in the same spirit as that of [`HTTPService`](BaseHTTPService).
+/// proxy for a (possibly remote) API service.
 pub trait APIService {
     /// Send a POST request to the `uri` with the JSON object `data` as
     /// the POST request body.

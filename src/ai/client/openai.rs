@@ -64,7 +64,7 @@
 //! - [OpenAI model documentation](https://platform.openai.com/docs/models)
 
 use crate::ai::Auth;
-use crate::ai::client::{AIModel, APIClient, APIRequest, APIResponse, APIResult};
+use crate::ai::client::{AIClient, AIModel, AIRequest, AIResponse, AIResult};
 use crate::ai::service::{APIService, HTTPService};
 use hypertyper::HTTPClientFactory;
 use itertools::Itertools;
@@ -79,11 +79,11 @@ pub struct OpenAIClient<T: APIService + Sync> {
     service: T,
 }
 
-impl<T: APIService + Sync> APIClient for OpenAIClient<T> {
-    type APIRequest = OpenAIRequest;
-    type APIResponse = OpenAIResponse;
+impl<T: APIService + Sync> AIClient for OpenAIClient<T> {
+    type AIRequest = OpenAIRequest;
+    type AIResponse = OpenAIResponse;
 
-    async fn send(&self, request: &Self::APIRequest) -> APIResult<Self::APIResponse> {
+    async fn send(&self, request: &Self::AIRequest) -> AIResult<Self::AIResponse> {
         self.service.post(Self::BASE_URI, &self.auth, request).await
     }
 }
@@ -119,7 +119,7 @@ pub struct OpenAIRequest {
     store: bool,
 }
 
-impl APIRequest for OpenAIRequest {
+impl AIRequest for OpenAIRequest {
     /// This request uses OpenAI GPT-specific [models](OpenAIModel).
     type Model = OpenAIModel;
 
@@ -301,7 +301,7 @@ pub struct OpenAIResponse {
     output: Vec<OpenAIOutput>,
 }
 
-impl APIResponse for OpenAIResponse {
+impl AIResponse for OpenAIResponse {
     fn concatenate(&self) -> String {
         self.output()
             .map(|o| o.concatenate())
@@ -445,7 +445,7 @@ mod test {
         use super::load_data;
         use crate::ai::Auth;
         use crate::ai::client::openai::{OpenAIClient, OpenAIRequest};
-        use crate::ai::client::{APIClient, APIRequest};
+        use crate::ai::client::{AIClient, AIRequest};
         use crate::ai::service::APIService;
         use hypertyper::HTTPResult;
         use reqwest::IntoUrl;

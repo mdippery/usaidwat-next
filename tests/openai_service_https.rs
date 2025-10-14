@@ -5,7 +5,7 @@
 
 use hypertyper::{HTTPClientFactory, HTTPResult};
 use usaidwat::ai::Auth;
-use usaidwat::ai::client::APIRequest;
+use usaidwat::ai::client::AIRequest;
 use usaidwat::ai::client::openai::{OpenAIModel, OpenAIRequest, OpenAIResponse};
 use usaidwat::ai::service::{APIService, HTTPService};
 
