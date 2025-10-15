@@ -4,9 +4,9 @@
 // of each individual component.
 
 use hypertyper::{HTTPClientFactory, HTTPResult};
-use usaidwat::ai::Auth;
 use usaidwat::ai::client::AIRequest;
 use usaidwat::ai::client::openai::{OpenAIModel, OpenAIRequest, OpenAIResponse};
+use usaidwat::ai::service::Auth;
 use usaidwat::ai::service::{APIService, HTTPService};
 
 #[tokio::test]

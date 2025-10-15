@@ -3,7 +3,7 @@
 
 //! Services for communicating with APIs using HTTP.
 
-use crate::ai::Auth;
+pub use hypertyper::auth::Auth;
 use hypertyper::{HTTPClient, HTTPClientFactory, HTTPResult};
 use reqwest::{IntoUrl, header};
 use serde::Serialize;
