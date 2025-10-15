@@ -21,7 +21,7 @@ colored = "3.0.0"
 counter = "0.7.0"
 env_logger = "0.11.8"
 htmlentity = "1.3.2"
-hypertyper = { version = "0.1.0", git = "https://github.com/mdippery/hypertyper.git", tag = "v0.1.0" }
+hypertyper = { version = "0.2.0", git = "https://github.com/mdippery/hypertyper.git" }
 indoc = "2.0.6"
 itertools = "0.14.0"
 log = "0.4.27"
@@ -40,5 +40,4 @@ tokio-pager = { version = "1.0.1", git = "https://github.com/mdippery/tokio-page
 paste = "1.0.15"
 pretty_assertions = "1.4.1"
 seq-macro = "0.3.6"
-temp-env = "0.3.6"
 uuid = { version = "1.16.0", features = ["v4"] }
