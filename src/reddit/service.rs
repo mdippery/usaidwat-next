@@ -8,8 +8,7 @@
 //! specifically for Reddit.
 
 use hypertyper::{HTTPClient, HTTPClientFactory, HTTPError, HTTPResult};
-use reqwest::IntoUrl;
-use reqwest::header;
+use reqwest::{IntoUrl, header};
 
 /// A service for retrieving information for Reddit users.
 ///
