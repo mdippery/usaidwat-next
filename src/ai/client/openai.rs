@@ -64,8 +64,9 @@
 //! - [OpenAI model documentation](https://platform.openai.com/docs/models)
 
 use crate::ai::client::{AIClient, AIModel, AIRequest, AIResponse, AIResult};
-use crate::ai::service::{Auth, HTTPService};
-use hypertyper::{HTTPClientFactory, service};
+use crate::ai::service::{Auth, Service};
+use hypertyper::HTTPClientFactory;
+use hypertyper::service::HTTPService;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use std::fmt;
@@ -73,12 +74,12 @@ use std::slice::Iter;
 
 /// An OpenAI API client.
 #[derive(Debug)]
-pub struct OpenAIClient<T: service::HTTPService + Sync> {
+pub struct OpenAIClient<T: HTTPService + Sync> {
     auth: Auth,
     service: T,
 }
 
-impl<T: service::HTTPService + Sync> AIClient for OpenAIClient<T> {
+impl<T: HTTPService + Sync> AIClient for OpenAIClient<T> {
     type AIRequest = OpenAIRequest;
     type AIResponse = OpenAIResponse;
 
@@ -87,7 +88,7 @@ impl<T: service::HTTPService + Sync> AIClient for OpenAIClient<T> {
     }
 }
 
-impl<T: service::HTTPService + Sync> OpenAIClient<T> {
+impl<T: HTTPService + Sync> OpenAIClient<T> {
     /// The base URI for OpenAI API requests.
     const BASE_URI: &'static str = "https://api.openai.com/v1/responses";
 
@@ -96,11 +97,11 @@ impl<T: service::HTTPService + Sync> OpenAIClient<T> {
     }
 }
 
-impl OpenAIClient<HTTPService> {
+impl OpenAIClient<Service> {
     /// Create a new OpenAI client using the given authentication data and
     /// the given factory to create underlying HTTP clients.
     pub fn new(auth: Auth, factory: HTTPClientFactory) -> Self {
-        let service = HTTPService::new(factory);
+        let service = Service::new(factory);
         Self::with_service(auth, service)
     }
 }

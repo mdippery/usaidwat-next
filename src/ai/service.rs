@@ -4,6 +4,7 @@
 //! Services for communicating with APIs using HTTP.
 
 pub use hypertyper::auth::Auth;
+use hypertyper::service::HTTPService;
 use hypertyper::{HTTPClient, HTTPClientFactory, HTTPResult};
 use reqwest::{IntoUrl, header};
 use serde::Serialize;
@@ -16,11 +17,11 @@ use serde::de::DeserializeOwned;
 /// service for a deterministic service when writing tests. Most AI API
 /// clients should use this `APIService` by default.
 #[derive(Debug)]
-pub struct HTTPService {
+pub struct Service {
     client: HTTPClient,
 }
 
-impl HTTPService {
+impl Service {
     /// Creates a new HTTP service using clients from the given factory.
     pub fn new(factory: HTTPClientFactory) -> Self {
         let client = factory.create();
@@ -28,7 +29,7 @@ impl HTTPService {
     }
 }
 
-impl hypertyper::service::HTTPService for HTTPService {
+impl HTTPService for Service {
     /// Sends a GET request to a Reddit API endpoint and returns the raw body.
     ///
     /// # Panics
