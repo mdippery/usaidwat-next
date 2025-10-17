@@ -3,11 +3,11 @@
 // with openai_client_https, but it ensures we are testing the integration
 // of each individual component.
 
+use hypertyper::service::HTTPService;
 use hypertyper::{HTTPClientFactory, HTTPResult};
 use usaidwat::ai::client::AIRequest;
 use usaidwat::ai::client::openai::{OpenAIModel, OpenAIRequest, OpenAIResponse};
 use usaidwat::ai::service::Auth;
-use usaidwat::ai::service::{APIService, HTTPService};
 
 #[tokio::test]
 async fn it_sends_a_post_request_using_gpt4o() {
@@ -17,7 +17,7 @@ async fn it_sends_a_post_request_using_gpt4o() {
         .model(OpenAIModel::Gpt4o)
         .input("write a haiku about ai");
     let factory = HTTPClientFactory::new(env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION"));
-    let service = HTTPService::new(factory);
+    let service = usaidwat::ai::service::HTTPService::new(factory);
     let response: HTTPResult<OpenAIResponse> = service
         .post("https://api.openai.com/v1/responses", &auth, &request)
         .await;
@@ -34,7 +34,7 @@ async fn it_sends_a_post_request_using_gpt5nano() {
         .model(OpenAIModel::Gpt5nano)
         .input("write a haiku about ai");
     let factory = HTTPClientFactory::new(env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION"));
-    let service = HTTPService::new(factory);
+    let service = usaidwat::ai::service::HTTPService::new(factory);
     let response: HTTPResult<OpenAIResponse> = service
         .post("https://api.openai.com/v1/responses", &auth, &request)
         .await;
