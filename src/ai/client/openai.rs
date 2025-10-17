@@ -64,9 +64,8 @@
 //! - [OpenAI model documentation](https://platform.openai.com/docs/models)
 
 use crate::ai::client::{AIClient, AIModel, AIRequest, AIResponse, AIResult};
-use crate::ai::service::{Auth, Service};
-use hypertyper::HTTPClientFactory;
-use hypertyper::service::HTTPService;
+use crate::ai::service::Service;
+use hypertyper::{Auth, HTTPClientFactory, HTTPService};
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use std::fmt;
@@ -445,9 +444,7 @@ mod test {
         use super::load_data;
         use crate::ai::client::openai::{OpenAIClient, OpenAIRequest};
         use crate::ai::client::{AIClient, AIRequest};
-        use crate::ai::service::Auth;
-        use hypertyper::HTTPResult;
-        use hypertyper::service::HTTPService;
+        use hypertyper::{Auth, HTTPResult, HTTPService};
         use reqwest::IntoUrl;
         use serde::Serialize;
         use serde::de::DeserializeOwned;

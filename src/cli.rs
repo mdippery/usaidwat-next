@@ -5,7 +5,6 @@
 
 use crate::ai::client::AIModel;
 use crate::ai::client::openai::{OpenAIClient, OpenAIModel};
-use crate::ai::service::Auth;
 use crate::clock::SystemClock;
 use crate::count::{SortAlgorithm, SubredditCounter};
 use crate::filter::{RedditFilter, StringSet};
@@ -15,7 +14,7 @@ use crate::summary::Summarizer;
 use crate::view::{ViewOptions, Viewable};
 use clap::{Args, Parser, Subcommand, ValueEnum};
 use clap_verbosity_flag::Verbosity;
-use hypertyper::HTTPClientFactory;
+use hypertyper::{Auth, HTTPClientFactory};
 use indoc::formatdoc;
 use log::{debug, info, trace};
 use std::time::Instant;

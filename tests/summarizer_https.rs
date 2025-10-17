@@ -1,6 +1,5 @@
-use hypertyper::HTTPClientFactory;
+use hypertyper::{Auth, HTTPClientFactory};
 use usaidwat::ai::client::openai::OpenAIClient;
-use usaidwat::ai::service::Auth;
 use usaidwat::reddit::Redditor;
 use usaidwat::summary::Summarizer;
 

@@ -7,9 +7,7 @@
 //! with the Reddit API over HTTPS, essentially a specialized HTTPS client
 //! specifically for Reddit.
 
-use hypertyper::auth::Auth;
-use hypertyper::service::HTTPService;
-use hypertyper::{HTTPClient, HTTPClientFactory, HTTPError, HTTPResult};
+use hypertyper::{Auth, HTTPClient, HTTPClientFactory, HTTPError, HTTPResult, HTTPService};
 use reqwest::{IntoUrl, header};
 use serde::Serialize;
 use serde::de::DeserializeOwned;
