@@ -5,7 +5,11 @@ use crate::clock::{Clock, DateTime, Utc};
 use crate::reddit::Redditor;
 use crate::reddit::service::Service;
 use hypertyper::HTTPResult;
+use hypertyper::auth::Auth;
+use hypertyper::service::HTTPService;
 use reqwest::IntoUrl;
+use serde::Serialize;
+use serde::de::DeserializeOwned;
 use std::fs;
 
 pub fn do_logging() {
@@ -35,7 +39,7 @@ impl<'a> TestService<'a> {
     }
 }
 
-impl<'a> Service for TestService<'a> {
+impl<'a> HTTPService for TestService<'a> {
     async fn get<U>(&self, uri: U) -> HTTPResult<String>
     where
         U: IntoUrl + Send,
@@ -43,6 +47,17 @@ impl<'a> Service for TestService<'a> {
         Ok(fs::read_to_string(uri.as_str()).expect("could not find test data"))
     }
 
+    async fn post<U, D, R>(&self, _uri: U, _auth: &Auth, _data: &D) -> HTTPResult<R>
+    where
+        U: IntoUrl + Send,
+        D: Serialize + Sync,
+        R: DeserializeOwned,
+    {
+        unimplemented!("Reddit test HTTP service does not support POST requests");
+    }
+}
+
+impl<'a> Service for TestService<'a> {
     async fn get_resource(&self, _username: &str, resource: &str) -> HTTPResult<String> {
         let filename = format!("tests/data/reddit/{resource}_{}.json", self.suffix);
         self.get(&filename).await
