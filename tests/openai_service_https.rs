@@ -3,11 +3,10 @@
 // with openai_client_https, but it ensures we are testing the integration
 // of each individual component.
 
-use hypertyper::service::HTTPService;
-use hypertyper::{HTTPClientFactory, HTTPResult};
+use hypertyper::{Auth, HTTPClientFactory, HTTPResult, HTTPService};
 use usaidwat::ai::client::AIRequest;
 use usaidwat::ai::client::openai::{OpenAIModel, OpenAIRequest, OpenAIResponse};
-use usaidwat::ai::service::{Auth, Service};
+use usaidwat::ai::service::Service;
 
 #[tokio::test]
 async fn it_sends_a_post_request_using_gpt4o() {

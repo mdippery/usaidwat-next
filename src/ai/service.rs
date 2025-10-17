@@ -3,9 +3,7 @@
 
 //! Services for communicating with APIs using HTTP.
 
-pub use hypertyper::auth::Auth;
-use hypertyper::service::HTTPService;
-use hypertyper::{HTTPClient, HTTPClientFactory, HTTPResult};
+use hypertyper::{Auth, HTTPClient, HTTPClientFactory, HTTPResult, HTTPService};
 use reqwest::{IntoUrl, header};
 use serde::Serialize;
 use serde::de::DeserializeOwned;
