@@ -65,7 +65,7 @@
 
 use crate::ai::client::{AIClient, AIModel, AIRequest, AIResponse, AIResult};
 use crate::ai::service::Service;
-use hypertyper::{Auth, HTTPClientFactory, HTTPService};
+use hypertyper::{Auth, HTTPClientFactory, HTTPPost};
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use std::fmt;
@@ -73,12 +73,12 @@ use std::slice::Iter;
 
 /// An OpenAI API client.
 #[derive(Debug)]
-pub struct OpenAIClient<T: HTTPService + Sync> {
+pub struct OpenAIClient<T: HTTPPost + Sync> {
     auth: Auth,
     service: T,
 }
 
-impl<T: HTTPService + Sync> AIClient for OpenAIClient<T> {
+impl<T: HTTPPost + Sync> AIClient for OpenAIClient<T> {
     type AIRequest = OpenAIRequest;
     type AIResponse = OpenAIResponse;
 
@@ -87,7 +87,7 @@ impl<T: HTTPService + Sync> AIClient for OpenAIClient<T> {
     }
 }
 
-impl<T: HTTPService + Sync> OpenAIClient<T> {
+impl<T: HTTPPost + Sync> OpenAIClient<T> {
     /// The base URI for OpenAI API requests.
     const BASE_URI: &'static str = "https://api.openai.com/v1/responses";
 
@@ -444,25 +444,14 @@ mod test {
         use super::load_data;
         use crate::ai::client::openai::{OpenAIClient, OpenAIRequest};
         use crate::ai::client::{AIClient, AIRequest};
-        use hypertyper::{Auth, HTTPResult, HTTPService};
+        use hypertyper::{Auth, HTTPPost, HTTPResult};
         use reqwest::IntoUrl;
         use serde::Serialize;
         use serde::de::DeserializeOwned;
 
         struct TestAPIService {}
 
-        impl HTTPService for TestAPIService {
-            async fn get<U>(&self, _uri: U) -> HTTPResult<String>
-            where
-                U: IntoUrl + Send,
-            {
-                // TODO: Don't define this on HTTP client.
-                // unimplemented!() is a bit of a cop-out. Ideally hypertyper::service::HTTPService
-                // would allow us to only implement the methods we want to implement, but as of
-                // v0.2.0, that is not possible, so we will panic() here.
-                unimplemented!("AI test HTTP service does not support GET requests");
-            }
-
+        impl HTTPPost for TestAPIService {
             async fn post<U, D, R>(&self, _uri: U, _auth: &Auth, _data: &D) -> HTTPResult<R>
             where
                 U: IntoUrl + Send,

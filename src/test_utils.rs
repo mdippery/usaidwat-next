@@ -4,12 +4,8 @@
 use crate::clock::{Clock, DateTime, Utc};
 use crate::reddit::Redditor;
 use crate::reddit::service::Service;
-use hypertyper::HTTPResult;
-use hypertyper::auth::Auth;
-use hypertyper::service::HTTPService;
+use hypertyper::{HTTPGet, HTTPResult};
 use reqwest::IntoUrl;
-use serde::Serialize;
-use serde::de::DeserializeOwned;
 use std::fs;
 
 pub fn do_logging() {
@@ -39,21 +35,12 @@ impl<'a> TestService<'a> {
     }
 }
 
-impl<'a> HTTPService for TestService<'a> {
+impl<'a> HTTPGet for TestService<'a> {
     async fn get<U>(&self, uri: U) -> HTTPResult<String>
     where
         U: IntoUrl + Send,
     {
         Ok(fs::read_to_string(uri.as_str()).expect("could not find test data"))
-    }
-
-    async fn post<U, D, R>(&self, _uri: U, _auth: &Auth, _data: &D) -> HTTPResult<R>
-    where
-        U: IntoUrl + Send,
-        D: Serialize + Sync,
-        R: DeserializeOwned,
-    {
-        unimplemented!("Reddit test HTTP service does not support POST requests");
     }
 }
 

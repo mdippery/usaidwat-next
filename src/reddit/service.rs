@@ -7,17 +7,15 @@
 //! with the Reddit API over HTTPS, essentially a specialized HTTPS client
 //! specifically for Reddit.
 
-use hypertyper::{Auth, HTTPClient, HTTPClientFactory, HTTPError, HTTPResult, HTTPService};
-use reqwest::{IntoUrl, header};
-use serde::Serialize;
-use serde::de::DeserializeOwned;
+use hypertyper::{HTTPClient, HTTPClientFactory, HTTPError, HTTPGet, HTTPResult, IntoUrl};
+use reqwest::header;
 
 /// A service for retrieving information for Reddit users.
 ///
 /// Using this trait, clients can implement different ways of connecting
 /// to the Reddit API, such as an actual connector for production code,
 /// and a mocked connector for testing purposes.
-pub trait Service: HTTPService {
+pub trait Service: HTTPGet {
     /// Performs a GET request to the `resource` associated with the given
     /// `username` and returns it as a parsed JSON response.
     fn get_resource(
@@ -56,7 +54,7 @@ impl RedditService {
     }
 }
 
-impl HTTPService for RedditService {
+impl HTTPGet for RedditService {
     /// Sends a GET request to a Reddit API endpoint and returns the raw body.
     async fn get<U>(&self, uri: U) -> HTTPResult<String>
     where
@@ -78,26 +76,6 @@ impl HTTPService for RedditService {
                 Ok(resp.text().await?)
             }
         }
-    }
-
-    /// Sends a POST request to the Reddit API endpoint with the given data
-    /// and returns the response as a JSON object.
-    ///
-    /// # Panics
-    ///
-    /// Always, because the Reddit HTTP service is a read-only service that
-    /// makes no POST requests, so this method is not implemented.
-    async fn post<U, D, R>(&self, _uri: U, _auth: &Auth, _data: &D) -> HTTPResult<R>
-    where
-        U: IntoUrl + Send,
-        D: Serialize + Sync,
-        R: DeserializeOwned,
-    {
-        // TODO: Don't define this on HTTP client.
-        // unimplemented!() is a bit of a cop-out. Ideally hypertyper::service::HTTPService
-        // would allow us to only implement the methods we want to implement, but as of
-        // v0.2.0, that is not possible, so we will panic() here.
-        unimplemented!("Reddit HTTP service does not support POST requests");
     }
 }
 

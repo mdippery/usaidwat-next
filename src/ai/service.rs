@@ -19,7 +19,7 @@
 //!
 //! [`hypertyper.service`]: https://docs.rs/hypertyper/latest/hypertyper/service/index.html
 
-use hypertyper::{Auth, HTTPClient, HTTPClientFactory, HTTPResult, HTTPService, IntoUrl};
+use hypertyper::{Auth, HTTPClient, HTTPClientFactory, HTTPPost, HTTPResult, IntoUrl};
 use reqwest::header;
 use serde::Serialize;
 use serde::de::DeserializeOwned;
@@ -44,23 +44,7 @@ impl Service {
     }
 }
 
-impl HTTPService for Service {
-    /// Sends a GET request to a Reddit API endpoint and returns the raw body.
-    ///
-    /// # Panics
-    ///
-    /// Always, because the AI HTTP service only needs to make POST requests.
-    async fn get<U>(&self, _uri: U) -> HTTPResult<String>
-    where
-        U: IntoUrl + Send,
-    {
-        // TODO: Don't define this on HTTP client.
-        // unimplemented!() is a bit of a cop-out. Ideally hypertyper::service::HTTPService
-        // would allow us to only implement the methods we want to implement, but as of
-        // v0.2.0, that is not possible, so we will panic() here.
-        unimplemented!("AI HTTP service does not support GET requests");
-    }
-
+impl HTTPPost for Service {
     /// Send a POST request to the `uri` with the JSON object `data` as
     /// the POST request body.
     ///

@@ -3,7 +3,7 @@
 // with openai_client_https, but it ensures we are testing the integration
 // of each individual component.
 
-use hypertyper::{Auth, HTTPClientFactory, HTTPResult, HTTPService};
+use hypertyper::{Auth, HTTPClientFactory, HTTPPost, HTTPResult};
 use usaidwat::ai::client::AIRequest;
 use usaidwat::ai::client::openai::{OpenAIModel, OpenAIRequest, OpenAIResponse};
 use usaidwat::ai::service::Service;
