@@ -193,6 +193,28 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a1d728cc89cf3aee9ff92b05e62b19ee65a02b5702cff7d5a377e32c6ae29d8d"
 
 [[package]]
+name = "cogito"
+version = "0.1.0"
+source = "git+https://github.com/mdippery/cogito.git#9b48163965dc309efea3c8beba38fd0d42dfb294"
+dependencies = [
+ "hypertyper",
+ "reqwest",
+ "serde",
+]
+
+[[package]]
+name = "cogito-openai"
+version = "0.1.0"
+source = "git+https://github.com/mdippery/cogito.git#9b48163965dc309efea3c8beba38fd0d42dfb294"
+dependencies = [
+ "cogito",
+ "hypertyper",
+ "itertools",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "colorchoice"
 version = "1.0.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -300,7 +322,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "39cab71617ae0d63f51a36d69f866391735b51691dbda63cf6f96d042b63efeb"
 dependencies = [
  "libc",
- "windows-sys 0.59.0",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
@@ -1138,7 +1160,7 @@ dependencies = [
  "errno",
  "libc",
  "linux-raw-sys",
- "windows-sys 0.59.0",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
@@ -1402,7 +1424,7 @@ dependencies = [
  "getrandom 0.3.4",
  "once_cell",
  "rustix",
- "windows-sys 0.59.0",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
@@ -1664,6 +1686,8 @@ dependencies = [
  "chrono",
  "clap",
  "clap-verbosity-flag",
+ "cogito",
+ "cogito-openai",
  "colored",
  "counter",
  "env_logger",

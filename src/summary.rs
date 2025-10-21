@@ -3,9 +3,9 @@
 
 //! AI summarization.
 
-use crate::ai::client::{AIClient, AIRequest, AIResponse, AIResult};
 use crate::markdown;
 use crate::reddit::Redditor;
+use cogito::client::{AIClient, AIRequest, AIResponse, AIResult};
 use itertools::Itertools;
 
 /// Summarizes a Redditor's comments and provides a sentiment analysis using AI.
@@ -94,11 +94,12 @@ where
 
 #[cfg(test)]
 mod tests {
-    use crate::ai::client::openai::OpenAIResponse;
-    use crate::ai::client::{AIClient, AIModel, AIRequest, AIResponse, AIResult};
     use crate::reddit::Redditor;
     use crate::summary::Summarizer;
     use crate::test_utils::load_output;
+    use cogito::AIModel;
+    use cogito::client::{AIClient, AIRequest, AIResponse, AIResult};
+    use cogito_openai::client::OpenAIResponse;
     use std::fs;
     use std::sync::{Arc, Mutex};
 

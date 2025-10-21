@@ -102,10 +102,9 @@
 //! [Apache License 2.0]: https://www.apache.org/licenses/LICENSE-2.0
 //! [API key]: https://platform.openai.com/settings/organization/api-keys
 //! [OpenAI API account]: https://platform.openai.com/docs/overview
-//! [cheapest model]: ai::client::AIModel::cheapest()
-//! [openai module documentation]: ai::client::openai
+//! [cheapest model]: https://docs.rs/cogito/latest/cogito/trait.AIModel.html#tymethod.cheapest
+//! [openai module documentation]: https://docs.rs/cogito-openai
 
-pub mod ai;
 pub mod cli;
 pub mod clock;
 pub mod count;

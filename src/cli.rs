@@ -3,8 +3,6 @@
 
 //! Drives the command-line program.
 
-use crate::ai::client::AIModel;
-use crate::ai::client::openai::{OpenAIClient, OpenAIModel};
 use crate::clock::SystemClock;
 use crate::count::{SortAlgorithm, SubredditCounter};
 use crate::filter::{RedditFilter, StringSet};
@@ -14,6 +12,9 @@ use crate::summary::Summarizer;
 use crate::view::{ViewOptions, Viewable};
 use clap::{Args, Parser, Subcommand, ValueEnum};
 use clap_verbosity_flag::Verbosity;
+use cogito::AIModel;
+use cogito_openai::OpenAIModel;
+use cogito_openai::client::OpenAIClient;
 use hypertyper::{Auth, HTTPClientFactory};
 use indoc::formatdoc;
 use log::{debug, info, trace};
@@ -498,8 +499,8 @@ impl Runner {
 mod tests {
     mod ai_model_class {
         use super::super::AIModelClass;
-        use crate::ai::client::AIModel;
-        use crate::ai::client::openai::OpenAIModel;
+        use cogito::AIModel;
+        use cogito_openai::OpenAIModel;
         use paste::paste;
 
         macro_rules! model_tests {
