@@ -56,7 +56,7 @@ pub fn convert_html_entities(text: impl AsRef<str>) -> String {
     let text = text.as_ref().trim();
     entity::decode(text.as_bytes())
         .to_string()
-        .unwrap_or(text.to_string())
+        .unwrap_or_else(|_| text.to_string())
 }
 
 /// A string-like structure with parts that can be matched against a
