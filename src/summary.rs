@@ -60,7 +60,7 @@ where
             .client
             .send(&request)
             .await?
-            .concatenate()
+            .result()
             .trim()
             .to_string())
     }
@@ -162,7 +162,7 @@ mod tests {
     struct TestAPIResponse;
 
     impl AIResponse for TestAPIResponse {
-        fn concatenate(&self) -> String {
+        fn result(&self) -> String {
             let json_data = fs::read_to_string("tests/data/openai/responses_multi_content.json")
                 .expect("could not load file");
             let wrapped: OpenAIResponse =
