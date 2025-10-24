@@ -26,6 +26,11 @@ where
 {
     const INSTRUCTIONS: &'static str = include_str!("summary_prompt.txt");
 
+    /// Default prompt sent to the LLM when processing user input.
+    pub fn default_instructions() -> String {
+        Self::INSTRUCTIONS.replace('\n', " ").trim().to_string()
+    }
+
     /// Summarizes content from the given `user`.
     ///
     /// `auth` will be used when making requests to the AI service.
@@ -82,7 +87,10 @@ where
     /// This is the set of instructions occurring before the text to be
     /// summarized.
     pub fn instructions(&self) -> String {
-        Self::INSTRUCTIONS.replace('\n', " ").trim().to_string()
+        Self::default_instructions()
+            .replace('\n', " ")
+            .trim()
+            .to_string()
     }
 
     /// The full input sent to the LLM, including any introductory

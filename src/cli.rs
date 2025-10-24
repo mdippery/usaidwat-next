@@ -13,6 +13,8 @@ use crate::view::{ViewOptions, Viewable};
 use clap::{Args, Parser, Subcommand, ValueEnum};
 use clap_verbosity_flag::Verbosity;
 use cogito::AIModel;
+use cogito::client::{AIClient, AIRequest};
+use cogito::service::Service;
 use cogito_openai::OpenAIModel;
 use cogito_openai::client::OpenAIClient;
 use hypertyper::{Auth, HTTPClientFactory};
@@ -41,6 +43,24 @@ where
           best        {best}
           cheapest    {cheapest}
         * fastest     {fastest}"
+    }
+}
+
+fn after_summary_help_long<T>() -> String
+where
+    T: AIClient,
+    <T::AIRequest as AIRequest>::Model: AIModel + fmt::Display,
+{
+    let short_help = after_summary_help::<<T::AIRequest as AIRequest>::Model>();
+    let prompt = textwrap::fill(
+        &Summarizer::<T>::default_instructions(),
+        textwrap::termwidth(),
+    );
+    formatdoc! {
+        "[4mPrompt:[24m
+        {prompt}
+
+        {short_help}"
     }
 }
 
@@ -111,7 +131,10 @@ enum Command {
     /// Summarize a user's posting history
     #[clap(visible_alias = "summarize")]
     #[clap(visible_alias = "s")]
-    #[clap(after_help = after_summary_help::<OpenAIModel>())]
+    #[clap(
+        after_help = after_summary_help::<OpenAIModel>(),
+        after_long_help = after_summary_help_long::<OpenAIClient<Service>>(),
+    )]
     Summary {
         /// Reddit username
         username: String,
