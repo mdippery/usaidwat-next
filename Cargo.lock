@@ -194,8 +194,8 @@ checksum = "a1d728cc89cf3aee9ff92b05e62b19ee65a02b5702cff7d5a377e32c6ae29d8d"
 
 [[package]]
 name = "cogito"
-version = "0.1.0"
-source = "git+https://github.com/mdippery/cogito.git#733b7d3dbde0c36dc49bc97917d87baaaecf94c9"
+version = "0.1.1"
+source = "git+https://github.com/mdippery/cogito.git#9769f2fce12aaaea034961618c8e0b60ea47b924"
 dependencies = [
  "hypertyper",
  "reqwest",
@@ -205,7 +205,7 @@ dependencies = [
 [[package]]
 name = "cogito-openai"
 version = "0.1.0"
-source = "git+https://github.com/mdippery/cogito.git#733b7d3dbde0c36dc49bc97917d87baaaecf94c9"
+source = "git+https://github.com/mdippery/cogito.git#9769f2fce12aaaea034961618c8e0b60ea47b924"
 dependencies = [
  "cogito",
  "hypertyper",
@@ -322,7 +322,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "39cab71617ae0d63f51a36d69f866391735b51691dbda63cf6f96d042b63efeb"
 dependencies = [
  "libc",
- "windows-sys 0.61.2",
+ "windows-sys 0.59.0",
 ]
 
 [[package]]
@@ -599,8 +599,8 @@ dependencies = [
 
 [[package]]
 name = "hypertyper"
-version = "0.2.0"
-source = "git+https://github.com/mdippery/hypertyper.git#f04401ed4206070a697bce4a41ce81eee0fc06d0"
+version = "0.3.0"
+source = "git+https://github.com/mdippery/hypertyper.git#a4a7000ec2612da4a7463fd26e5117aa54ff8d25"
 dependencies = [
  "reqwest",
  "serde",
@@ -1163,7 +1163,7 @@ dependencies = [
  "errno",
  "libc",
  "linux-raw-sys",
- "windows-sys 0.61.2",
+ "windows-sys 0.59.0",
 ]
 
 [[package]]
@@ -1427,7 +1427,7 @@ dependencies = [
  "getrandom 0.3.4",
  "once_cell",
  "rustix",
- "windows-sys 0.61.2",
+ "windows-sys 0.59.0",
 ]
 
 [[package]]

@@ -1,5 +1,6 @@
+use cogito::service::Auth;
 use cogito_openai::client::OpenAIClient;
-use hypertyper::{Auth, HTTPClientFactory};
+use hypertyper::HTTPClientFactory;
 use usaidwat::reddit::Redditor;
 use usaidwat::summary::Summarizer;
 
