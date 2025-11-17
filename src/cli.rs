@@ -3,7 +3,6 @@
 
 //! Drives the command-line program.
 
-use crate::clock::SystemClock;
 use crate::count::{SortAlgorithm, SubredditCounter};
 use crate::filter::{RedditFilter, StringSet};
 use crate::reddit::Redditor;
@@ -17,6 +16,7 @@ use cogito::client::{AIClient, AIRequest};
 use cogito::service::{Auth, Service};
 use cogito_openai::OpenAIModel;
 use cogito_openai::client::OpenAIClient;
+use horologe::SystemClock;
 use hypertyper::HTTPClientFactory;
 use indoc::formatdoc;
 use log::{debug, info, trace};

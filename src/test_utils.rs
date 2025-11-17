@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright (C) 2025 Michael Dippery <michael@monkey-robot.com>
 
-use crate::clock::{Clock, DateTime, Utc};
 use crate::reddit::Redditor;
 use crate::reddit::service::Service;
 use hypertyper::{HTTPGet, HTTPResult};
@@ -48,31 +47,6 @@ impl<'a> Service for TestService<'a> {
     async fn get_resource(&self, _username: &str, resource: &str) -> HTTPResult<String> {
         let filename = format!("tests/data/reddit/{resource}_{}.json", self.suffix);
         self.get(&filename).await
-    }
-}
-
-pub struct FrozenClock {
-    datetime: DateTime<Utc>,
-}
-
-impl FrozenClock {
-    pub fn new(datetime: DateTime<Utc>) -> Self {
-        FrozenClock { datetime }
-    }
-}
-
-impl Default for FrozenClock {
-    fn default() -> Self {
-        let datetime = DateTime::parse_from_rfc3339("2025-05-23T10:13:00-07:00")
-            .expect("invalid date supplied")
-            .with_timezone(&Utc);
-        Self::new(datetime)
-    }
-}
-
-impl Clock for FrozenClock {
-    fn now(&self) -> DateTime<Utc> {
-        self.datetime
     }
 }
 

@@ -106,7 +106,6 @@
 //! [openai module documentation]: https://docs.rs/cogito-openai
 
 pub mod cli;
-pub mod clock;
 pub mod count;
 pub mod filter;
 pub mod markdown;

@@ -4,12 +4,12 @@
 //! Formats viewable objects for display in a terminal.
 
 use crate::cli::DateFormat;
-use crate::clock::{Clock, HasAge};
 use crate::count::SubredditCount;
 use crate::reddit::client::{Redditor, Timeline};
 use crate::reddit::thing::{Comment, HasSubreddit, Submission};
 use crate::text::RegexReplaceable;
 use colored::Colorize;
+use horologe::{Clock, age::HasAge};
 use indoc::formatdoc;
 use itertools::Itertools;
 
@@ -307,7 +307,8 @@ mod tests {
     mod format_info {
         use super::super::*;
         use crate::reddit::Redditor;
-        use crate::test_utils::{FrozenClock, load_output};
+        use crate::test_utils::load_output;
+        use horologe::testing::FrozenClock;
 
         #[tokio::test]
         async fn it_formats_a_user() {
@@ -322,7 +323,8 @@ mod tests {
         use super::super::*;
         use super::with_no_color;
         use crate::reddit::Redditor;
-        use crate::test_utils::{FrozenClock, do_logging, load_output};
+        use crate::test_utils::{do_logging, load_output};
+        use horologe::testing::FrozenClock;
         use pretty_assertions::assert_eq;
 
         // TODO: Test with and without color when possible
@@ -431,7 +433,8 @@ mod tests {
     mod format_submission {
         use super::super::*;
         use crate::reddit::{Redditor, thing::Submission};
-        use crate::test_utils::{FrozenClock, load_output};
+        use crate::test_utils::load_output;
+        use horologe::testing::FrozenClock;
         use pretty_assertions::assert_eq;
 
         async fn get_post(n: usize) -> Submission {
@@ -502,7 +505,8 @@ mod tests {
         use super::super::*;
         use crate::count::{SortAlgorithm, SubredditCounter};
         use crate::reddit::Redditor;
-        use crate::test_utils::{FrozenClock, load_output};
+        use crate::test_utils::load_output;
+        use horologe::testing::FrozenClock;
         use pretty_assertions::assert_eq;
 
         #[tokio::test]
@@ -567,7 +571,8 @@ mod tests {
     mod format_timeline {
         use super::super::*;
         use crate::reddit::Redditor;
-        use crate::test_utils::{FrozenClock, load_output};
+        use crate::test_utils::load_output;
+        use horologe::testing::FrozenClock;
 
         #[tokio::test]
         async fn it_formats_a_timeline() {

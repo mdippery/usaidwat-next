@@ -3,11 +3,11 @@
 
 //! Clients for reading data from the Reddit API.
 
-use crate::clock::{DateTime, HasAge, Utc};
 use crate::reddit::service::{RedditService, Service};
 use crate::reddit::thing::{self, Comment, Submission, User};
 pub use chrono::Weekday;
 use chrono::{Datelike, Timelike};
+use horologe::{DateTime, Utc, age::HasAge};
 use hypertyper;
 use thiserror::Error;
 use tokio::try_join;
@@ -191,10 +191,9 @@ impl<'a> Iterator for TimelineIterator<'a> {
 #[cfg(test)]
 mod tests {
     mod user_with_data {
-        use crate::clock::HasAge;
         use crate::reddit::Redditor;
-        use crate::test_utils::FrozenClock;
         use chrono::DateTime;
+        use horologe::{age::HasAge, testing::FrozenClock};
 
         #[tokio::test]
         async fn it_returns_its_username() {
@@ -264,10 +263,9 @@ mod tests {
     }
 
     mod user_with_no_data {
-        use crate::clock::HasAge;
         use crate::reddit::Redditor;
-        use crate::test_utils::FrozenClock;
         use chrono::DateTime;
+        use horologe::{age::HasAge, testing::FrozenClock};
 
         #[tokio::test]
         async fn it_returns_its_username() {
