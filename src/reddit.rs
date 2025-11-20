@@ -7,4 +7,5 @@ pub mod client;
 pub mod service;
 pub mod thing;
 
+#[doc(inline)]
 pub use client::Redditor;

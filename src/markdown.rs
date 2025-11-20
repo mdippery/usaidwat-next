@@ -10,7 +10,9 @@
 pub mod bare;
 pub mod terminal;
 
+#[doc(inline)]
 pub use bare::parse as summarize;
+#[doc(inline)]
 pub use terminal::parse;
 
 use log::{trace, warn};

@@ -6,6 +6,7 @@
 use crate::count::{SortAlgorithm, SubredditCounter};
 use crate::filter::{RedditFilter, StringSet};
 use crate::reddit::Redditor;
+#[doc(inline)]
 pub use crate::reddit::client::Error;
 use crate::summary::Summarizer;
 use crate::view::{ViewOptions, Viewable};
