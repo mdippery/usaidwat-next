@@ -1,6 +1,6 @@
 use cogito::service::Auth;
 use cogito_openai::client::OpenAIClient;
-use hypertyper::HTTPClientFactory;
+use hypertyper::HttpClientFactory;
 use usaidwat::reddit::Redditor;
 use usaidwat::summary::Summarizer;
 
@@ -8,7 +8,7 @@ use usaidwat::summary::Summarizer;
 #[ignore = "long test"]
 async fn it_summarizes_a_redditors_comments() {
     let auth = Auth::from_env("OPENAI_API_KEY").expect("$OPENAI_API_KEY is not defined");
-    let factory = HTTPClientFactory::new(env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION"));
+    let factory = HttpClientFactory::new(env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION"));
     let client = OpenAIClient::new(auth, factory);
     let user = Redditor::new("mipadi")
         .await

@@ -12,13 +12,11 @@ use crate::summary::Summarizer;
 use crate::view::{ViewOptions, Viewable};
 use clap::{Args, Parser, Subcommand, ValueEnum};
 use clap_verbosity_flag::Verbosity;
-use cogito::AIModel;
-use cogito::client::{AIClient, AIRequest};
-use cogito::service::{Auth, Service};
+use cogito::prelude::*;
 use cogito_openai::OpenAIModel;
 use cogito_openai::client::OpenAIClient;
 use horologe::SystemClock;
-use hypertyper::HTTPClientFactory;
+use hypertyper::HttpClientFactory;
 use indoc::formatdoc;
 use log::{debug, info, trace};
 use std::time::Instant;
@@ -32,7 +30,7 @@ const AFTER_HELP: &str = include_str!("help/after.txt");
 
 fn after_summary_help<T>() -> String
 where
-    T: AIModel + fmt::Display,
+    T: AiModel + fmt::Display,
 {
     let flagship: T = AIModelClass::Flagship.model();
     let best: T = AIModelClass::Best.model();
@@ -49,10 +47,10 @@ where
 
 fn after_summary_help_long<T>() -> String
 where
-    T: AIClient,
-    <T::AIRequest as AIRequest>::Model: AIModel + fmt::Display,
+    T: AiClient,
+    <T::AiRequest as AiRequest>::Model: AiModel + fmt::Display,
 {
-    let short_help = after_summary_help::<<T::AIRequest as AIRequest>::Model>();
+    let short_help = after_summary_help::<<T::AiRequest as AiRequest>::Model>();
     let prompt = textwrap::fill(
         &Summarizer::<T>::default_instructions(),
         textwrap::termwidth(),
@@ -286,7 +284,7 @@ impl fmt::Display for AIModelClass {
 impl AIModelClass {
     /// Returns the AI model corresponding to the model selected by the
     /// command-line flags.
-    pub fn model<T: AIModel>(&self) -> T {
+    pub fn model<T: AiModel>(&self) -> T {
         match self {
             AIModelClass::Flagship => T::flagship(),
             AIModelClass::Best => T::best(),
@@ -451,7 +449,7 @@ impl Runner {
         let auth =
             Auth::from_env("OPENAI_API_KEY").map_err(|_| include_str!("help/summary.txt"))?;
 
-        let factory = HTTPClientFactory::new(env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION"));
+        let factory = HttpClientFactory::new(env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION"));
         let client = OpenAIClient::new(auth, factory);
 
         let summarizer = Summarizer::new(client, self.user());
@@ -523,7 +521,7 @@ impl Runner {
 mod tests {
     mod ai_model_class {
         use super::super::AIModelClass;
-        use cogito::AIModel;
+        use cogito::AiModel;
         use cogito_openai::OpenAIModel;
         use paste::paste;
 

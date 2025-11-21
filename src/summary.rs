@@ -5,24 +5,24 @@
 
 use crate::markdown;
 use crate::reddit::Redditor;
-use cogito::client::{AIClient, AIRequest, AIResponse, AIResult};
+use cogito::prelude::*;
 use itertools::Itertools;
 
 /// Summarizes a Redditor's comments and provides a sentiment analysis using AI.
 #[derive(Debug)]
 pub struct Summarizer<'a, C>
 where
-    C: AIClient,
-    C::AIRequest: AIRequest,
+    C: AiClient,
+    C::AiRequest: AiRequest,
 {
     client: C,
     user: &'a Redditor,
-    model: <C::AIRequest as AIRequest>::Model,
+    model: <C::AiRequest as AiRequest>::Model,
 }
 
 impl<'a, C> Summarizer<'a, C>
 where
-    C: AIClient,
+    C: AiClient,
 {
     const INSTRUCTIONS: &'static str = include_str!("summary_prompt.txt");
 
@@ -38,7 +38,7 @@ where
         Self {
             client,
             user,
-            model: <C::AIRequest as AIRequest>::Model::default(),
+            model: <C::AiRequest as AiRequest>::Model::default(),
         }
     }
 
@@ -46,17 +46,17 @@ where
     ///
     /// By default, the summarizer uses the default model, but that option can
     /// be changed here.
-    pub fn model(self, model: <C::AIRequest as AIRequest>::Model) -> Self {
+    pub fn model(self, model: <C::AiRequest as AiRequest>::Model) -> Self {
         Self { model, ..self }
     }
 
     /// Summarize the Redditor's comments and return the summary as a string,
     /// including an analysis of sentiment and tone.
-    pub async fn summarize(&self) -> AIResult<String> {
+    pub async fn summarize(&self) -> AiResult<String> {
         // We might want to separate instructions from text to summarize,
         // or at least pass some of the preamble as instructions.
         // Iterate on this.
-        let request = C::AIRequest::default()
+        let request = C::AiRequest::default()
             .model(self.model)
             .input(self.input());
 
@@ -105,8 +105,7 @@ mod tests {
     use crate::reddit::Redditor;
     use crate::summary::Summarizer;
     use crate::test_utils::load_output;
-    use cogito::AIModel;
-    use cogito::client::{AIClient, AIRequest, AIResponse, AIResult};
+    use cogito::prelude::*;
     use cogito_openai::client::OpenAIResponse;
     use std::fs;
     use std::sync::{Arc, Mutex};
@@ -119,7 +118,7 @@ mod tests {
         OtherAIModel,
     }
 
-    impl AIModel for TestAIModel {
+    impl AiModel for TestAIModel {
         fn flagship() -> Self {
             TestAIModel::TestAIModel
         }
@@ -144,7 +143,7 @@ mod tests {
         input: String,
     }
 
-    impl AIRequest for TestAPIRequest {
+    impl AiRequest for TestAPIRequest {
         type Model = TestAIModel;
 
         fn model(self, model: Self::Model) -> Self {
@@ -169,7 +168,7 @@ mod tests {
     #[derive(Debug)]
     struct TestAPIResponse;
 
-    impl AIResponse for TestAPIResponse {
+    impl AiResponse for TestAPIResponse {
         fn result(&self) -> String {
             let json_data = fs::read_to_string("tests/data/openai/responses_multi_content.json")
                 .expect("could not load file");
@@ -206,16 +205,16 @@ mod tests {
         }
     }
 
-    impl AIClient for TestAIClient {
-        type AIRequest = TestAPIRequest;
-        type AIResponse = TestAPIResponse;
+    impl AiClient for TestAIClient {
+        type AiRequest = TestAPIRequest;
+        type AiResponse = TestAPIResponse;
 
-        async fn send(&self, request: &Self::AIRequest) -> AIResult<Self::AIResponse> {
+        async fn send(&self, request: &Self::AiRequest) -> AiResult<Self::AiResponse> {
             self.request_spy
                 .lock()
                 .expect("could not lock mutex")
                 .record(request.clone());
-            Ok(Self::AIResponse {})
+            Ok(Self::AiResponse {})
         }
     }
 

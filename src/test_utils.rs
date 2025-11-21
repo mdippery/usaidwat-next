@@ -3,8 +3,7 @@
 
 use crate::reddit::Redditor;
 use crate::reddit::service::Service;
-use hypertyper::{HTTPGet, HTTPResult};
-use reqwest::IntoUrl;
+use hypertyper::prelude::*;
 use std::fs;
 
 pub fn do_logging() {
@@ -34,8 +33,8 @@ impl<'a> TestService<'a> {
     }
 }
 
-impl<'a> HTTPGet for TestService<'a> {
-    async fn get<U>(&self, uri: U) -> HTTPResult<String>
+impl<'a> HttpGet for TestService<'a> {
+    async fn get<U>(&self, uri: U) -> HttpResult<String>
     where
         U: IntoUrl + Send,
     {
@@ -44,7 +43,7 @@ impl<'a> HTTPGet for TestService<'a> {
 }
 
 impl<'a> Service for TestService<'a> {
-    async fn get_resource(&self, _username: &str, resource: &str) -> HTTPResult<String> {
+    async fn get_resource(&self, _username: &str, resource: &str) -> HttpResult<String> {
         let filename = format!("tests/data/reddit/{resource}_{}.json", self.suffix);
         self.get(&filename).await
     }

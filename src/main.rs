@@ -2,7 +2,7 @@
 // Copyright (C) 2025 Michael Dippery <michael@monkey-robot.com>
 
 use clap::Parser;
-use hypertyper::HTTPError;
+use hypertyper::HttpError;
 use reqwest::StatusCode;
 use std::process;
 use usaidwat::cli::{Config, Error, Runner};
@@ -14,7 +14,7 @@ fn die(error_code: i32, message: &str) {
 
 fn dispatch_err(username: &str, err: &Error) {
     let message = match err {
-        Error::Service(HTTPError::Http(StatusCode::NOT_FOUND)) => {
+        Error::Service(HttpError::Http(StatusCode::NOT_FOUND)) => {
             format!("no such user: {username}")
         }
         _ => err.to_string(),

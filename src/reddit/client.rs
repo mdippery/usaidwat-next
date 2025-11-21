@@ -154,7 +154,7 @@ impl Timeline {
 pub enum Error {
     /// An error from the underlying HTTP service.
     #[error("Service error: {0}")]
-    Service(#[from] hypertyper::HTTPError),
+    Service(#[from] hypertyper::HttpError),
 
     /// An error parsing data.
     #[error("Parse error: {0}")]
