@@ -306,6 +306,15 @@ impl Submission {
         self.domain.starts_with("self.")
     }
 
+    /// The contents of the post if it is a self post, otherwise `None`.
+    pub fn self_text(&self) -> Option<String> {
+        if self.is_self() {
+            Some(self.selftext.clone())
+        } else {
+            None
+        }
+    }
+
     /// The submission's permalink.
     pub fn permalink(&self) -> String {
         let path = &self.permalink;
@@ -844,10 +853,46 @@ mod tests {
         }
 
         #[test]
+        fn it_returns_self_text_if_it_is_a_self_post() {
+            let expected = "\
+I have two types of technology upgrades available for my exosuit: items listed as \
+_protection units_, and items listed as _protection upgrades_. The ones listed as upgrades have \
+text that generally says something like \"an almost total rework of the &lt;damage type&gt; \
+Protection, this upgrade brings unparalleled improvements to &lt;damage type&gt; Shielding and \
+&lt;damage type&gt; Protection\", whereas the upgrade units give a percentage of resistance.
+
+Should I install both, or do I just need to install one or the other? For example:
+
+- I have a \"High-Energy Bio-Integrity Unit\" which is a _protection upgrade_, and I can build a \
+\"Radiation Reflector\" which is a _protection unit_. Should I install both?
+- I have a \"Specialist De-Toxifier\" and I can build a \"Toxin Suppressor\". Should I install both?
+- I have a \"Carbon Sublimation Pump\" and I can build a \"Coolant Network\". Should I install both?
+- I have a \"Nitroged-Based Thermal Stabilizer\" and I can build a \"Thermic Layer\". Should I \
+install both?
+
+And then for something similar but a little different:
+
+- I have a \"Deep Water Depth Protection\" which says it is an \"almost total rework of the Aeration \
+Membrance\", and I can also build an Aeration Membrane. Will crafting and installing an Aeration \
+Membrane bring any extra benefits?";
+            let submissions = Submission::parse(&load_data("submitted_mipadi")).unwrap();
+            let submission = &submissions[3];
+            assert!(submission.self_text().is_some());
+            assert_eq!(submission.self_text().unwrap(), expected);
+        }
+
+        #[test]
         fn it_returns_false_if_it_is_a_self_post() {
             let submissions = Submission::parse(&load_data("submitted_mipadi")).unwrap();
             let submission = &submissions[0];
             assert!(!submission.is_self());
+        }
+
+        #[test]
+        fn it_returns_no_self_text_if_it_is_not_a_self_post() {
+            let submissions = Submission::parse(&load_data("submitted_mipadi")).unwrap();
+            let submission = &submissions[0];
+            assert!(submission.self_text().is_none())
         }
 
         #[test]
