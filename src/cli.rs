@@ -203,6 +203,10 @@ enum PostSubcommand {
         // Only show posts from these subreddits
         subreddits: Vec<String>,
 
+        /// Only show self posts
+        #[arg(long = "self", default_value_t = false)]
+        self_only: bool,
+
         /// Output log in a more compact form
         #[arg(long, default_value_t = false)]
         oneline: bool,
@@ -391,8 +395,11 @@ impl Runner {
                 subreddits,
                 date,
                 oneline,
+                self_only,
                 ..
-            } => Ok(self.run_posts_log(subreddits, date, oneline).await?),
+            } => Ok(self
+                .run_posts_log(subreddits, date, oneline, self_only)
+                .await?),
             PostSubcommand::Tally(config) => self.run_posts_tally(&config.sort_algorithm()),
         }
     }
@@ -402,6 +409,7 @@ impl Runner {
         subreddits: &Vec<String>,
         date_format: &DateFormat,
         oneline: &bool,
+        self_only: &bool,
     ) -> Result {
         let opts = ViewOptions::default()
             .oneline(*oneline)
@@ -412,9 +420,11 @@ impl Runner {
             subreddits.join(" ")
         ))?;
 
-        let posts = RedditFilter::new(self.user().submissions())
-            .filter(&filter)
-            .collect();
+        let posts = self
+            .user()
+            .submissions()
+            .filter(|p| !*self_only || p.is_self());
+        let posts = RedditFilter::new(posts).filter(&filter).collect();
 
         let joiner = if *oneline { "\n" } else { "\n\n\n" };
         let output = posts
