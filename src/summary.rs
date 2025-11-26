@@ -8,13 +8,15 @@ use crate::reddit::Redditor;
 use crate::reddit::thing::{HasBody, Removable};
 use cogito::prelude::*;
 use itertools::Itertools;
+use log::debug;
+use std::fmt;
 
 /// Summarizes a Redditor's comments and provides a sentiment analysis using AI.
 #[derive(Debug)]
 pub struct Summarizer<'a, C>
 where
     C: AiClient,
-    C::AiRequest: AiRequest,
+    C::AiRequest: AiRequest + fmt::Debug,
 {
     client: C,
     user: &'a Redditor,
@@ -24,6 +26,7 @@ where
 impl<'a, C> Summarizer<'a, C>
 where
     C: AiClient,
+    C::AiRequest: AiRequest + fmt::Debug,
 {
     const INSTRUCTIONS: &'static str = include_str!("summary_prompt.txt");
 
@@ -63,6 +66,8 @@ where
         let request = C::AiRequest::default()
             .model(self.model)
             .input(self.input(include_self));
+
+        debug!("Sending AI API request:\n{request:#?}");
 
         // TODO: Do we need a unified Result and Error enum, or at least a unified module?
         Ok(self
