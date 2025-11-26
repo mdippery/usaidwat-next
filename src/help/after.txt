@@ -1,7 +1,7 @@
-You will need access to the OpenAI API to run `usaidwat summary`.
-To get access to the OpenAI API, create an API account at
-[4mplatform.openai.com[24m. Once you have an account, save your API key in the
-$OPENAI_API_KEY environment variable and rerun `usaidwat summary`.
+You will need access to the Claude API to run `usaidwat summary`.
+To get access to the Claude API, create an API account at
+[4mplatform.claude.com[24m. Once you have an account, save your API key in the
+$CLAUDE_API_KEY environment variable and rerun `usaidwat summary`.
 
 Copyright (C) 2025 Michael Dippery <michael@monkey-robot.com>.
 Licensed under the Apache 2.0 license.
