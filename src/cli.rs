@@ -579,8 +579,8 @@ impl Runner {
 mod tests {
     mod ai_model_class {
         use super::super::AIModelClass;
-        use cogito::AiModel;
-        use cogito_openai::OpenAIModel;
+        use cogito::prelude::*;
+        use cogito_openai::prelude::*;
         use paste::paste;
 
         macro_rules! model_tests {
