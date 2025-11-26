@@ -195,7 +195,7 @@ checksum = "a1d728cc89cf3aee9ff92b05e62b19ee65a02b5702cff7d5a377e32c6ae29d8d"
 [[package]]
 name = "cogito"
 version = "0.2.0"
-source = "git+https://github.com/mdippery/cogito.git#fc69cd8622c1cb9bc336b302bd6455960b997ef7"
+source = "git+https://github.com/mdippery/cogito.git?branch=claude#f9a74c043e176db65027608eea8d4e6c6a21302e"
 dependencies = [
  "hypertyper",
  "reqwest",
@@ -204,8 +204,8 @@ dependencies = [
 
 [[package]]
 name = "cogito-openai"
-version = "0.2.0"
-source = "git+https://github.com/mdippery/cogito.git#fc69cd8622c1cb9bc336b302bd6455960b997ef7"
+version = "0.3.0"
+source = "git+https://github.com/mdippery/cogito.git?branch=claude#f9a74c043e176db65027608eea8d4e6c6a21302e"
 dependencies = [
  "cogito",
  "hypertyper",
