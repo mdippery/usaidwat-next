@@ -203,13 +203,14 @@ dependencies = [
 ]
 
 [[package]]
-name = "cogito-openai"
-version = "0.3.0"
+name = "cogito-claude"
+version = "0.1.0"
 source = "git+https://github.com/mdippery/cogito.git#5e299cd9ba3164289eeb6bbcfebdd996ff957f7a"
 dependencies = [
  "cogito",
  "hypertyper",
- "itertools",
+ "log",
+ "reqwest",
  "serde",
  "serde_json",
 ]
@@ -1695,7 +1696,7 @@ dependencies = [
  "clap",
  "clap-verbosity-flag",
  "cogito",
- "cogito-openai",
+ "cogito-claude",
  "colored",
  "counter",
  "env_logger",

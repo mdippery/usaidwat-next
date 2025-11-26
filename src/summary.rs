@@ -134,7 +134,7 @@ mod tests {
     use crate::summary::Summarizer;
     use crate::test_utils::load_output;
     use cogito::prelude::*;
-    use cogito_openai::client::OpenAIResponse;
+    use cogito_claude::prelude::*;
     use pretty_assertions::assert_eq;
     use std::fs;
     use std::sync::{Arc, Mutex};
@@ -199,9 +199,9 @@ mod tests {
 
     impl AiResponse for TestAPIResponse {
         fn result(&self) -> String {
-            let json_data = fs::read_to_string("tests/data/openai/responses_multi_content.json")
+            let json_data = fs::read_to_string("tests/data/claude/responses_multi_content.json")
                 .expect("could not load file");
-            let wrapped: OpenAIResponse =
+            let wrapped: ClaudeResponse =
                 serde_json::from_str(&json_data).expect("could not parse json");
             wrapped.result()
         }

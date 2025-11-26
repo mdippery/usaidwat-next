@@ -1,15 +1,15 @@
 use cogito::service::Auth;
-use cogito_openai::client::OpenAIClient;
+use cogito_claude::prelude::*;
 use hypertyper::HttpClientFactory;
 use usaidwat::reddit::Redditor;
 use usaidwat::summary::Summarizer;
 
 #[tokio::test]
-#[ignore = "long test"]
+//#[ignore = "long test"]
 async fn it_summarizes_a_redditors_comments() {
-    let auth = Auth::from_env("OPENAI_API_KEY").expect("$OPENAI_API_KEY is not defined");
+    let auth = Auth::from_env("CLAUDE_API_KEY").expect("$CLAUDE_API_KEY is not defined");
     let factory = HttpClientFactory::new(env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION"));
-    let client = OpenAIClient::new(auth, factory);
+    let client = ClaudeClient::new(auth, factory);
     let user = Redditor::new("mipadi")
         .await
         .expect("could not create redditor");

@@ -63,35 +63,35 @@
 //! usaidwat --help
 //! ```
 //!
-//! # OpenAI API Setup
+//! # Claude API Setup
 //!
 //! To use the summarization feature provided by `usaidwat summary` and the
-//! [`Summarizer`](summary::Summarizer), you must set up access to OpenAI.
-//! To enable access:
+//! [`Summarizer`](summary::Summarizer), you must set up access to the Claude
+//! platform. To enable access:
 //!
-//! 1. Set up an [OpenAI API account].
+//! 1. Set up a [Claude API account].
 //! 2. Generate an [API key].
 //! 3. Copy and paste the generated key.
-//! 4. Store the generated key in your shell's `$OPENAI_API_KEY` environment
+//! 4. Store the generated key in your shell's `$CLAUDE_API_KEY` environment
 //!    variable. Follow your shell's procedure for configuring environment
 //!    variables, but generally this involves running
 //!
 //!    ```bash
-//!    $ export OPENAI_API_KEY='copied api key'
+//!    $ export CLAUDE_API_KEY='copied api key'
 //!    ```
 //!
 //!    In your shell session or in your shell's configuration ("rc") file
 //!    (e.g., `~/.bashrc` or `~/.zshrc`).
 //!
-//! **You are solely responsible for the cost of your use of the OpenAI API!**
-//! See the [openai module documentation] for more information on the cost of
-//! using the OpenAI API.
+//! **You are solely responsible for the cost of your use of the Claude API!**
+//! See the [claude module documentation] for more information on the cost of
+//! using the Claude API.
 //!
 //! By default, `usaidwat summary` will use the [cheapest model]; see
 //! `usaidwat summary -h` for other options.
 //!
-//! Currently only OpenAI's API is supported by usaidwat, but support for additional
-//! providers may be added in the future.
+//! Currently only the Claude API is supported by usaidwat, but support for
+//! additional providers may be added in the future.
 //!
 //! # License
 //!
@@ -100,10 +100,10 @@
 //! link for more information on licensing.
 //!
 //! [Apache License 2.0]: https://www.apache.org/licenses/LICENSE-2.0
-//! [API key]: https://platform.openai.com/settings/organization/api-keys
-//! [OpenAI API account]: https://platform.openai.com/docs/overview
+//! [API key]: https://platform.claude.com/settings/keys
+//! [Claude API account]: https://platform.claude.com/
 //! [cheapest model]: https://docs.rs/cogito/latest/cogito/trait.AIModel.html#tymethod.cheapest
-//! [openai module documentation]: https://docs.rs/cogito-openai
+//! [claude module documentation]: https://docs.rs/cogito-claude
 
 pub mod cli;
 pub mod count;

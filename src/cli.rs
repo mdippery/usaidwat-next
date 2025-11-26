@@ -13,8 +13,7 @@ use crate::view::{ViewOptions, Viewable};
 use clap::{Args, Parser, Subcommand, ValueEnum};
 use clap_verbosity_flag::Verbosity;
 use cogito::prelude::*;
-use cogito_openai::OpenAIModel;
-use cogito_openai::client::OpenAIClient;
+use cogito_claude::prelude::*;
 use horologe::SystemClock;
 use hypertyper::HttpClientFactory;
 use indoc::formatdoc;
@@ -132,8 +131,8 @@ enum Command {
     #[clap(visible_alias = "summarize")]
     #[clap(visible_alias = "s")]
     #[clap(
-        after_help = after_summary_help::<OpenAIModel>(),
-        after_long_help = after_summary_help_long::<OpenAIClient<Service>>(),
+        after_help = after_summary_help::<ClaudeModel>(),
+        after_long_help = after_summary_help_long::<ClaudeClient<Service>>(),
     )]
     Summary {
         /// Reddit username
@@ -503,10 +502,10 @@ impl Runner {
 
     async fn run_summary(&self, model: &AIModelClass, include_self: &bool) -> Result {
         let auth =
-            Auth::from_env("OPENAI_API_KEY").map_err(|_| include_str!("help/summary.txt"))?;
+            Auth::from_env("CLAUDE_API_KEY").map_err(|_| include_str!("help/summary.txt"))?;
 
         let factory = HttpClientFactory::new(env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION"));
-        let client = OpenAIClient::new(auth, factory);
+        let client = ClaudeClient::new(auth, factory);
 
         let summarizer = Summarizer::new(client, self.user());
         info!("Instructions:\n{}", summarizer.instructions());
@@ -581,7 +580,7 @@ mod tests {
     mod ai_model_class {
         use super::super::AIModelClass;
         use cogito::prelude::*;
-        use cogito_openai::prelude::*;
+        use cogito_claude::prelude::*;
         use paste::paste;
 
         macro_rules! model_tests {
@@ -591,8 +590,8 @@ mod tests {
                         #[test]
                         fn [<it_selects_the_ $name:snake _model>]() {
                             let flag = AIModelClass::$name;
-                            let model: OpenAIModel = flag.model();
-                            assert_eq!(model, OpenAIModel::[<$name:snake>]());
+                            let model: ClaudeModel = flag.model();
+                            assert_eq!(model, ClaudeModel::[<$name:snake>]());
                         }
                     )*
                 }
