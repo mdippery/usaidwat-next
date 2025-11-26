@@ -198,7 +198,7 @@ mod tests {
                 .expect("could not load file");
             let wrapped: OpenAIResponse =
                 serde_json::from_str(&json_data).expect("could not parse json");
-            wrapped.concatenate()
+            wrapped.result()
         }
     }
 
