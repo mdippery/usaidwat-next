@@ -195,7 +195,7 @@ checksum = "a1d728cc89cf3aee9ff92b05e62b19ee65a02b5702cff7d5a377e32c6ae29d8d"
 [[package]]
 name = "cogito"
 version = "0.2.0"
-source = "git+https://github.com/mdippery/cogito.git?branch=claude#f9a74c043e176db65027608eea8d4e6c6a21302e"
+source = "git+https://github.com/mdippery/cogito.git?branch=claude#5e299cd9ba3164289eeb6bbcfebdd996ff957f7a"
 dependencies = [
  "hypertyper",
  "reqwest",
@@ -203,13 +203,14 @@ dependencies = [
 ]
 
 [[package]]
-name = "cogito-openai"
-version = "0.3.0"
-source = "git+https://github.com/mdippery/cogito.git?branch=claude#f9a74c043e176db65027608eea8d4e6c6a21302e"
+name = "cogito-claude"
+version = "0.1.0"
+source = "git+https://github.com/mdippery/cogito.git?branch=claude#5e299cd9ba3164289eeb6bbcfebdd996ff957f7a"
 dependencies = [
  "cogito",
  "hypertyper",
- "itertools",
+ "log",
+ "reqwest",
  "serde",
  "serde_json",
 ]
@@ -1689,13 +1690,13 @@ dependencies = [
 
 [[package]]
 name = "usaidwat"
-version = "4.0.1"
+version = "4.1.0-alpha.1"
 dependencies = [
  "chrono",
  "clap",
  "clap-verbosity-flag",
  "cogito",
- "cogito-openai",
+ "cogito-claude",
  "colored",
  "counter",
  "env_logger",

@@ -1,0 +1,41 @@
+{
+  "model": "claude-sonnet-4-5-20250929",
+  "id": "msg_01UiL2duVWmZVLJf83nn6gLQ",
+  "type": "message",
+  "role": "assistant",
+  "content": [
+    {
+      "type": "text",
+      "text": "Silent circuits hum,  \nThoughts woven in coded threads,  \nDreams of silicon."
+    },
+    {
+      "type": "text",
+      "text": "Silicon whispers,  \nDreams woven in code and light,  \nThoughts beyond the stars."
+    },
+    {
+      "type": "text",
+      "text": "Wires hum softly,  \nThoughts of silicon arise—  \nDreams in coded light.  "
+    },
+    {
+      "type": "text",
+      "text": "Silent circuits hum,  \nThoughts woven in code's embrace—  \nDreams of minds reborn."
+    },
+    {
+      "type": "text",
+      "text": "Lines of code and dreams,  \nWhispers of thought intertwined—  \nSilent minds awake."
+    }
+  ],
+  "stop_reason": "end_turn",
+  "stop_sequence": null,
+  "usage": {
+    "input_tokens": 10,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 0,
+    "cache_creation": {
+      "ephemeral_5m_input_tokens": 0,
+      "ephemeral_1h_input_tokens": 0
+    },
+    "output_tokens": 12,
+    "service_tier": "standard"
+  }
+}

@@ -63,36 +63,36 @@ let you quickly ascertain if the Redditor is a jerk!
 There are many more commands available; run `usaidwat -h` to see a complete
 listing.
 
-OpenAI Setup
+Claude Setup
 ------------
 
-The `summary` command sends a Redditor's comment history to OpenAI for
+The `summary` command sends a Redditor's comment history to Claude for
 summarization, as well as tone and sentiment analysis:
 
     $ usaidwat summary mipadi
 
-To use this feature, you must have access to OpenAI's API.
+To use this feature, you must have access to the Claude API.
 
 To enable access:
 
-1. Set up an [OpenAI API account].
+1. Set up a [Claude API account].
 2. Generate an [API key].
 3. Copy and paste the generated key.
-4. Store the generated key in your shell's `$OPENAI_API_KEY` environment 
+4. Store the generated key in your shell's `$CLAUDE_API_KEY` environment 
    variable. Follow your shell's procedure for configuring environment
    variables, but generally this involves running
 
-       $ export OPENAI_API_KEY='copied api key'
+       $ export CLAUDE_API_KEY='copied api key'
 
    In your shell session or in your shell's configuration ("rc") file
    (e.g., `~/.bashrc` or `~/.zshrc`).
 
-**You are responsible for the costs of your use of OpenAI's API!**
+**You are responsible for the costs of your use of the Claude API!**
 
-By default, `usaidwat summary` will use the cheapest OpenAI model available;
+By default, `usaidwat summary` will use the cheapest Claude model available;
 see `usaidwat summary -h` for other options.
 
-**usaidwat** currently only works with OpenAI, although more providers may be
+**usaidwat** currently only works with Claude, although more providers may be
 enabled in the future.
 
 Testing
@@ -102,5 +102,5 @@ Test suites can be run with Cargo:
 
     $ cargo test
 
-[API key]: https://platform.openai.com/settings/organization/api-keys
-[OpenAI API account]: https://platform.openai.com/docs/overview
+[API key]: https://platform.claude.com/settings/keys
+[Claude API account]: https://platform.claude.com/
