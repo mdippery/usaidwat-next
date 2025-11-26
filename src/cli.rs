@@ -48,6 +48,7 @@ where
 fn after_summary_help_long<T>() -> String
 where
     T: AiClient,
+    T::AiRequest: AiRequest + fmt::Debug,
     <T::AiRequest as AiRequest>::Model: AiModel + fmt::Display,
 {
     let short_help = after_summary_help::<<T::AiRequest as AiRequest>::Model>();
