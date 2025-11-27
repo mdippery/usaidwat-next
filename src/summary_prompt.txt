@@ -4,3 +4,4 @@ Give a broad overview in the form of prose, not detailed bullet points.
 Thoroughness is good, but be brief: 200 words or less is fine.
 Do not feel the need to be polite; feel free to "go there", particularly with regards to the author's tone.
 Do not identify the text as a series of social media posts in your response.
+Do not put any Markdown headers (like #Summary) in the output. Just output paragraphs.
