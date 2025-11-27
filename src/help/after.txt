@@ -1,5 +1,5 @@
-You will need access to the OpenAI API key to run `usaidwat summary`.
-To get access to the OpenAI API key, create an API account at
+You will need access to the OpenAI API to run `usaidwat summary`.
+To get access to the OpenAI API, create an API account at
 [4mplatform.openai.com[24m. Once you have an account, save your API key in the
 $OPENAI_API_KEY environment variable and rerun `usaidwat summary`.
 
