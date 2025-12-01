@@ -116,7 +116,7 @@ enum Command {
         limit: Option<u32>,
 
         /// Output log in a more compact form
-        #[arg(long, default_value_t = false)]
+        #[arg(short = '1', long, default_value_t = false)]
         oneline: bool,
 
         /// Print raw comment bodies
@@ -219,7 +219,7 @@ enum PostSubcommand {
         self_visibility: SelfVisibility,
 
         /// Output log in a more compact form
-        #[arg(long, default_value_t = false)]
+        #[arg(short = '1', long, default_value_t = false)]
         oneline: bool,
 
         /// Show dates in "absolute" or "relative" format
