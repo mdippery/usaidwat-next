@@ -61,11 +61,11 @@ where
     ///
     /// If `needle` is `None`, all items are returned.
     pub fn grep(self, needle: &Option<String>) -> RedditFilter<impl Iterator<Item = I::Item>> {
-        let things: Vec<I::Item> = match needle {
-            None => self.things.collect(),
-            Some(needle) => self.things.filter(|thing| thing.matches(needle)).collect(),
-        };
-        let things = things.into_iter();
+        let things = self
+            .things
+            .filter(|thing| needle.is_none() || thing.matches(needle.as_ref().unwrap()))
+            .collect::<Vec<_>>()
+            .into_iter();
         RedditFilter { things }
     }
 
