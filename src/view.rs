@@ -6,7 +6,7 @@
 use crate::cli::DateFormat;
 use crate::count::SubredditCount;
 use crate::reddit::client::{Redditor, Timeline};
-use crate::reddit::thing::{Comment, HasSubreddit, Submission};
+use crate::reddit::thing::{Comment, HasBody, HasSubreddit, Submission};
 use crate::text::RegexReplaceable;
 use colored::Colorize;
 use horologe::{Clock, age::HasAge};

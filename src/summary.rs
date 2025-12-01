@@ -5,6 +5,7 @@
 
 use crate::markdown;
 use crate::reddit::Redditor;
+use crate::reddit::thing::HasBody;
 use cogito::prelude::*;
 use itertools::Itertools;
 

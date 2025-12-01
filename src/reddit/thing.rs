@@ -25,10 +25,60 @@ pub enum Error {
 /// A standard parsing result.
 pub type Result<T> = std::result::Result<T, Error>;
 
-/// A thing that is attached to a subreddit.
+/// A [thing](self) that is attached to a subreddit.
 pub trait HasSubreddit {
     /// The subreddit the thing appears in.
     fn subreddit(&self) -> &str;
+}
+
+/// A [thing](self) that has a body.
+pub trait HasBody {
+    /// The thing's body, as formatted Markdown text.
+    ///
+    /// The formatted text converts Markdown markup into terminal escape
+    /// codes for elegant display in a terminal.
+    fn body(&self) -> String;
+
+    /// The raw Markdown markup for the thing, as returned from the Reddit API.
+    ///
+    /// Like [`HasBody::raw_body`], this text is suitable for passing to a
+    /// Markdown parser. Unlike [`HasBody::raw_body`], the text is not wrapped,
+    /// and HTML entities have not yet been converted.
+    fn markdown_body(&self) -> String;
+
+    /// The thing's body, as raw Markdown text, with HTML entities converted
+    /// to their respective characters.
+    ///
+    /// Reddit converts some raw Markdown characters to HTML entities;
+    /// for example, `>` in raw Markdown markup will be returned from
+    /// Reddit as `&gt;` to be compatible with HTML and XML. This method
+    /// will convert HTML entities like `&gt;` into their corresponding
+    /// characters, but it will not do any additional parsing of Markdown
+    /// text. In other words, the text returned by this method is suitable
+    /// for passing into a Markdown parser.
+    ///
+    /// The returned text is wrapped to the current terminal width, so it
+    /// is also suitable for output to a terminal. For raw, unwrapped text,
+    /// without converted entities, use [`Comment::markdown_body`].
+    fn raw_body(&self) -> String {
+        textwrap::fill(
+            &text::convert_html_entities(&self.markdown_body()),
+            textwrap::termwidth(),
+        )
+    }
+
+    /// A summarized form of the thing's body, suitable for passing to
+    /// an LLM.
+    ///
+    /// This is essentially the thing's body stripped of all markup so
+    /// it is only the basic text. Text contained in extra markup, like link
+    /// text and quotes, are completely removed.
+    ///
+    /// Paragraphs are unwrapped (they appear on one line), and spaces between
+    /// paragraphs are removed.
+    fn summarized_body(&self) -> String {
+        markdown::summarize(&self.markdown_body())
+    }
 }
 
 /// A Reddit user account.
@@ -205,57 +255,15 @@ impl Comment {
     pub fn score(&self) -> i64 {
         self.score
     }
+}
 
-    /// The comment body, as formatted Markdown text.
-    ///
-    /// The formatted text converts Markdown markup into terminal escape
-    /// codes for elegant display in a terminal.
-    pub fn body(&self) -> String {
+impl HasBody for Comment {
+    fn body(&self) -> String {
         markdown::parse(&self.body, textwrap::termwidth())
     }
 
-    /// A summarized form of the comment body, suitable for passing to
-    /// an LLM.
-    ///
-    /// This is essentially the comment's body stripped of all markup so
-    /// it is only the basic text. Text contained in extra markup, like link
-    /// text and quotes, are completely removed.
-    ///
-    /// Paragraphs are unwrapped (they appear on one line), and spaces between
-    /// paragraphs are removed.
-    pub fn summarized_body(&self) -> String {
-        markdown::summarize(&self.body)
-    }
-
-    /// The comment body, as raw Markdown text, with HTML entities converted
-    /// to their respective characters.
-    ///
-    /// Reddit converts some raw Markdown characters to HTML entities;
-    /// for example, `>` in raw Markdown markup will be returned from
-    /// Reddit as `&gt;` to be compatible with HTML and XML. This method
-    /// will convert HTML entities like `&gt;` into their corresponding
-    /// characters, but it will not do any additional parsing of Markdown
-    /// text. In other words, the text returned by this method is suitable
-    /// for passing into a Markdown parser.
-    ///
-    /// The returned text is wrapped to the current terminal width, so it
-    /// is also suitable for output to a terminal. For raw, unwrapped text,
-    /// without converted entities, use [`Comment::markdown_body`].
-    pub fn raw_body(&self) -> String {
-        textwrap::fill(
-            &text::convert_html_entities(&self.body),
-            textwrap::termwidth(),
-        )
-    }
-
-    /// The raw Markdown markup for the comment, as returned from the Reddit
-    /// API.
-    ///
-    /// Like [`Comment::raw_body`], this text is suitable for passing to a
-    /// Markdown parser. Unlike [`Comment::raw_body`], the text is not wrapped,
-    /// and HTML entities have not yet been converted.
-    pub fn markdown_body(&self) -> &str {
-        &self.body
+    fn markdown_body(&self) -> String {
+        self.body.clone()
     }
 }
 
