@@ -263,7 +263,7 @@ impl fmt::Display for DateFormat {
 
 /// Determines the visibility of self posts in log output.
 #[derive(Clone, Debug, Default, PartialEq, ValueEnum)]
-pub enum SelfVisibility {
+enum SelfVisibility {
     /// Include self posts in log output, along with submission links.
     #[default]
     Always,
@@ -287,7 +287,7 @@ impl fmt::Display for SelfVisibility {
 
 /// Determines the qualities of the AI model used for summarization.
 #[derive(Clone, Debug, Default, ValueEnum)]
-pub enum AIModelClass {
+enum AIModelClass {
     /// Use the AI service's flagship model.
     ///
     /// This is the model that a particular AI service promotes as their
