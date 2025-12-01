@@ -203,9 +203,20 @@ enum PostSubcommand {
         // Only show posts from these subreddits
         subreddits: Vec<String>,
 
-        /// Only show self posts
-        #[arg(long = "self", default_value_t = false)]
-        self_only: bool,
+        /// Show or hide self posts
+        #[arg(
+            long = "self",
+            value_name = "VISIBILITY",
+            default_value_t,
+            // TODO: --self implies --self=only
+            // Unfortunately this option doesn't work, even though it should.
+            // The docs say requires_equals must be true and num_args must be
+            // set for default_missing_value to work, but it doesn't work even
+            // when setting those. Doesn't hurt to leave this defined until
+            // I can fix it, though.
+            default_missing_value = "only"
+        )]
+        self_visibility: SelfVisibility,
 
         /// Output log in a more compact form
         #[arg(long, default_value_t = false)]
@@ -246,6 +257,30 @@ impl fmt::Display for DateFormat {
         match self {
             DateFormat::Absolute => write!(f, "absolute"),
             DateFormat::Relative => write!(f, "relative"),
+        }
+    }
+}
+
+/// Determines the visibility of self posts in log output.
+#[derive(Clone, Debug, Default, PartialEq, ValueEnum)]
+pub enum SelfVisibility {
+    /// Include self posts in log output, along with submission links.
+    #[default]
+    Always,
+
+    /// Hide self posts in log output.
+    Never,
+
+    /// Only show self posts in log output.
+    Only,
+}
+
+impl fmt::Display for SelfVisibility {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            SelfVisibility::Always => write!(f, "always"),
+            SelfVisibility::Never => write!(f, "never"),
+            SelfVisibility::Only => write!(f, "only"),
         }
     }
 }
@@ -395,10 +430,10 @@ impl Runner {
                 subreddits,
                 date,
                 oneline,
-                self_only,
+                self_visibility,
                 ..
             } => Ok(self
-                .run_posts_log(subreddits, date, oneline, self_only)
+                .run_posts_log(subreddits, date, oneline, self_visibility)
                 .await?),
             PostSubcommand::Tally(config) => self.run_posts_tally(&config.sort_algorithm()),
         }
@@ -409,7 +444,7 @@ impl Runner {
         subreddits: &Vec<String>,
         date_format: &DateFormat,
         oneline: &bool,
-        self_only: &bool,
+        self_visibility: &SelfVisibility,
     ) -> Result {
         let opts = ViewOptions::default()
             .oneline(*oneline)
@@ -420,10 +455,12 @@ impl Runner {
             subreddits.join(" ")
         ))?;
 
-        let posts = self
-            .user()
-            .submissions()
-            .filter(|p| !*self_only || p.is_self());
+        // TODO: Should really test the filtering logic
+        let posts = self.user().submissions().filter(|p| match self_visibility {
+            SelfVisibility::Always => true,
+            SelfVisibility::Never => !p.is_self(),
+            SelfVisibility::Only => p.is_self(),
+        });
         let posts = RedditFilter::new(posts).filter(&filter).collect();
 
         let joiner = if *oneline { "\n" } else { "\n\n\n" };
