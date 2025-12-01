@@ -73,14 +73,11 @@ where
     ///
     /// If `subreddits` is empty, all items are returned.
     pub fn filter(self, subreddits: &StringSet) -> RedditFilter<impl Iterator<Item = I::Item>> {
-        let things: Vec<I::Item> = if subreddits.is_empty() {
-            self.things.collect()
-        } else {
-            self.things
-                .filter(|item| subreddits.contains(item.subreddit()))
-                .collect()
-        };
-        let things = things.into_iter();
+        let things = self
+            .things
+            .filter(|item| subreddits.is_empty() || subreddits.contains(item.subreddit()))
+            .collect::<Vec<_>>()
+            .into_iter();
 
         RedditFilter { things }
     }
