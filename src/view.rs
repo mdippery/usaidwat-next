@@ -131,13 +131,12 @@ impl Comment {
             self.body()
         };
 
-        let body = if !opts.raw
-            && let Some(grep) = &opts.grep
-        {
-            body.replace_all(&format!("(?i)(?<s>{grep})"), &"$s".red().to_string())
-        } else {
-            body
-        };
+        let body = self
+            .grep(opts)
+            .and_then(|grep| {
+                Some(body.replace_all(&format!("(?i)(?<s>{grep})"), &"$s".red().to_string()))
+            })
+            .unwrap_or(body);
 
         formatdoc! {"
             {}
@@ -157,6 +156,10 @@ impl Comment {
 
     fn view_oneline<C: Clock>(&self, _: &ViewOptions, _: &C) -> String {
         format!("{} {}", self.subreddit().green(), self.link_title())
+    }
+
+    fn grep<'a>(&self, opts: &'a ViewOptions) -> Option<&'a str> {
+        if opts.raw { None } else { opts.grep.as_deref() }
     }
 }
 
