@@ -323,8 +323,6 @@ Does that mean that the task difficulty is hindered, i.e., when the table says t
 Does that mean that the move roll, which can be a difficulty task of 0 (if moving a short distance) or a Speed task difficulty of 4 (if moving a long distance) is hindered, and the player must also make a roll of the difficulty shown in the table to climb (i.e., two rolls)?
 If #2 is the case, I imagine that move rolls only apply inside of combat (or a similar encounter), so in other cases, such as simply having to climb a cliff, would the player then only make a single climb check to climb as much as they want or need to?
 
-[removed]
-
 I am using the Carrot weather complication with the X-Large watch face, and it looks like this, with the temperature in the center of the gauge and the weather conditions as a small icon on the bottom. However, I also use the complication with the Infograph face, where in a previous iteration of the application, I reversed the display of the temperature and condition labels, so that the temperature is in small text at the bottom of the gauge, and the condition is shown larger, in the center of the gauge, as shown here. This is identical to what is shown in the preview for the complication X-Large on the X-Large face.
 Is there a way to swap the temperature text and condition icon on the X-Large face, so that the condition is shown as a large icon in the center and the temperature is a smaller text label at the bottom of the gauge (as shown in the preview)?
 

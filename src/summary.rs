@@ -5,7 +5,7 @@
 
 use crate::markdown;
 use crate::reddit::Redditor;
-use crate::reddit::thing::HasBody;
+use crate::reddit::thing::{HasBody, Removable};
 use cogito::prelude::*;
 use itertools::Itertools;
 
@@ -93,7 +93,7 @@ where
             let post_body = self
                 .user
                 .submissions()
-                .filter(|p| p.is_self())
+                .filter(|p| p.is_self() && !p.is_removed())
                 .map(|p| p.summarized_body())
                 .join("\n\n");
             format!("{comment_body}\n\n{post_body}")

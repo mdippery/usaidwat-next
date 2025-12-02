@@ -83,6 +83,12 @@ pub trait HasBody {
     }
 }
 
+/// A thing that can be removed.
+pub trait Removable {
+    /// True if the thing has been removed.
+    fn is_removed(&self) -> bool;
+}
+
 /// A Reddit user account.
 #[derive(Debug)]
 pub struct User {
@@ -355,6 +361,12 @@ impl HasSubreddit for Submission {
     /// The subreddit in which the submission was posted.
     fn subreddit(&self) -> &str {
         &self.subreddit
+    }
+}
+
+impl Removable for Submission {
+    fn is_removed(&self) -> bool {
+        self.selftext.to_lowercase() == "[removed]"
     }
 }
 
