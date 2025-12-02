@@ -33,18 +33,20 @@ pub trait HasSubreddit {
 
 /// A [thing](self) that has a body.
 pub trait HasBody {
-    /// The thing's body, as formatted Markdown text.
-    ///
-    /// The formatted text converts Markdown markup into terminal escape
-    /// codes for elegant display in a terminal.
-    fn body(&self) -> String;
-
     /// The raw Markdown markup for the thing, as returned from the Reddit API.
     ///
     /// Like [`HasBody::raw_body`], this text is suitable for passing to a
     /// Markdown parser. Unlike [`HasBody::raw_body`], the text is not wrapped,
     /// and HTML entities have not yet been converted.
     fn markdown_body(&self) -> String;
+
+    /// The thing's body, as formatted Markdown text.
+    ///
+    /// The formatted text converts Markdown markup into terminal escape
+    /// codes for elegant display in a terminal.
+    fn body(&self) -> String {
+        markdown::parse(&self.markdown_body(), textwrap::termwidth())
+    }
 
     /// The thing's body, as raw Markdown text, with HTML entities converted
     /// to their respective characters.
@@ -258,10 +260,6 @@ impl Comment {
 }
 
 impl HasBody for Comment {
-    fn body(&self) -> String {
-        markdown::parse(&self.body, textwrap::termwidth())
-    }
-
     fn markdown_body(&self) -> String {
         self.body.clone()
     }
@@ -337,6 +335,13 @@ impl Submission {
     /// The URL to which the submission points.
     pub fn url(&self) -> &str {
         &self.url
+    }
+}
+
+impl HasBody for Submission {
+    fn markdown_body(&self) -> String {
+        // TODO: Should this return link_text() if not a self post?
+        self.self_text().unwrap_or(String::new())
     }
 }
 
@@ -851,6 +856,87 @@ mod tests {
             let submission = &submissions[0];
             let expected = "https://acoup.blog/2025/01/03/collections-coinage-and-the-tyranny-of-fantasy-gold/";
             assert_eq!(submission.url(), expected);
+        }
+
+        #[test]
+        fn it_returns_its_body_if_it_is_a_self_post() {
+            let expected =
+                "At some point or another, I bought some albums on iTunes. In some cases, I've
+also ripped these CDs and imported them into iTunes. In older versions of iOS,
+I could hide purchased music from the Music app, but now that purchased music
+shows up, leading to duplicates like \u{1b}[4mthis\u{1b}[24m <http://imgur.com/a/FRsN6>. Is there a
+way to hide purchased music in iOS 10?";
+            let submissions = Submission::parse(&load_data("submitted_mipadi")).unwrap();
+            let submission = &submissions[67];
+            assert_eq!(submission.body(), expected);
+        }
+
+        #[test]
+        fn it_returns_raw_markdown_if_it_is_a_self_post() {
+            let expected = "At some point or another, I bought some albums on \
+                iTunes. In some cases, I've also ripped these CDs and imported \
+                them into iTunes. In older versions of iOS, I could hide \
+                purchased music from the Music app, but now that purchased \
+                music shows up, leading to duplicates like \
+                [this](http://imgur.com/a/FRsN6). Is there a way to hide \
+                purchased music in iOS 10?";
+            let submissions = Submission::parse(&load_data("submitted_mipadi")).unwrap();
+            let submission = &submissions[67];
+            assert_eq!(submission.markdown_body(), expected);
+        }
+
+        #[test]
+        fn it_returns_its_body_with_html_entities_converted_if_it_is_a_self_post() {
+            let expected =
+                "At some point or another, I bought some albums on iTunes. In some cases, I've
+also ripped these CDs and imported them into iTunes. In older versions of iOS,
+I could hide purchased music from the Music app, but now that purchased music
+shows up, leading to duplicates like [this](http://imgur.com/a/FRsN6). Is there
+a way to hide purchased music in iOS 10?";
+            let submissions = Submission::parse(&load_data("submitted_mipadi")).unwrap();
+            let submission = &submissions[67];
+            assert_eq!(submission.raw_body(), expected);
+        }
+
+        #[test]
+        fn it_returns_a_summarized_body_if_it_is_a_self_post() {
+            let expected = "At some point or another, I bought some albums on \
+                iTunes. In some cases, I've also ripped these CDs and imported \
+                them into iTunes. In older versions of iOS, I could hide \
+                purchased music from the Music app, but now that purchased \
+                music shows up, leading to duplicates like this. Is there a way \
+                to hide purchased music in iOS 10?";
+            let submissions = Submission::parse(&load_data("submitted_mipadi")).unwrap();
+            let submission = &submissions[67];
+            assert_eq!(submission.summarized_body(), expected);
+        }
+
+        #[test]
+        fn it_returns_its_body_if_it_is_not_a_self_post() {
+            let submissions = Submission::parse(&load_data("submitted_mipadi")).unwrap();
+            let submission = &submissions[0];
+            assert_eq!(submission.body(), "");
+        }
+
+        #[test]
+        fn it_returns_raw_markdown_if_it_is_not_a_self_post() {
+            let submissions = Submission::parse(&load_data("submitted_mipadi")).unwrap();
+            let submission = &submissions[0];
+            assert_eq!(submission.body(), "");
+        }
+
+        #[test]
+        fn it_returns_its_body_with_html_entities_converted_if_it_is_not_a_self_post() {
+            let submissions = Submission::parse(&load_data("submitted_mipadi")).unwrap();
+            let submission = &submissions[0];
+            assert_eq!(submission.body(), "");
+        }
+
+        #[test]
+        fn it_returns_a_summarized_body_if_it_is_not_a_self_post() {
+            let submissions = Submission::parse(&load_data("submitted_mipadi")).unwrap();
+            let submission = &submissions[0];
+            assert_eq!(submission.body(), "");
         }
 
         #[test]

@@ -178,18 +178,25 @@ impl DateFormattable for Submission {}
 impl Submission {
     fn view_full<C: Clock>(&self, opts: &ViewOptions, clock: &C) -> String {
         let age = self.format_date(opts, clock);
+        let body = if self.is_self() {
+            &self.body()
+        } else {
+            self.link_uri()
+        };
+
         String::from(
             formatdoc! {"
                 {}
                 {}
                 {}
                 {}
+
                 {}",
                 self.subreddit().green(),
                 self.short_permalink().yellow(),
                 self.title().magenta(),
                 age.blue(),
-                self.link_uri(),
+                body,
             }
             // Remove trailing space since the link will be blank for self posts
             .trim_end(),

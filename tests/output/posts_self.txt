@@ -2,3 +2,30 @@
 [33mhttps://www.reddit.com/r/NoMansSkyTheGame/comments/1e83c2w[0m
 [35mShould I install both protection upgrades and protection units in an exosuit?[0m
 [34m10 months ago[0m
+
+I have two types of technology upgrades available for my exosuit: items listed
+as [4mprotection units[24m, and items listed as [4mprotection upgrades[24m. The ones listed as
+upgrades have text that generally says something like "an almost total rework of
+the <damage type> Protection, this upgrade brings unparalleled improvements to
+<damage type> Shielding and <damage type> Protection", whereas the upgrade units
+give a percentage of resistance.
+
+Should I install both, or do I just need to install one or the other? For
+example:
+
+  * I have a "High-Energy Bio-Integrity Unit" which is a [4mprotection upgrade[24m,
+    and I can build a "Radiation Reflector" which is a [4mprotection unit[24m. Should I
+    install both?
+  * I have a "Specialist De-Toxifier" and I can build a "Toxin Suppressor".
+    Should I install both?
+  * I have a "Carbon Sublimation Pump" and I can build a "Coolant Network".
+    Should I install both?
+  * I have a "Nitroged-Based Thermal Stabilizer" and I can build a "Thermic
+    Layer". Should I install both?
+
+And then for something similar but a little different:
+
+  * I have a "Deep Water Depth Protection" which says it is an "almost total
+    rework of the Aeration Membrance", and I can also build an Aeration
+    Membrane. Will crafting and installing an Aeration Membrane bring any extra
+    benefits?
