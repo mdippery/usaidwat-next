@@ -141,6 +141,10 @@ enum Command {
         /// Use this AI model for summarization
         #[arg(short = 'm', long, default_value_t)]
         model: AIModelClass,
+
+        /// Include self posts in AI summarization
+        #[arg(long = "self", default_value_t = false)]
+        include_self: bool,
     },
 
     /// Tally a user's comments by subreddit
@@ -371,7 +375,11 @@ impl Runner {
                     .await
             }
             Command::Posts(subconfig) => self.run_posts(subconfig).await,
-            Command::Summary { model, .. } => self.run_summary(model).await,
+            Command::Summary {
+                model,
+                include_self,
+                ..
+            } => self.run_summary(model, include_self).await,
             Command::Tally(config) => self.run_tally(&config.sort_algorithm()),
             Command::Timeline { .. } => self.run_timeline(),
         }
@@ -492,7 +500,7 @@ impl Runner {
         }
     }
 
-    async fn run_summary(&self, model: &AIModelClass) -> Result {
+    async fn run_summary(&self, model: &AIModelClass, include_self: &bool) -> Result {
         let auth =
             Auth::from_env("OPENAI_API_KEY").map_err(|_| include_str!("help/summary.txt"))?;
 
@@ -501,7 +509,10 @@ impl Runner {
 
         let summarizer = Summarizer::new(client, self.user());
         info!("Instructions:\n{}", summarizer.instructions());
-        debug!("Summarization output:\n{}", summarizer.context());
+        debug!(
+            "Summarization output:\n{}",
+            summarizer.context(*include_self)
+        );
 
         let model = model.model();
         debug!("Using model: {:?} - {}", model, model);
@@ -518,7 +529,7 @@ impl Runner {
         let now = Instant::now();
         let output = summarizer
             .model(model)
-            .summarize()
+            .summarize(*include_self)
             .await
             .map_err(|err| format!("Error in API request: {err}"))?;
         let elapsed = now.elapsed();

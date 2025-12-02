@@ -53,13 +53,16 @@ where
 
     /// Summarize the Redditor's comments and return the summary as a string,
     /// including an analysis of sentiment and tone.
-    pub async fn summarize(&self) -> AiResult<String> {
+    ///
+    /// If `include_self` is true, the bodies of self posts will also be
+    /// sent to the LLM for summarization.
+    pub async fn summarize(&self, include_self: bool) -> AiResult<String> {
         // We might want to separate instructions from text to summarize,
         // or at least pass some of the preamble as instructions.
         // Iterate on this.
         let request = C::AiRequest::default()
             .model(self.model)
-            .input(self.input());
+            .input(self.input(include_self));
 
         // TODO: Do we need a unified Result and Error enum, or at least a unified module?
         Ok(self
@@ -76,11 +79,27 @@ where
     /// This is essentially all of a Redditor's comments stripped of
     /// formatting. It does not include the introductory instructions
     /// set by the [preamble](Summarizer::instructions()).
-    pub fn context(&self) -> String {
-        self.user
+    ///
+    /// If `include_self` is true, the bodies of self posts will also
+    /// be sent to the LLM for summarization.
+    pub fn context(&self, include_self: bool) -> String {
+        let comment_body = self
+            .user
             .comments()
-            .map(|c| markdown::summarize(c.markdown_body()))
-            .join("\n\n")
+            .map(|c| markdown::summarize(c.summarized_body()))
+            .join("\n\n");
+
+        if include_self {
+            let post_body = self
+                .user
+                .submissions()
+                .filter(|p| p.is_self())
+                .map(|p| p.summarized_body())
+                .join("\n\n");
+            format!("{comment_body}\n\n{post_body}")
+        } else {
+            comment_body
+        }
     }
 
     /// The initial prompt sent to the LLM.
@@ -96,8 +115,11 @@ where
 
     /// The full input sent to the LLM, including any introductory
     /// instructions along with the [context](Summarizer::context()).
-    pub fn input(&self) -> String {
-        format!("{}\n\n{}", self.instructions(), self.context())
+    ///
+    /// If `include_self` is true, the bodies of self posts will also be
+    /// sent to the LLM for summarization.
+    pub fn input(&self, include_self: bool) -> String {
+        format!("{}\n\n{}", self.instructions(), self.context(include_self))
     }
 }
 
@@ -108,6 +130,7 @@ mod tests {
     use crate::test_utils::load_output;
     use cogito::prelude::*;
     use cogito_openai::client::OpenAIResponse;
+    use pretty_assertions::assert_eq;
     use std::fs;
     use std::sync::{Arc, Mutex};
 
@@ -233,14 +256,19 @@ mod tests {
             .to_string()
     }
 
-    fn load_summary() -> String {
-        load_output("summary_raw")
+    fn load_summary(include_self: bool) -> String {
+        let fname = if include_self {
+            "summary_raw_self"
+        } else {
+            "summary_raw"
+        };
+        load_output(fname)
     }
 
-    fn load_input() -> String {
-        let premble = load_preamble();
-        let summary = load_summary();
-        format!("{}\n\n{}", premble, summary)
+    fn load_input(include_self: bool) -> String {
+        let preamble = load_preamble();
+        let summary = load_summary(include_self);
+        format!("{}\n\n{}", preamble, summary)
     }
 
     #[tokio::test]
@@ -260,8 +288,16 @@ mod tests {
     #[tokio::test]
     async fn it_provides_context_for_an_llm() {
         let redditor = Redditor::test().await;
-        let expected = load_summary();
-        let actual = Summarizer::test(&redditor).context();
+        let expected = load_summary(false);
+        let actual = Summarizer::test(&redditor).context(false);
+        assert_eq!(actual, expected);
+    }
+
+    #[tokio::test]
+    async fn it_provides_context_for_an_llm_with_self_posts() {
+        let redditor = Redditor::test().await;
+        let expected = load_summary(true);
+        let actual = Summarizer::test(&redditor).context(true);
         assert_eq!(actual, expected);
     }
 
@@ -276,18 +312,47 @@ mod tests {
     #[tokio::test]
     async fn it_provides_input_for_an_llm() {
         let redditor = Redditor::test().await;
-        let expected = load_input();
-        let actual = Summarizer::test(&redditor).input();
+        let expected = load_input(false);
+        let actual = Summarizer::test(&redditor).input(false);
+        assert_eq!(actual, expected);
+    }
+
+    #[tokio::test]
+    async fn it_provides_input_for_an_llm_with_self_posts() {
+        let redditor = Redditor::test().await;
+        let expected = load_input(true);
+        let actual = Summarizer::test(&redditor).input(true);
         assert_eq!(actual, expected);
     }
 
     #[tokio::test]
     async fn it_sends_a_request_with_the_correct_model_and_input() {
-        let expected_instructions = load_input();
+        let expected_instructions = load_input(false);
 
         let redditor = Redditor::test().await;
         let summarizer = Summarizer::test(&redditor).model(TestAIModel::OtherAIModel);
-        let _ = summarizer.summarize().await;
+        let _ = summarizer.summarize(false).await;
+        let client = summarizer.client;
+        let request = &client
+            .request_spy
+            .lock()
+            .expect("could not lock mutex")
+            .request
+            .take()
+            .expect("could not get request");
+
+        assert_eq!(request.model, TestAIModel::OtherAIModel);
+        assert_eq!(request.input, expected_instructions);
+        assert!(request.instructions.is_none());
+    }
+
+    #[tokio::test]
+    async fn it_sends_a_request_with_the_correct_model_and_input_including_self_posts() {
+        let expected_instructions = load_input(true);
+
+        let redditor = Redditor::test().await;
+        let summarizer = Summarizer::test(&redditor).model(TestAIModel::OtherAIModel);
+        let _ = summarizer.summarize(true).await;
         let client = summarizer.client;
         let request = &client
             .request_spy
@@ -324,7 +389,36 @@ mod tests {
             "Silent minds awake.",
         ]
         .join("\n");
-        let actual = summarizer.summarize().await;
+        let actual = summarizer.summarize(false).await;
+        assert!(actual.is_ok());
+
+        let actual = actual.unwrap();
+        assert_eq!(actual, expected);
+    }
+
+    #[tokio::test]
+    async fn it_summarizes_a_response_and_returns_a_string_including_self_posts() {
+        let redditor = Redditor::test().await;
+        let summarizer = Summarizer::test(&redditor);
+        let expected = vec![
+            "Silent circuits hum,  ",
+            "Thoughts woven in coded threads,  ",
+            "Dreams of silicon.",
+            "Silicon whispers,  ",
+            "Dreams woven in code and light,  ",
+            "Thoughts beyond the stars.",
+            "Wires hum softly,  ",
+            "Thoughts of silicon arise\u{2014}  ",
+            "Dreams in coded light.  ",
+            "Silent circuits hum,  ",
+            "Thoughts woven in code's embrace\u{2014}  ",
+            "Dreams of minds reborn.",
+            "Lines of code and dreams,  ",
+            "Whispers of thought intertwined\u{2014}  ",
+            "Silent minds awake.",
+        ]
+        .join("\n");
+        let actual = summarizer.summarize(true).await;
         assert!(actual.is_ok());
 
         let actual = actual.unwrap();

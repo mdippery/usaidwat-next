@@ -14,7 +14,7 @@ async fn it_summarizes_a_redditors_comments() {
         .await
         .expect("could not create redditor");
     let summarizer = Summarizer::new(client, &user);
-    let response = summarizer.summarize().await;
+    let response = summarizer.summarize(false).await;
     assert!(response.is_ok());
 
     let response = response.unwrap();
