@@ -4,6 +4,7 @@
 //! General-purpose search utilities.
 
 use crate::reddit::thing::HasSubreddit;
+use itertools::Itertools;
 use regex::Regex;
 use std::collections::HashSet;
 
@@ -45,15 +46,23 @@ where
         Self { things }
     }
 
+    /// The number of items in the filter.
+    ///
+    /// This length is a "best guess" and may return `usize::MAX` if the
+    /// number of items in the filter cannot be accurately countered nor
+    /// estimated.
+    fn length(&self) -> usize {
+        self.things
+            .try_len()
+            .unwrap_or_else(|(_lower, upper)| upper.unwrap_or(usize::MAX))
+    }
+
     /// Returns the first n items.
     ///
     /// If `limit` is `None`, then all items are returned.
     pub fn take(self, limit: &Option<u32>) -> RedditFilter<impl Iterator<Item = I::Item>> {
-        let things: Vec<I::Item> = match limit {
-            None => self.things.collect(),
-            Some(n) => self.things.take(*n as usize).collect(),
-        };
-        let things = things.into_iter();
+        let n = limit.map(|n| n as usize).unwrap_or_else(|| self.length());
+        let things = self.things.take(n).collect::<Vec<_>>().into_iter();
         RedditFilter { things }
     }
 
