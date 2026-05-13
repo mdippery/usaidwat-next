@@ -126,7 +126,7 @@ impl StringSet {
             None
         } else {
             let all_positive = validator.all_positive();
-            let set = validator.into_set();
+            let set: HashSet<String> = validator.into();
             let kind = if all_positive {
                 StringSetKind::Positive(set)
             } else {
@@ -226,15 +226,15 @@ impl StringSetValidator {
     pub fn all_positive(&self) -> bool {
         self.strings.iter().all(|s| !s.starts_with('-'))
     }
+}
 
-    /// Converts the internally stored strings into a hash set, consuming
-    /// the validator in the process.
-    pub fn into_set(self) -> HashSet<String> {
-        HashSet::from_iter(
-            self.strings
-                .into_iter()
-                .map(|s| s.trim_start_matches('-').to_lowercase()),
-        )
+impl From<StringSetValidator> for HashSet<String> {
+    fn from(value: StringSetValidator) -> Self {
+        value
+            .strings
+            .into_iter()
+            .map(|s| s.trim_start_matches('-').to_lowercase())
+            .collect()
     }
 }
 
