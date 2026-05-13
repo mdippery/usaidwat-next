@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Copyright (C) 2025 Michael Dippery <michael@monkey-robot.com>
+// Copyright (C) 2025-2026 Michael Dippery <michael@monkey-robot.com>
 
 //! Drives the command-line program.
 
@@ -488,7 +488,7 @@ impl Runner {
 
         if self.user().has_submissions() {
             let posts = self.user().submissions();
-            let tallies = SubredditCounter::from_iter(posts).sort_by(sort_algorithm);
+            let tallies = posts.collect::<SubredditCounter>().sort_by(sort_algorithm);
             println!(
                 "{}",
                 tallies.view(&ViewOptions::default(), &SystemClock::default())
@@ -543,7 +543,9 @@ impl Runner {
 
         if self.user.has_comments() {
             let comments = self.user().comments();
-            let tallies = SubredditCounter::from_iter(comments).sort_by(sort_algorithm);
+            let tallies = comments
+                .collect::<SubredditCounter>()
+                .sort_by(sort_algorithm);
             println!(
                 "{}",
                 tallies.view(&ViewOptions::default(), &SystemClock::default())

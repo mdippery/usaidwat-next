@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Copyright (C) 2025 Michael Dippery <michael@monkey-robot.com>
+// Copyright (C) 2025-2026 Michael Dippery <michael@monkey-robot.com>
 
 //! General-purpose counting capabilities.
 
@@ -24,19 +24,38 @@ pub type SubredditCount = (String, usize);
 
 /// Groups Reddit comments and submissions by subreddit and provides a
 /// count of the number of items in each subreddit.
+///
+/// Normally you create a `SubredditCounter` by calling `collect()` on
+/// an iterator of `Comments` or `Submissions`, as described in
+/// [`SubredditCounter::from_iter()`].
 #[derive(Debug)]
 pub struct SubredditCounter {
     counts: Counter<String>,
 }
 
-impl SubredditCounter {
+impl<A: HasSubreddit> FromIterator<A> for SubredditCounter {
     /// Groups and counts comments and submissions.
     ///
     /// `iter` is an iterator of `Comments` or `Submissions`, or anything
     /// that has a subreddit attached to it.
-    pub fn from_iter<T: HasSubreddit>(iter: impl Iterator<Item = T>) -> Self {
+    ///
+    /// You can easily create a `SubredditCounter` from these iterators
+    /// using `collect()`:
+    ///
+    /// ```text
+    /// comments.collect::<SubredditCounter>()
+    /// ```
+    fn from_iter<T: IntoIterator<Item = A>>(iter: T) -> Self {
         let counts = SubredditCounter::count(iter);
         SubredditCounter { counts }
+    }
+}
+
+impl SubredditCounter {
+    fn count<T: HasSubreddit>(iter: impl IntoIterator<Item = T>) -> Counter<String> {
+        iter.into_iter()
+            .map(|item| String::from(item.subreddit()))
+            .collect::<Counter<_>>()
     }
 
     /// Sorts the subreddit counts by subreddit name or the count of items in
@@ -48,11 +67,6 @@ impl SubredditCounter {
             SortAlgorithm::Numerically => self.sort_numerically(),
             SortAlgorithm::Lexicographically => self.sort_lexicographically(),
         }
-    }
-
-    fn count<T: HasSubreddit>(iter: impl Iterator<Item = T>) -> Counter<String> {
-        iter.map(|item| String::from(item.subreddit()))
-            .collect::<Counter<_>>()
     }
 
     fn sort_numerically(&self) -> Vec<SubredditCount> {
@@ -133,7 +147,9 @@ mod tests {
         .iter()
         .map(|(subreddit, count)| ((*subreddit).to_string(), *count as usize))
         .collect();
-        let actual: Vec<SubredditCount> = SubredditCounter::from_iter(redditor.comments())
+        let actual: Vec<SubredditCount> = redditor
+            .comments()
+            .collect::<SubredditCounter>()
             .sort_by(&SortAlgorithm::Lexicographically);
         assert_eq!(actual, expected);
     }
@@ -158,8 +174,10 @@ mod tests {
         .iter()
         .map(|(subreddit, count)| ((*subreddit).to_string(), *count as usize))
         .collect();
-        let actual: Vec<SubredditCount> =
-            SubredditCounter::from_iter(redditor.comments()).sort_by(&SortAlgorithm::Numerically);
+        let actual: Vec<SubredditCount> = redditor
+            .comments()
+            .collect::<SubredditCounter>()
+            .sort_by(&SortAlgorithm::Numerically);
         assert_eq!(actual, expected);
     }
 }

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Copyright (C) 2025 Michael Dippery <michael@monkey-robot.com>
+// Copyright (C) 2025-2026 Michael Dippery <michael@monkey-robot.com>
 
 //! Formats viewable objects for display in a terminal.
 
@@ -522,7 +522,9 @@ mod tests {
         #[tokio::test]
         async fn it_formats_comment_tallies_by_subreddit_name() {
             let redditor = Redditor::test().await;
-            let counts = SubredditCounter::from_iter(redditor.comments())
+            let counts = redditor
+                .comments()
+                .collect::<SubredditCounter>()
                 .sort_by(&SortAlgorithm::Lexicographically);
             let expected = load_output("tally_comments_abc");
             let actual = counts.view(&ViewOptions::default(), &FrozenClock::default());
@@ -532,7 +534,9 @@ mod tests {
         #[tokio::test]
         async fn it_formats_comment_tallies_by_count() {
             let redditor = Redditor::test().await;
-            let counts = SubredditCounter::from_iter(redditor.comments())
+            let counts = redditor
+                .comments()
+                .collect::<SubredditCounter>()
                 .sort_by(&SortAlgorithm::Numerically);
             let expected = load_output("tally_comments_count");
             let actual = counts.view(&ViewOptions::default(), &FrozenClock::default());
@@ -542,8 +546,10 @@ mod tests {
         #[tokio::test]
         async fn it_returns_an_empty_string_if_no_comments() {
             let redditor = Redditor::test_empty().await;
-            let counts =
-                SubredditCounter::from_iter(redditor.comments()).sort_by(&SortAlgorithm::default());
+            let counts = redditor
+                .comments()
+                .collect::<SubredditCounter>()
+                .sort_by(&SortAlgorithm::default());
             let actual = counts.view(&ViewOptions::default(), &FrozenClock::default());
             assert_eq!(actual, "");
         }
@@ -551,7 +557,9 @@ mod tests {
         #[tokio::test]
         async fn it_formats_submission_tallies_by_subreddit_name() {
             let redditor = Redditor::test().await;
-            let counts = SubredditCounter::from_iter(redditor.submissions())
+            let counts = redditor
+                .submissions()
+                .collect::<SubredditCounter>()
                 .sort_by(&SortAlgorithm::Lexicographically);
             let expected = load_output("tally_posts_abc");
             let actual = counts.view(&ViewOptions::default(), &FrozenClock::default());
@@ -561,7 +569,9 @@ mod tests {
         #[tokio::test]
         async fn it_formats_submission_tallies_by_count() {
             let redditor = Redditor::test().await;
-            let counts = SubredditCounter::from_iter(redditor.submissions())
+            let counts = redditor
+                .submissions()
+                .collect::<SubredditCounter>()
                 .sort_by(&SortAlgorithm::Numerically);
             let expected = load_output("tally_posts_count");
             let actual = counts.view(&ViewOptions::default(), &FrozenClock::default());
@@ -571,7 +581,9 @@ mod tests {
         #[tokio::test]
         async fn it_returns_an_empty_string_if_no_submissions() {
             let redditor = Redditor::test_empty().await;
-            let counts = SubredditCounter::from_iter(redditor.submissions())
+            let counts = redditor
+                .submissions()
+                .collect::<SubredditCounter>()
                 .sort_by(&SortAlgorithm::default());
             let actual = counts.view(&ViewOptions::default(), &FrozenClock::default());
             assert_eq!(actual, "");
