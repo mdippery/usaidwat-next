@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Copyright (C) 2025 Michael Dippery <michael@monkey-robot.com>
+// Copyright (C) 2025-2026 Michael Dippery <michael@monkey-robot.com>
 
 //! General-purpose search utilities.
 
@@ -49,7 +49,7 @@ where
     /// The number of items in the filter.
     ///
     /// This length is a "best guess" and may return `usize::MAX` if the
-    /// number of items in the filter cannot be accurately countered nor
+    /// number of items in the filter cannot be accurately counted nor
     /// estimated.
     fn length(&self) -> usize {
         self.things
