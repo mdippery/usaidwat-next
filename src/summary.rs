@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Copyright (C) 2025 Michael Dippery <michael@monkey-robot.com>
+// Copyright (C) 2025-2026 Michael Dippery <michael@monkey-robot.com>
 
 //! AI summarization.
 
@@ -198,7 +198,7 @@ mod tests {
                 .expect("could not load file");
             let wrapped: OpenAIResponse =
                 serde_json::from_str(&json_data).expect("could not parse json");
-            wrapped.concatenate()
+            wrapped.result()
         }
     }
 
