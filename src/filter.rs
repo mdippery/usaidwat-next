@@ -138,10 +138,10 @@ impl StringSet {
     /// `needle` is a member of the set. If there are only _negated_ strings
     /// in the set, this means that `needle` is _not_ contained in the set.
     pub fn contains(&self, needle: impl AsRef<str>) -> bool {
-        let needle = needle.as_ref();
+        let needle = needle.as_ref().to_lowercase();
         match &self.kind {
-            StringSetKind::Negative(set) => !set.contains(&needle.to_lowercase()),
-            StringSetKind::Positive(set) => set.contains(&needle.to_lowercase()),
+            StringSetKind::Negative(set) => !set.contains(&needle),
+            StringSetKind::Positive(set) => set.contains(&needle),
         }
     }
 
