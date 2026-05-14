@@ -120,11 +120,7 @@ impl StringSet {
         S: IntoIterator,
         S::Item: AsRef<str>,
     {
-        let validator = StringSetValidator::from(strings);
-
-        if !validator.is_valid() {
-            None
-        } else {
+        StringSetValidator::from(strings).then(|validator| {
             let all_positive = validator.all_positive();
             let set: HashSet<String> = validator.into();
             let kind = if all_positive {
@@ -132,8 +128,8 @@ impl StringSet {
             } else {
                 StringSetKind::Negative(set)
             };
-            Some(Self { kind })
-        }
+            Self { kind }
+        })
     }
 
     /// True if the set contains the `needle`.
@@ -226,13 +222,23 @@ impl StringSetValidator {
     pub fn all_positive(&self) -> bool {
         self.strings.iter().all(|s| !s.starts_with('-'))
     }
+
+    /// Returns `Some(f(self))` if the string set validator is valid,
+    /// or `None` otherwise. The string set validator is consumed in the
+    /// process.
+    pub fn then<T, F>(self, f: F) -> Option<T>
+    where
+        F: FnOnce(Self) -> T,
+    {
+        if self.is_valid() { Some(f(self)) } else { None }
+    }
 }
 
 impl From<StringSetValidator> for HashSet<String> {
     fn from(value: StringSetValidator) -> Self {
         value
             .strings
-            .into_iter()
+            .iter()
             .map(|s| s.trim_start_matches('-').to_lowercase())
             .collect()
     }
