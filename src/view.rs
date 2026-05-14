@@ -30,7 +30,6 @@ pub struct ViewOptions {
     date_format: DateFormat,
     oneline: bool,
     grep: Option<String>,
-    #[allow(dead_code)] // This will be used eventually
     raw: bool,
 }
 
