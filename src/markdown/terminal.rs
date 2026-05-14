@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Copyright (C) 2025 Michael Dippery <michael@monkey-robot.com>
+// Copyright (C) 2025-2026 Michael Dippery <michael@monkey-robot.com>
 
 //! Markdown parsing engine for terminals.
 //!
@@ -254,7 +254,7 @@ struct MarkdownEmphasisVisitor {
 impl MarkdownEmphasisVisitor {
     pub fn new() -> Self {
         Self {
-            text: String::from(""),
+            text: String::new(),
             in_strong: false,
         }
     }
