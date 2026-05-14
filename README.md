@@ -102,5 +102,20 @@ Test suites can be run with Cargo:
 
     $ cargo test
 
+A note on versioning...
+-----------------------
+
+usaidwat is both an application and a library. Using it as an application is
+much more common than incorporating it into another application as a library,
+so its version number reflects that use case; that is, the major version
+number (the first component) reflects an _epoch_ of the application and is
+only incremented when there is a major new feature. Thus the _library_
+portion does not completely adhere to [SemVer] guidelines: a minor version
+update may not be backwards compatible. If you are incorporating usaidwat
+into your application as a library, you should consider that minor version
+bumps _may_ be backwards incompatible and define your version constraints
+accordingly.
+
 [API key]: https://platform.openai.com/settings/organization/api-keys
 [OpenAI API account]: https://platform.openai.com/docs/overview
+[SemVer]: https://semver.org
