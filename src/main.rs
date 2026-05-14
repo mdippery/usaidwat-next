@@ -32,7 +32,7 @@ async fn main() {
     match Runner::new(config).await {
         Ok(runner) => {
             if let Err(err) = runner.run().await {
-                die(1, &err.to_string())
+                die(1, &err)
             }
         }
         Err(err) => dispatch_err(&username, &err),

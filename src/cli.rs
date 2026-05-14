@@ -8,7 +8,6 @@ use crate::filter::{RedditFilter, StringSet};
 use crate::reddit::Redditor;
 use crate::summary::Summarizer;
 use crate::view::{ViewOptions, Viewable};
-use anyhow::anyhow;
 use clap::{Args, Parser, Subcommand, ValueEnum};
 use clap_verbosity_flag::Verbosity;
 use cogito::prelude::*;
@@ -18,12 +17,12 @@ use horologe::SystemClock;
 use hypertyper::HttpClientFactory;
 use indoc::formatdoc;
 use log::{debug, info, trace};
-use std::fmt;
 use std::time::Instant;
+use std::{fmt, result};
 use tokio_pager::{Pager, PagerEnv};
 
 /// Result of running a command.
-pub type Result = anyhow::Result<()>;
+pub type Result = result::Result<(), String>;
 
 const AFTER_HELP: &str = include_str!("help/after.txt");
 
@@ -408,7 +407,7 @@ impl Runner {
             .grep(grep.clone())
             .date_format(date_format.clone());
 
-        let filter = StringSet::from(subreddits).ok_or(anyhow!(
+        let filter = StringSet::from(subreddits).ok_or(format!(
             "invalid subreddit filter: {}",
             subreddits.join(" ")
         ))?;
@@ -429,7 +428,6 @@ impl Runner {
         Pager::new(PagerEnv::default().oneline(*oneline))
             .page(&output)
             .await
-            .map_err(|err| anyhow!(err))
     }
 
     async fn run_posts(&self, config: &PostCommandConfig) -> Result {
@@ -458,7 +456,7 @@ impl Runner {
             .oneline(*oneline)
             .date_format(date_format.clone());
 
-        let filter = StringSet::from(subreddits).ok_or(anyhow!(
+        let filter = StringSet::from(subreddits).ok_or(format!(
             "invalid subreddit filter: {}",
             subreddits.join(" ")
         ))?;
@@ -481,7 +479,6 @@ impl Runner {
         Pager::new(PagerEnv::default().oneline(*oneline))
             .page(&output)
             .await
-            .map_err(|err| anyhow!(err))
     }
 
     fn run_posts_tally(&self, sort_algorithm: &SortAlgorithm) -> Result {
@@ -502,8 +499,8 @@ impl Runner {
     }
 
     async fn run_summary(&self, model: &AIModelClass, include_self: &bool) -> Result {
-        let auth = Auth::from_env("OPENAI_API_KEY")
-            .map_err(|_| anyhow!(include_str!("help/summary.txt")))?;
+        let auth =
+            Auth::from_env("OPENAI_API_KEY").map_err(|_| include_str!("help/summary.txt"))?;
 
         let factory = HttpClientFactory::new(env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION"));
         let client = OpenAIClient::new(auth, factory);
@@ -532,14 +529,11 @@ impl Runner {
             .model(model)
             .summarize(*include_self)
             .await
-            .map_err(|err| anyhow!("Error in API request: {err}"))?;
+            .map_err(|err| format!("Error in API request: {err}"))?;
         let elapsed = now.elapsed();
         trace!("Summarization time: {:.4} secs", elapsed.as_secs_f64());
         let output = textwrap::fill(&output, textwrap::termwidth());
-        Pager::new(PagerEnv::default())
-            .page(&output)
-            .await
-            .map_err(|err| anyhow!(err))
+        Pager::new(PagerEnv::default()).page(&output).await
     }
 
     fn run_tally(&self, sort_algorithm: &SortAlgorithm) -> Result {
