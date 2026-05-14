@@ -372,7 +372,7 @@ impl Searchable for Submission {
         // Submissions to SubredditFilter, but using the title as the
         // searchable text seems like the most reasonable thing to do,
         // and might be useful in the future.
-        String::from(&self.title)
+        self.title.clone()
     }
 }
 
