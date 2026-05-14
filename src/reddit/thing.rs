@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Copyright (C) 2025 Michael Dippery <michael@monkey-robot.com>
+// Copyright (C) 2025-2026 Michael Dippery <michael@monkey-robot.com>
 
 //! A "thing" in the Reddit sense.
 //!
@@ -320,11 +320,7 @@ impl Submission {
 
     /// The contents of the post if it is a self post, otherwise `None`.
     pub fn self_text(&self) -> Option<String> {
-        if self.is_self() {
-            Some(self.selftext.clone())
-        } else {
-            None
-        }
+        self.is_self().then(|| self.selftext.clone())
     }
 
     /// The submission's permalink.
