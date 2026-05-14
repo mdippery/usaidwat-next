@@ -1,15 +1,13 @@
 // SPDX-License-Identifier: Apache-2.0
-// Copyright (C) 2025 Michael Dippery <michael@monkey-robot.com>
+// Copyright (C) 2025-2026 Michael Dippery <michael@monkey-robot.com>
 
 //! Clients for reading data from the Reddit API.
 
 use crate::reddit::service::{RedditService, Service};
-use crate::reddit::thing::{self, Comment, Submission, User};
+use crate::reddit::thing::{Comment, Submission, User};
 pub use chrono::Weekday;
 use chrono::{Datelike, Timelike};
 use horologe::{DateTime, Utc, age::HasAge};
-use hypertyper;
-use thiserror::Error;
 use tokio::try_join;
 
 /// Represents a Reddit user.
@@ -20,12 +18,9 @@ pub struct Redditor {
 }
 
 impl Redditor {
-    /// Creates a new client for retrieving information for Reddit users.
-    ///
-    /// `username` should be the Redditor's username.
-    ///
-    /// Returns an [`enum@Error`] if data cannot be parsed for the given username.
-    pub async fn new(username: impl Into<String>) -> Result<Self, Error> {
+    /// Creates a new client for retrieving information for a Reddit user with
+    /// the given `username`. Returns an `Err` result if data cannot be parsed.
+    pub async fn new(username: impl Into<String>) -> anyhow::Result<Self> {
         let service = RedditService::default();
         Self::with_service(username, service).await
     }
@@ -40,7 +35,7 @@ impl Redditor {
     pub(crate) async fn with_service<T: Service>(
         username: impl Into<String>,
         service: T,
-    ) -> Result<Self, Error> {
+    ) -> anyhow::Result<Self> {
         let username = username.into();
 
         let (user_data, comment_data, post_data) = try_join!(
@@ -151,18 +146,6 @@ impl Timeline {
         }
         buckets
     }
-}
-
-/// A client error.
-#[derive(Debug, Error)]
-pub enum Error {
-    /// An error from the underlying HTTP service.
-    #[error("Service error: {0}")]
-    Service(#[from] hypertyper::HttpError),
-
-    /// An error parsing data.
-    #[error("Parse error: {0}")]
-    Parse(#[from] thing::Error),
 }
 
 #[derive(Debug)]

@@ -12,18 +12,6 @@ use crate::filter::Searchable;
 use crate::{markdown, text};
 use horologe::{DateTime, Utc, age::HasAge};
 use serde::{Deserialize, Deserializer};
-use thiserror::Error;
-
-/// An error processing or creating a thing.
-#[derive(Debug, Error)]
-pub enum Error {
-    /// A parsing error.
-    #[error("Parsing error occurred: {0}")]
-    Parse(#[from] serde_json::Error),
-}
-
-/// A standard parsing result.
-pub type Result<T> = std::result::Result<T, Error>;
 
 /// A [thing](self) that is attached to a subreddit.
 pub trait HasSubreddit {
@@ -154,12 +142,12 @@ impl User {
     /// data structures.
     ///
     /// `user_data` is the result of a call to `/users/<user>/about.json`
-    /// and contains account medata, `comment_data` is the result of a call
+    /// and contains account metadata, `comment_data` is the result of a call
     /// to `/users/<user>/comments.json`, and `post_data` is the result of
     /// a call to `/users/<user>/submitted.json`.
     ///
-    /// Obviously parsing can fail so this method returns an `Option`.
-    pub fn parse<S>(user_data: S, comment_data: S, post_data: S) -> Result<Self>
+    /// Obviously parsing can fail so this method returns a `Result`.
+    pub fn parse<S>(user_data: S, comment_data: S, post_data: S) -> anyhow::Result<Self>
     where
         S: AsRef<str>,
     {
@@ -196,7 +184,7 @@ impl About {
     /// `/users/<user>/about.json`.
     ///
     /// This method is generally invoked by `User`, not directly.
-    fn parse(user_data: &str) -> Result<Self> {
+    fn parse(user_data: &str) -> anyhow::Result<Self> {
         Ok(serde_json::from_str(user_data).map(|wrapper: AboutResponse| wrapper.data)?)
     }
 
@@ -223,7 +211,7 @@ impl Comment {
     /// `/users/<user>/comments.json`.
     ///
     /// This method is generally invoked by `User`, not directly.
-    fn parse(comment_data: &str) -> Result<Vec<Self>> {
+    fn parse(comment_data: &str) -> anyhow::Result<Vec<Self>> {
         let json_object = serde_json::from_str(comment_data).map(
             |comment_listing: ListingResponse<CommentResponse>| {
                 comment_listing
@@ -299,7 +287,7 @@ impl Submission {
     /// `/users/<user>/submitted.json`.
     ///
     /// This method is generally invoked by `User`, not directly.
-    fn parse(post_data: &str) -> Result<Vec<Self>> {
+    fn parse(post_data: &str) -> anyhow::Result<Vec<Self>> {
         let json_object = serde_json::from_str(post_data).map(
             |comment_listing: ListingResponse<SubmissionResponse>| {
                 comment_listing
