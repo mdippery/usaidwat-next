@@ -42,8 +42,17 @@ impl<A: HasSubreddit> FromIterator<A> for SubredditCounter {
     /// You can easily create a `SubredditCounter` from these iterators
     /// using `collect()`:
     ///
-    /// ```compile_fail
-    /// comments.collect::<SubredditCounter>()
+    /// ```
+    /// # use usaidwat::count::{SortAlgorithm, SubredditCount, SubredditCounter};
+    /// # use usaidwat::reddit::thing::Comment;
+    /// # fn get_comments_somehow() -> Vec<Comment> {
+    /// #     vec![]
+    /// # }
+    /// let comments: Vec<Comment> = get_comments_somehow();
+    /// let counter: Vec<SubredditCount> = comments
+    ///     .into_iter()
+    ///     .collect::<SubredditCounter>()
+    ///     .sort_by(&SortAlgorithm::Numerically);
     /// ```
     fn from_iter<T: IntoIterator<Item = A>>(iter: T) -> Self {
         let counts = SubredditCounter::count(iter);
