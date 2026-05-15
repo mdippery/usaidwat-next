@@ -82,7 +82,9 @@ To enable access:
    variable. Follow your shell's procedure for configuring environment
    variables, but generally this involves running
 
-       $ export OPENAI_API_KEY='copied api key'
+   ```bash
+   $ export OPENAI_API_KEY='copied api key'
+   ```
 
    In your shell session or in your shell's configuration ("rc") file
    (e.g., `~/.bashrc` or `~/.zshrc`).
