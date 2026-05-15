@@ -42,7 +42,7 @@ impl<A: HasSubreddit> FromIterator<A> for SubredditCounter {
     /// You can easily create a `SubredditCounter` from these iterators
     /// using `collect()`:
     ///
-    /// ```text
+    /// ```compile_fail
     /// comments.collect::<SubredditCounter>()
     /// ```
     fn from_iter<T: IntoIterator<Item = A>>(iter: T) -> Self {
