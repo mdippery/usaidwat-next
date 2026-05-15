@@ -1,6 +1,6 @@
 [package]
 name = "usaidwat"
-version = "4.1.0-alpha.5+master"
+version = "4.1.0-alpha.6+master"
 authors = ["Michael Dippery <michael@monkey-robot.com>"]
 description = "Answers the age-old question, \"Where does a Redditor comment the most?\""
 readme = "README.md"
@@ -31,7 +31,7 @@ itertools = "0.14.0"
 log = "0.4.27"
 markdown = "1.0.0"
 regex = "1.11.1"
-reqwest = { version = "0.12.15", features = ["json"] }
+reqwest = { version = "0.13.3", features = ["json"] }
 serde = { version = "1.0.219", features = ["derive"] }
 serde_json = "1.0.140"
 textwrap = { version = "0.16.2", features = ["terminal_size"] }
