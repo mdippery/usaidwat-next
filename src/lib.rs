@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright (C) 2025-2026 Michael Dippery <michael@monkey-robot.com>
 
-#![doc = include_str!("../README.md")]
+#![cfg_attr(not(doctest), doc = include_str!("../README.md"))]
 
 pub mod cli;
 pub mod count;
