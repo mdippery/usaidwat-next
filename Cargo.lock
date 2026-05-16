@@ -1941,7 +1941,7 @@ dependencies = [
 
 [[package]]
 name = "usaidwat"
-version = "4.1.0-beta.0+master"
+version = "4.1.0"
 dependencies = [
  "anyhow",
  "chrono",
