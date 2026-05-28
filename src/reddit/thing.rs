@@ -33,7 +33,7 @@ pub trait HasBody {
     /// The formatted text converts Markdown markup into terminal escape
     /// codes for elegant display in a terminal.
     fn body(&self) -> String {
-        markdown::parse(&self.markdown_body(), textwrap::termwidth())
+        markdown::parse(self.markdown_body(), textwrap::termwidth())
     }
 
     /// The thing's body, as raw Markdown text, with HTML entities converted
@@ -52,7 +52,7 @@ pub trait HasBody {
     /// without converted entities, use [`Comment::markdown_body`].
     fn raw_body(&self) -> String {
         textwrap::fill(
-            &text::convert_html_entities(&self.markdown_body()),
+            &text::convert_html_entities(self.markdown_body()),
             textwrap::termwidth(),
         )
     }
@@ -67,7 +67,7 @@ pub trait HasBody {
     /// Paragraphs are unwrapped (they appear on one line), and spaces between
     /// paragraphs are removed.
     fn summarized_body(&self) -> String {
-        markdown::summarize(&self.markdown_body())
+        markdown::summarize(self.markdown_body())
     }
 }
 
