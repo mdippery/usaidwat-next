@@ -132,9 +132,7 @@ impl Comment {
 
         let body = self
             .grep(opts)
-            .and_then(|grep| {
-                Some(body.replace_all(&format!("(?i)(?<s>{grep})"), &"$s".red().to_string()))
-            })
+            .map(|grep| body.replace_all(&format!("(?i)(?<s>{grep})"), &"$s".red().to_string()))
             .unwrap_or(body);
 
         formatdoc! {"
