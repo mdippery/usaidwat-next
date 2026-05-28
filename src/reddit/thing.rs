@@ -331,7 +331,7 @@ impl Submission {
 impl HasBody for Submission {
     fn markdown_body(&self) -> String {
         // TODO: Should this return link_text() if not a self post?
-        self.self_text().unwrap_or(String::new())
+        self.self_text().unwrap_or_default()
     }
 }
 
