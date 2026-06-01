@@ -4,6 +4,8 @@
 // suffice until I can come up with a better way.
 // I mostly just want to make sure that the types and everything are correct.
 
+use hypertyper::HttpError;
+use reqwest::StatusCode;
 use usaidwat::reddit::service::{RedditService, Service};
 use uuid::Uuid;
 
@@ -34,4 +36,12 @@ async fn it_returns_an_error_for_invalid_users() {
     let user = Uuid::new_v4().to_string();
     let resp = service.get_resource(&user, "about").await;
     assert!(resp.is_err(), "response was {resp:?}");
+
+    if let Err(HttpError::Request(http_error)) = &resp
+        && let Some(code) = http_error.status()
+    {
+        assert_eq!(code, StatusCode::NOT_FOUND);
+    } else {
+        panic!("Unexpected response: {resp:?}");
+    }
 }
