@@ -10,6 +10,7 @@ use usaidwat::reddit::service::{RedditService, Service};
 use uuid::Uuid;
 
 #[tokio::test]
+#[ignore = "reddit now requires a logged-in user or a cookie or something"]
 async fn it_retrieves_profiles() {
     let service = RedditService::default();
     let resp = service.get_resource("mipadi", "about").await.unwrap();
@@ -17,6 +18,7 @@ async fn it_retrieves_profiles() {
 }
 
 #[tokio::test]
+#[ignore = "reddit now requires a logged-in user or a cookie or something"]
 async fn it_retrieves_comments() {
     let service = RedditService::default();
     let resp = service.get_resource("mipadi", "comments").await.unwrap();
@@ -24,6 +26,7 @@ async fn it_retrieves_comments() {
 }
 
 #[tokio::test]
+#[ignore = "reddit now requires a logged-in user or a cookie or something"]
 async fn it_retrieves_posts() {
     let service = RedditService::default();
     let resp = service.get_resource("mipadi", "submitted").await.unwrap();
@@ -31,6 +34,7 @@ async fn it_retrieves_posts() {
 }
 
 #[tokio::test]
+#[ignore = "reddit now requires a logged-in user or a cookie or something"]
 async fn it_returns_an_error_for_invalid_users() {
     let service = RedditService::default();
     let user = Uuid::new_v4().to_string();
