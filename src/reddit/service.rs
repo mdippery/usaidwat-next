@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Copyright (C) 2025 Michael Dippery <michael@monkey-robot.com>
+// Copyright (C) 2025-2026 Michael Dippery <michael@monkey-robot.com>
 
 //! HTTPS connector for the Reddit API.
 //!
@@ -7,6 +7,7 @@
 //! with the Reddit API over HTTPS, essentially a specialized HTTPS client
 //! specifically for Reddit.
 
+use hypertyper::http_factory;
 use hypertyper::prelude::*;
 use reqwest::header;
 
@@ -33,7 +34,7 @@ pub struct RedditService {
 impl Default for RedditService {
     /// Creates a new Reddit service.
     fn default() -> Self {
-        let factory = HttpClientFactory::new(env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION"));
+        let factory = http_factory!();
         let client = factory.create();
         Self { client }
     }
