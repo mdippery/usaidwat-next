@@ -386,7 +386,8 @@ impl Runner {
     fn run_info(&self) -> Result {
         println!(
             "{}",
-            self.user().view(&ViewOptions::default(), &SystemClock)
+            self.user()
+                .view(&ViewOptions::default(), &SystemClock::default())
         );
         Ok(())
     }
@@ -420,7 +421,7 @@ impl Runner {
         let joiner = if *oneline { "\n" } else { "\n\n\n" };
         let output = comments
             .iter()
-            .map(|comment| comment.view(&opts, &SystemClock))
+            .map(|comment| comment.view(&opts, &SystemClock::default()))
             .collect::<Vec<_>>()
             .join(joiner);
 
@@ -471,7 +472,7 @@ impl Runner {
         let joiner = if *oneline { "\n" } else { "\n\n\n" };
         let output = posts
             .iter()
-            .map(|post| post.view(&opts, &SystemClock))
+            .map(|post| post.view(&opts, &SystemClock::default()))
             .collect::<Vec<_>>()
             .join(joiner);
 
@@ -486,7 +487,10 @@ impl Runner {
         if self.user().has_submissions() {
             let posts = self.user().submissions();
             let tallies = posts.collect::<SubredditCounter>().sort_by(sort_algorithm);
-            println!("{}", tallies.view(&ViewOptions::default(), &SystemClock));
+            println!(
+                "{}",
+                tallies.view(&ViewOptions::default(), &SystemClock::default())
+            );
             Ok(())
         } else {
             println!("{} has no posts.", self.user().username());
@@ -540,7 +544,10 @@ impl Runner {
             let tallies = comments
                 .collect::<SubredditCounter>()
                 .sort_by(sort_algorithm);
-            println!("{}", tallies.view(&ViewOptions::default(), &SystemClock));
+            println!(
+                "{}",
+                tallies.view(&ViewOptions::default(), &SystemClock::default())
+            );
             Ok(())
         } else {
             println!("{} has no comments.", self.user().username());
@@ -558,7 +565,7 @@ impl Runner {
                 "{}",
                 self.user()
                     .timeline()
-                    .view(&ViewOptions::default(), &SystemClock)
+                    .view(&ViewOptions::default(), &SystemClock::default())
             );
             Ok(())
         } else {

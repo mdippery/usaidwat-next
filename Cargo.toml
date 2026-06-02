@@ -43,3 +43,6 @@ paste = "1.0.15"
 pretty_assertions = "1.4.1"
 seq-macro = "0.3.6"
 uuid = { version = "1.16.0", features = ["v4"] }
+
+[lints.clippy]
+default_constructed_unit_structs = "allow"
