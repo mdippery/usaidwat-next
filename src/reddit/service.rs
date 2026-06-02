@@ -7,7 +7,6 @@
 //! with the Reddit API over HTTPS, essentially a specialized HTTPS client
 //! specifically for Reddit.
 
-use hypertyper::http_factory;
 use hypertyper::prelude::*;
 use reqwest::header;
 
@@ -34,13 +33,21 @@ pub struct RedditService {
 impl Default for RedditService {
     /// Creates a new Reddit service.
     fn default() -> Self {
-        let factory = http_factory!();
+        let factory = HttpClientFactory::with_user_agent(Self::user_agent());
         let client = factory.create();
         Self { client }
     }
 }
 
 impl RedditService {
+    pub fn user_agent() -> String {
+        format!(
+            "{}/{} by u/mipadi",
+            env!("CARGO_PKG_NAME"),
+            env!("CARGO_PKG_VERSION")
+        )
+    }
+
     fn query_string(&self, resource: &str) -> &str {
         match resource {
             "comments" => "?limit=100",
