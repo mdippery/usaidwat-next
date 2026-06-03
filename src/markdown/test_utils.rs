@@ -1,13 +1,14 @@
+// SPDX-License-Identifier: Apache-2.0
+// Copyright (C) 2026 Michael Dippery <michael@monkey-robot.com>
+
 use std::fs;
 
-#[macro_export]
 macro_rules! parse_assert_eq {
     ($left:expr , $right:expr) => {
         assert_eq!(parse(&$left), $right);
     };
 }
 
-#[macro_export]
 macro_rules! header_tests {
     ($expected:expr) => {
         seq_macro::seq!(N in 1..=6 {
@@ -20,6 +21,8 @@ macro_rules! header_tests {
         });
     };
 }
+
+pub(crate) use {header_tests, parse_assert_eq};
 
 pub fn load_markdown(file: &str) -> String {
     let file = format!("tests/markdown/{file}.md");

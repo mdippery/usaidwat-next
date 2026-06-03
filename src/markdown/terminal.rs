@@ -570,9 +570,8 @@ impl Visitor for MarkdownBlockquoteVisitor {
 
 #[cfg(test)]
 mod tests {
-    use crate::markdown::test_utils::{load_markdown, load_output};
+    use crate::markdown::test_utils::{header_tests, load_markdown, load_output, parse_assert_eq};
     use crate::test_utils::do_logging;
-    use crate::{header_tests, parse_assert_eq};
     //use pretty_assertions::assert_eq;
 
     const TEXTWIDTH: usize = 80;

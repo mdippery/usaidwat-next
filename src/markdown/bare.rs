@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Copyright (C) 2025 Michael Dippery <michael@monkey-robot.com>
+// Copyright (C) 2025-2026 Michael Dippery <michael@monkey-robot.com>
 
 //! A bare Markdown parser.
 //!
@@ -140,9 +140,8 @@ impl TextAppendable for MarkdownVisitor {
 #[cfg(test)]
 mod tests {
     use super::parse;
-    use crate::markdown::test_utils::load_markdown;
+    use crate::markdown::test_utils::{header_tests, load_markdown, parse_assert_eq};
     use crate::test_utils::do_logging;
-    use crate::{header_tests, parse_assert_eq};
     use pretty_assertions::assert_eq;
 
     fn load_output(file: &str) -> String {
