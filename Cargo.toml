@@ -22,14 +22,13 @@ cogito = { version="0.2.2-alpha.1", git = "https://github.com/mdippery/cogito.gi
 cogito-openai = { version="0.3.2-alpha.1", git = "https://github.com/mdippery/cogito.git" }
 colored = "3.0.0"
 counter = "0.7.0"
+discount = { version = "1.0.0-beta.0", path = "../discount" }
 env_logger = "0.11.8"
 horologe = { version = "2.0.0-alpha.0", features = ["age", "relative-age", "test-utils"], git = "https://github.com/mdippery/horologe.git" }
-htmlentity = "1.3.2"
 hypertyper = { version = "0.4.0-alpha.1", git = "https://github.com/mdippery/hypertyper.git" }
 indoc = "2.0.6"
 itertools = "0.14.0"
 log = "0.4.27"
-markdown = "1.0.0"
 regex = "1.11.1"
 reqwest = { version = "0.13.3", features = ["json"] }
 serde = { version = "1.0.219", features = ["derive"] }
@@ -41,7 +40,6 @@ tokio-pager = { version = "1.0.2", git = "https://github.com/mdippery/tokio-page
 [dev-dependencies]
 paste = "1.0.15"
 pretty_assertions = "1.4.1"
-seq-macro = "0.3.6"
 uuid = { version = "1.16.0", features = ["v4"] }
 
 [lints.clippy]

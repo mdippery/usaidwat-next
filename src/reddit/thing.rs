@@ -9,7 +9,7 @@
 //! work with JSON data from the Reddit API.
 
 use crate::filter::Searchable;
-use crate::{markdown, text};
+use crate::text;
 use horologe::{DateTime, Utc, age::HasAge};
 use serde::{Deserialize, Deserializer};
 
@@ -33,7 +33,7 @@ pub trait HasBody {
     /// The formatted text converts Markdown markup into terminal escape
     /// codes for elegant display in a terminal.
     fn body(&self) -> String {
-        markdown::parse(self.markdown_body(), textwrap::termwidth())
+        discount::terminal(self.markdown_body(), textwrap::termwidth())
     }
 
     /// The thing's body, as raw Markdown text, with HTML entities converted
@@ -67,7 +67,7 @@ pub trait HasBody {
     /// Paragraphs are unwrapped (they appear on one line), and spaces between
     /// paragraphs are removed.
     fn summarized_body(&self) -> String {
-        markdown::summarize(self.markdown_body())
+        discount::plain(self.markdown_body())
     }
 }
 

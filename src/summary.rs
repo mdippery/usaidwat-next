@@ -3,7 +3,6 @@
 
 //! AI summarization.
 
-use crate::markdown;
 use crate::reddit::Redditor;
 use crate::reddit::thing::{HasBody, Removable};
 use cogito::prelude::*;
@@ -86,7 +85,7 @@ where
         let comment_body = self
             .user
             .comments()
-            .map(|c| markdown::summarize(c.summarized_body()))
+            .map(|c| discount::plain(c.summarized_body()))
             .join("\n\n");
 
         if include_self {

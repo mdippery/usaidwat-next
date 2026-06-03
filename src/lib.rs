@@ -6,7 +6,6 @@
 pub mod cli;
 pub mod count;
 pub mod filter;
-pub mod markdown;
 pub mod reddit;
 pub mod summary;
 pub mod text;

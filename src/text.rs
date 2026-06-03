@@ -1,63 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
-// Copyright (C) 2025 Michael Dippery <michael@monkey-robot.com>
+// Copyright (C) 2025-2026 Michael Dippery <michael@monkey-robot.com>
 
 //! Helpful utilities for working with text.
 
-use htmlentity::entity::{self, ICodedDataTrait};
+pub use discount::text::convert_html_entities;
 use regex::Regex;
-
-/// Converts HTML entities into their single-character equivalents.
-///
-/// For example, Reddit returns "&" as "&amp;", ">" as "&gt;",
-/// and "<" as "&lt;"; this function will convert those HTML
-/// entities into single, human-readable characters.
-///
-/// Leading and trailing whitespace will also be trimmed from the string.
-///
-/// # Examples
-///
-/// `convert_html_entities` will convert HTML entities into their respective
-/// single-character equivalents:
-///
-/// ```
-/// use usaidwat::text::convert_html_entities;
-/// let raw = "&lt;This &amp; That&gt;";
-/// let converted = convert_html_entities(raw);
-/// assert_eq!(converted, "<This & That>");
-/// ```
-///
-/// It will also remove leading and trailing whitespace:
-///
-/// ```
-/// use usaidwat::text::convert_html_entities;
-/// let raw = "  &lt;This &amp; That&gt;  ";
-/// let converted = convert_html_entities(raw);
-/// assert_eq!(converted, "<This & That>");
-/// ```
-///
-/// It won't change characters that are not HTML entities:
-///
-/// ```
-/// use usaidwat::text::convert_html_entities;
-/// let raw = "A Plaintext Post";
-/// let converted = convert_html_entities(raw);
-/// assert_eq!(converted, raw);
-/// ```
-///
-/// It will even handle empty strings:
-///
-/// ```
-/// use usaidwat::text::convert_html_entities;
-/// let raw = "";
-/// let converted = convert_html_entities(raw);
-/// assert_eq!(converted, raw);
-/// ```
-pub fn convert_html_entities(text: impl AsRef<str>) -> String {
-    let text = text.as_ref().trim();
-    entity::decode(text.as_bytes())
-        .to_string()
-        .unwrap_or_else(|_| text.to_string())
-}
 
 /// A string-like structure with parts that can be matched against a
 /// regex and replaced.
