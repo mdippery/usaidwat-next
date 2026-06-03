@@ -10,6 +10,7 @@
 
 use crate::filter::Searchable;
 use crate::text;
+use discount::terminal;
 use horologe::{DateTime, Utc, age::HasAge};
 use serde::{Deserialize, Deserializer};
 
@@ -33,7 +34,7 @@ pub trait HasBody {
     /// The formatted text converts Markdown markup into terminal escape
     /// codes for elegant display in a terminal.
     fn body(&self) -> String {
-        discount::terminal(self.markdown_body(), textwrap::termwidth())
+        discount::terminal(self.markdown_body(), terminal::termwidth())
     }
 
     /// The thing's body, as raw Markdown text, with HTML entities converted
@@ -53,7 +54,7 @@ pub trait HasBody {
     fn raw_body(&self) -> String {
         textwrap::fill(
             &text::convert_html_entities(self.markdown_body()),
-            textwrap::termwidth(),
+            terminal::termwidth(),
         )
     }
 

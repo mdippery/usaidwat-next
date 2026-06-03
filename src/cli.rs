@@ -13,6 +13,7 @@ use clap_verbosity_flag::Verbosity;
 use cogito::prelude::*;
 use cogito_openai::OpenAIModel;
 use cogito_openai::client::OpenAIClient;
+use discount::terminal;
 use horologe::SystemClock;
 use hypertyper::HttpClientFactory;
 use indoc::formatdoc;
@@ -51,7 +52,7 @@ where
     let short_help = after_summary_help::<<T::AiRequest as AiRequest>::Model>();
     let prompt = textwrap::fill(
         &Summarizer::<T>::default_instructions(),
-        textwrap::termwidth(),
+        terminal::termwidth(),
     );
     formatdoc! {
         "[4mPrompt:[24m
@@ -532,7 +533,7 @@ impl Runner {
             .map_err(|err| format!("Error in API request: {err}"))?;
         let elapsed = now.elapsed();
         trace!("Summarization time: {:.4} secs", elapsed.as_secs_f64());
-        let output = textwrap::fill(&output, textwrap::termwidth());
+        let output = textwrap::fill(&output, terminal::termwidth());
         Pager::new(PagerEnv::default()).page(&output).await
     }
 
