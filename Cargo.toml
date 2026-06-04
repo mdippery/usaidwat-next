@@ -22,7 +22,7 @@ cogito = { version="0.2.2-alpha.1", git = "https://github.com/mdippery/cogito.gi
 cogito-openai = { version="0.3.2-alpha.1", git = "https://github.com/mdippery/cogito.git" }
 colored = "3.0.0"
 counter = "0.7.0"
-discount = { version = "1.0.0-beta.0", path = "../discount" }
+discount = { version = "1.0.0-beta.0", git = "git://git.mipadi.net/discount.git" }
 env_logger = "0.11.8"
 horologe = { version = "2.0.0-alpha.0", features = ["age", "relative-age", "test-utils"], git = "https://github.com/mdippery/horologe.git" }
 hypertyper = { version = "0.4.0-alpha.1", git = "https://github.com/mdippery/hypertyper.git" }

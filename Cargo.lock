@@ -322,6 +322,7 @@ checksum = "56254986775e3233ffa9c4d7d3faaf6d36a2c09d30b20687e9f88bc8bafc16c8"
 [[package]]
 name = "discount"
 version = "1.0.0-beta.0"
+source = "git+git://git.mipadi.net/discount.git#7f5626f506fdc6b5e382cc83d5446c9ed790babf"
 dependencies = [
  "htmlentity",
  "itertools",
