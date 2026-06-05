@@ -126,7 +126,7 @@ impl StringSet {
         S: IntoIterator,
         S::Item: AsRef<str>,
     {
-        StringSetValidator::from(strings).then(|validator| {
+        StringSetValidator::from(strings).and_then(|validator| {
             let all_positive = validator.all_positive();
             let set: HashSet<String> = validator.into();
             let kind = if all_positive {
@@ -232,9 +232,9 @@ impl StringSetValidator {
     /// Returns `Some(f(self))` if the string set validator is valid,
     /// or `None` otherwise. The string set validator is consumed in the
     /// process.
-    pub fn then<T, F>(self, f: F) -> Option<T>
+    pub fn and_then<U, F>(self, f: F) -> Option<U>
     where
-        F: FnOnce(Self) -> T,
+        F: FnOnce(Self) -> U,
     {
         if self.is_valid() { Some(f(self)) } else { None }
     }
