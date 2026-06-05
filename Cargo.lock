@@ -160,9 +160,9 @@ checksum = "613afe47fcd5fac7ccf1db93babcb082c5994d996f20b8b159f2ad1658eb5724"
 
 [[package]]
 name = "chrono"
-version = "0.4.44"
+version = "0.4.45"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c673075a2e0e5f4a1dde27ce9dee1ea4558c7ffe648f576438a20ca1d2acc4b0"
+checksum = "1aa79e62e7697b8e29b513a68abacf485adcd1fe8284a4316c5ae868e6633327"
 dependencies = [
  "iana-time-zone",
  "js-sys",
@@ -233,8 +233,8 @@ dependencies = [
 
 [[package]]
 name = "cogito"
-version = "0.2.2-alpha.1"
-source = "git+https://github.com/mdippery/cogito.git#0e1b12fef9ac6dbaff1aa50d6838836b21d2dce4"
+version = "0.2.2"
+source = "git+https://github.com/mdippery/cogito.git#528d489feb026a623446779e3bc5212425378c20"
 dependencies = [
  "hypertyper",
  "reqwest",
@@ -243,8 +243,8 @@ dependencies = [
 
 [[package]]
 name = "cogito-openai"
-version = "0.3.2-alpha.1"
-source = "git+https://github.com/mdippery/cogito.git#0e1b12fef9ac6dbaff1aa50d6838836b21d2dce4"
+version = "0.3.2"
+source = "git+https://github.com/mdippery/cogito.git#528d489feb026a623446779e3bc5212425378c20"
 dependencies = [
  "cogito",
  "hypertyper",
@@ -321,8 +321,8 @@ checksum = "56254986775e3233ffa9c4d7d3faaf6d36a2c09d30b20687e9f88bc8bafc16c8"
 
 [[package]]
 name = "discount"
-version = "1.0.0-beta.0"
-source = "git+git://git.mipadi.net/discount.git#5e07e8c924005f3abb127a4e2c3be531ede7f218"
+version = "1.0.0"
+source = "git+git://git.mipadi.net/discount.git#fc9302d59ac6362caf2ad0413f6d67da35ae677e"
 dependencies = [
  "htmlentity",
  "itertools",
@@ -556,8 +556,8 @@ checksum = "2304e00983f87ffb38b55b444b5e3b60a884b5d30c0fca7d82fe33449bbe55ea"
 
 [[package]]
 name = "horologe"
-version = "2.0.0-alpha.0"
-source = "git+https://github.com/mdippery/horologe.git#2311e04f38c0de5c7021d50013052b6d66ed9204"
+version = "2.0.0"
+source = "git+https://github.com/mdippery/horologe.git#03cb97e78f51745f3d3ee45efce79f8b48610714"
 dependencies = [
  "chrono",
  "regex",
@@ -688,8 +688,8 @@ dependencies = [
 
 [[package]]
 name = "hypertyper"
-version = "0.4.0-alpha.1"
-source = "git+https://github.com/mdippery/hypertyper.git#23b44f2d5f091171f043d24ed18f1c18184b53d3"
+version = "0.4.0"
+source = "git+https://github.com/mdippery/hypertyper.git#7700dafeca43024dff7d88cd26d50e6ba09621c5"
 dependencies = [
  "reqwest",
  "serde",
@@ -1002,9 +1002,9 @@ checksum = "6373607a59f0be73a39b6fe456b8192fcc3585f602af20751600e974dd455e77"
 
 [[package]]
 name = "log"
-version = "0.4.31"
+version = "0.4.32"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "113b30b4cd05f7c06868fdb2854f66a7b9fece9a48425351cd532e810d74024f"
+checksum = "953f07c43838f8e6f9758cab68bf5bed85465e7587ebe0b823f1bcd81978ad3a"
 
 [[package]]
 name = "lru-slab"
@@ -1303,9 +1303,9 @@ dependencies = [
 
 [[package]]
 name = "reqwest"
-version = "0.13.3"
+version = "0.13.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "62e0021ea2c22aed41653bc7e1419abb2c97e038ff2c33d0e1309e49a97deec0"
+checksum = "219c5811de6525e5416c7d5d53bb656d3afdbc6c5af816e0802bcfa42dbdc1c3"
 dependencies = [
  "base64",
  "bytes",
@@ -1543,9 +1543,9 @@ dependencies = [
 
 [[package]]
 name = "serde_json"
-version = "1.0.149"
+version = "1.0.150"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "83fc039473c5595ace860d8c4fafa220ff474b3fc6bfdb4293327f1a37e94d86"
+checksum = "e8014e44b4736ed0538adeecded0fce2a272f22dc9578a7eb6b2d9993c74cfb9"
 dependencies = [
  "itoa",
  "memchr",
@@ -1799,8 +1799,8 @@ dependencies = [
 
 [[package]]
 name = "tokio-pager"
-version = "1.0.3-alpha.0"
-source = "git+https://github.com/mdippery/tokio-pager.git#b171240fad1d0d211743dd8931f946fb4f9cc124"
+version = "1.0.3"
+source = "git+https://github.com/mdippery/tokio-pager.git#a9a4e37ad1a098d79bf5283ae241792dd7e999d1"
 dependencies = [
  "tokio",
 ]
@@ -1948,7 +1948,7 @@ dependencies = [
 
 [[package]]
 name = "usaidwat"
-version = "4.2.0-beta.0"
+version = "4.2.0-beta.1"
 dependencies = [
  "anyhow",
  "chrono",
@@ -1991,9 +1991,9 @@ checksum = "06abde3611657adf66d383f00b093d7faecc7fa57071cce2578660c9f1010821"
 
 [[package]]
 name = "uuid"
-version = "1.23.1"
+version = "1.23.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ddd74a9687298c6858e9b88ec8935ec45d22e8fd5e6394fa1bd4e99a87789c76"
+checksum = "d258b83ceec21034727ecee8c382cfa6c3e133699b0742c64571814fb420c9f7"
 dependencies = [
  "getrandom 0.4.2",
  "js-sys",
