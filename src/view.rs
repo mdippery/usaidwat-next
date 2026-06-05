@@ -342,6 +342,7 @@ mod tests {
                 .comments()
                 .nth(n)
                 .expect("no comment found")
+                .clone()
         }
 
         #[tokio::test]
@@ -450,6 +451,7 @@ mod tests {
                 .submissions()
                 .nth(n)
                 .expect("no comment found")
+                .clone()
         }
 
         #[tokio::test]

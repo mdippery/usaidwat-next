@@ -20,6 +20,12 @@ pub trait HasSubreddit {
     fn subreddit(&self) -> &str;
 }
 
+impl<T: HasSubreddit> HasSubreddit for &T {
+    fn subreddit(&self) -> &str {
+        (**self).subreddit()
+    }
+}
+
 /// A [thing](self) that has a body.
 pub trait HasBody {
     /// The raw Markdown markup for the thing, as returned from the Reddit API.
@@ -69,6 +75,12 @@ pub trait HasBody {
     /// paragraphs are removed.
     fn summarized_body(&self) -> String {
         discount::plain(self.markdown_body())
+    }
+}
+
+impl<T: HasBody> HasBody for &T {
+    fn markdown_body(&self) -> String {
+        (**self).markdown_body()
     }
 }
 
@@ -168,13 +180,13 @@ impl User {
     }
 
     /// User's comments.
-    pub fn comments(&self) -> impl Iterator<Item = Comment> {
-        self.comments.clone().into_iter()
+    pub fn comments(&self) -> impl Iterator<Item = &Comment> {
+        self.comments.iter()
     }
 
     /// User's submissions.
-    pub fn submissions(&self) -> impl Iterator<Item = Submission> {
-        self.submissions.clone().into_iter()
+    pub fn submissions(&self) -> impl Iterator<Item = &Submission> {
+        self.submissions.iter()
     }
 }
 

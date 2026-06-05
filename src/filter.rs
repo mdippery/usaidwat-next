@@ -27,6 +27,12 @@ pub trait Searchable {
     }
 }
 
+impl<T: Searchable> Searchable for &T {
+    fn search_text(&self) -> String {
+        (**self).search_text()
+    }
+}
+
 /// A container for filtering Reddit things.
 pub struct RedditFilter<I>
 where

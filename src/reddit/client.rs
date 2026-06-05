@@ -64,12 +64,12 @@ impl Redditor {
     }
 
     /// Redditor's comments.
-    pub fn comments(&self) -> impl Iterator<Item = Comment> {
+    pub fn comments(&self) -> impl Iterator<Item = &Comment> {
         self.user.comments()
     }
 
     /// Redditor's posts (articles and self posts).
-    pub fn submissions(&self) -> impl Iterator<Item = Submission> {
+    pub fn submissions(&self) -> impl Iterator<Item = &Submission> {
         // TODO: Filter out removed posts here?
         // It will result in the number of returned submissions possibly
         // being less than 100 (for example, the test data's non-removed
