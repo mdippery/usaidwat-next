@@ -6,6 +6,7 @@
 use crate::reddit::thing::HasSubreddit;
 use counter::Counter;
 use itertools::Itertools;
+use std::cmp::Ordering;
 
 /// Differentiates between the different sorting algorithms used to
 /// return subreddit counts.
@@ -79,14 +80,13 @@ impl SubredditCounter {
     }
 
     fn sort_numerically(&self) -> Vec<SubredditCount> {
-        self.counts
-            .most_common_tiebreaker(|lhs, rhs| Ord::cmp(&lhs.to_lowercase(), &rhs.to_lowercase()))
+        self.counts.most_common_tiebreaker(sort_string)
     }
 
     fn sort_lexicographically(&self) -> Vec<SubredditCount> {
         self.counts
             .keys()
-            .sorted_by(|lhs, rhs| Ord::cmp(&lhs.to_lowercase(), &rhs.to_lowercase()))
+            .sorted_by(|lhs, rhs| sort_string(lhs, rhs))
             .map(|key| {
                 (
                     key.to_owned(),
@@ -98,6 +98,11 @@ impl SubredditCounter {
             })
             .collect::<Vec<_>>()
     }
+}
+
+#[inline]
+fn sort_string(lhs: &String, rhs: &String) -> Ordering {
+    Ord::cmp(&lhs.to_lowercase(), &rhs.to_lowercase())
 }
 
 #[cfg(test)]
