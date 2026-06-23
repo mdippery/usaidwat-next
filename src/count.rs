@@ -80,7 +80,8 @@ impl SubredditCounter {
     }
 
     fn sort_numerically(&self) -> Vec<SubredditCount> {
-        self.counts.most_common_tiebreaker(sort_string)
+        self.counts
+            .most_common_tiebreaker(|lhs, rhs| sort_string(lhs, rhs))
     }
 
     fn sort_lexicographically(&self) -> Vec<SubredditCount> {
@@ -101,7 +102,7 @@ impl SubredditCounter {
 }
 
 #[inline]
-fn sort_string(lhs: &String, rhs: &String) -> Ordering {
+fn sort_string(lhs: &str, rhs: &str) -> Ordering {
     Ord::cmp(&lhs.to_lowercase(), &rhs.to_lowercase())
 }
 
