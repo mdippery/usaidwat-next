@@ -5,6 +5,26 @@ Are you a Redditor? Do you want to view the subreddits in which a particular
 user commonly posts? If you answered "yes" to all three of these questions,
 then **usaidwat** is the crate for you!
 
+Status
+------
+
+This project relies on unauthenticated access to Reddit's public API for a
+seamless user experience. Unfortunately, in May 2026, Reddit
+[disabled unauthenticated API access][Reddit API update], so now **usaidwat**
+returns [403 Forbidden](https://httpstatuses.io/403) for every request.
+
+The Reddit API code will need to be updated to require authentication, which
+will require that end users obtain [OAuth2][Reddit OAuth] keys.
+
+But on top of disabling unauthenticated API access, Reddit has also
+introduced a flag that hides users' comment and post histories; this flag is
+enabled for all new Reddit accounts, and nowadays, many Reddit accounts
+return no meaningful histories, furthering rendering this tool irrelevant.
+
+One day this tool may be updated to work, but it's probably never going to
+work as well as it did before, so right now it's little more than a
+historical curiosity.
+
 Installation
 ------------
 
@@ -133,3 +153,5 @@ accordingly.
 [SemVer]: https://semver.org/
 [openai module documentation]: https://docs.rs/cogito-openai
 [cheapest OpenAI model]: https://docs.rs/cogito/latest/cogito/trait.AIModel.html#tymethod.cheapest
+[Reddit API update]: https://www.reddit.com/r/modnews/comments/1tq9vxo/protecting_communities_from_scrapers_and_platform/
+[Reddit OAuth]: https://github.com/reddit-archive/reddit/wiki/OAuth2
