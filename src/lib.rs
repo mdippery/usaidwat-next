@@ -3,13 +3,15 @@
 
 #![cfg_attr(not(doctest), doc = include_str!("../README.md"))]
 
-pub mod cli;
 pub mod count;
 pub mod filter;
 pub mod reddit;
 pub mod summary;
 pub mod text;
 pub mod view;
+
+#[doc(hidden)]
+pub mod cli;
 
 #[cfg(test)]
 mod test_utils;
